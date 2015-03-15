@@ -136,12 +136,6 @@ if(!webservice.connectTimeout){
 if(!webservice.readTimeout){
     webservice.readTimeout = 20000
 }
-if(!security.cas.logoutUrl){
-    security.cas.logoutUrl = 'https://auth.ala.org.au/cas/logout'
-}
-if(!security.cas.casServerUrlPrefix){
-    security.cas.casServerUrlPrefix = 'https://auth.ala.org.au/cas'
-}
 if(!security.cas.bypass){
     security.cas.bypass = false
 }

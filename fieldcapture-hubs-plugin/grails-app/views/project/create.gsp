@@ -3,7 +3,7 @@
 <head>
     <meta name="layout" content="${grailsApplication.config.layout.skin ?: 'main'}"/>
     <title><g:message code="g.new"/> | <g:message code="g.projects"/> | <g:message code="g.fieldCapture"/></title>
-    <r:require modules="knockout,jqueryValidationEngine,datepicker,wizard,amplify,drawmap"/>
+    <r:require modules="knockout,jqueryValidationEngine,datepicker,wizard,amplify,drawmap,jQueryFileUpload"/>
 </head>
 
 <body>

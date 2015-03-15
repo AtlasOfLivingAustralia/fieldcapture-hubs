@@ -4,7 +4,7 @@ import grails.converters.JSON
 class ProjectController {
 
     def projectService, metadataService, commonService, activityService, userService, webService, roleService, grailsApplication
-    def siteService
+    def siteService, documentService
     static defaultAction = "index"
     static ignore = ['action','controller','id']
 
@@ -61,7 +61,7 @@ class ProjectController {
         if (project) {
             def siteInfo = siteService.getRaw(project.projectSiteId)
             [project: project,
-             documents: siteInfo.documents?:'[]',
+             siteDocuments: siteInfo.documents?:'[]',
              site: siteInfo.site,
              institutions: metadataService.institutionList(),
              programs: metadataService.programsModel()]
@@ -73,11 +73,35 @@ class ProjectController {
     def create() {
         [
                 citizenScience: params.citizenScience,
-                documents: [],
+                siteDocuments: '[]',
                 institutions: metadataService.institutionList(),
                 programs: projectService.programsModel(),
                 activityTypes: metadataService.activityTypesList()
         ]
+    }
+
+    def citizenScience() {
+        def user = userService.getUser()
+        def userId = user?.userId
+        [user: user,
+         projects: projectService.list(false, true).collect {
+             def imgUrl;
+             it.documents.each { doc ->
+                 if (doc.isPrimaryProjectImage) imgUrl = doc.url
+             }
+             // pass array instead of object to reduce size
+             [it.projectId,
+              it.coverage ?: '',
+              it.description,
+              userId && projectService.canUserEditProject(userId, it.projectId) ? 'y' : '',
+              it.name,
+              it.organisationName?:metadataService.getInstitutionName(it.organisationId),
+              it.status,
+              it.urlAndroid,
+              it.urlITunes,
+              it.urlWeb,
+              imgUrl]
+         }];
     }
 
     /**
@@ -125,10 +149,19 @@ class ProjectController {
 
         log.debug "json=" + (values as JSON).toString()
         log.debug "id=${id} class=${id?.getClass()}"
-        def projectSite = values.projectSite
-        values.remove("projectSite")
+        def projectSite = values.remove("projectSite")
+        def documents = values.remove('documents')
         def result = id? projectService.update(id, values): projectService.create(values)
         log.debug "result is " + result
+        if (documents && !result.error) {
+            if (!id) id = result.resp.projectId
+            documents.each { doc ->
+                doc.projectId = id
+                doc.isPrimaryProjectImage = doc.role == 'mainImage'
+                if (doc.isPrimaryProjectImage) doc.public = true
+                documentService.saveStagedImageDocument(doc)
+            }
+        }
         if (projectSite && !result.error) {
             if (!id) id = result.resp.projectId
             if (!projectSite.projects)

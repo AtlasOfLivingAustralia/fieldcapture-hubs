@@ -52,7 +52,7 @@
                 <span class="btn fileinput-button pull-right"
                       data-url="${createLink(controller: 'image', action:'upload')}"
                       data-role="banner"
-                      data-owner-key="organisationId"
+                      data-owner-type="organisationId"
                       data-owner-id="${organisation.organisationId}"
                       data-bind="stagedImageUpload:documents, visible:!logoUrl()"><i class="icon-plus"></i> <input id="banner" type="file" name="files"><span>Attach Banner Image</span></span>
             </div>
@@ -65,7 +65,7 @@
                 %{--<span class="btn fileinput-button pull-right"--}%
                       %{--data-url="${createLink(controller: 'image', action:'upload')}"--}%
                       %{--data-role="logo"--}%
-                      %{--data-owner-key="organisationId"--}%
+                      %{--data-owner-type="organisationId"--}%
                       %{--data-owner-id="${organisation.organisationId}"--}%
                       %{--data-bind="stagedImageUpload:documents, visible:!logoUrl()"><i class="icon-plus"></i> <input id="logo" type="file" name="files"><span>Attach Logo</span></span>--}%
 
@@ -79,7 +79,7 @@
                 <span class="btn fileinput-button pull-right"
                       data-url="${createLink(controller: 'image', action:'upload')}"
                       data-role="mainImage"
-                      data-owner-key="organisationId"
+                      data-owner-type="organisationId"
                       data-owner-id="${organisation.organisationId}"
                       data-bind="stagedImageUpload:documents, visible:!logoUrl()"><i class="icon-plus"></i> <input id="mainImage" type="file" name="files"><span>Attach Main Organisation Image</span></span>
 

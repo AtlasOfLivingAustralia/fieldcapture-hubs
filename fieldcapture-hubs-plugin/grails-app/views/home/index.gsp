@@ -175,7 +175,7 @@
                                         </g:if>
                                     </g:each>
                             </select>
-                            <img style="display:none;" id="map-colorby-status" width="23" height="23" src="${request.contextPath}/images/loading-1.gif" alt="Loading"/>
+                            <img style="display:none;" id="map-colorby-status" width="23" height="23" src="${request.contextPath}/images/loading.gif" alt="Loading"/>
                             <div id="legend-table">
                                 <table style="opacity:1.0; filter:alpha(opacity=50); border: none; font-size : 80%; display:inline-block;" id="legend-1" >
                                     <tbody>
@@ -626,7 +626,7 @@
                     var staticColors =
                     ['#458B00','#FF0000','#FF00FF','#282828','#8B4513','#FF8000','#1E90FF','#a549f6','#20988e','#afaec9',
                     '#dc0430','#aa7f69','#1077f1','#6da1ab','#3598e6','#95294d','#f27ad5','#dfd06e','#c16b54','#34f242'];
-                    $.each(geoPoints.selectedFacetTerms, function(i,facet){
+                    $.each(geoPoints.selectedFacetTerms || [], function(i,facet){
                         var legend = {};
                         var hex = i < staticColors.length ? staticColors[facet.index] : getRandomColor();
                         legend.color = hex;

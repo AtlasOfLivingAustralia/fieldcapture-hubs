@@ -3,7 +3,7 @@
 <head>
     <meta name="layout" content="${grailsApplication.config.layout.skin ?: 'main'}"/>
     <title>${project?.name?.encodeAsHTML()} | <g:message code="g.projects"/> | <g:message code="g.fieldCapture"/></title>
-    <r:require modules="knockout,jqueryValidationEngine,datepicker,amplify,drawmap"/>
+    <r:require modules="knockout,jqueryValidationEngine,datepicker,amplify,drawmap,jQueryFileUpload"/>
 </head>
 
 <body>
@@ -55,14 +55,16 @@ $(function(){
     ko.applyBindings(viewModel, document.getElementById("projectDetails"));
     $('#cancel').click(function () {
     <g:if test="${citizenScience}">
-        document.location.href = "${createLink(controller: 'home', action: 'citizenScience')}";
+        document.location.href = "${createLink(action: 'citizenScience')}";
     </g:if>
     <g:else>
         document.location.href = "${createLink(action: 'index', id: project?.projectId)}";
     </g:else>
     });
     $('#save').click(function () {
+    console.log("saving...");
         viewModel.save();
+    console.log("saved...");
     });
  });
 </r:script>

@@ -25,7 +25,7 @@ grails.project.dependency.resolution = {
         mavenRepo "http://nexus.ala.org.au/content/groups/public/"
 
     }
-    def tomcatVersion = '7.0.54'
+    def tomcatVersion = '7.0.55'
     def seleniumVersion = "2.21.0"
     def metadataExtractorVersion = "2.6.2"
     def imgscalrVersion = "4.2"
@@ -64,7 +64,7 @@ grails.project.dependency.resolution = {
     }
 
     plugins {
-        runtime ":jquery:1.11.0.2"
+        runtime ":jquery:1.11.1"
         //compile ':asset-pipeline:1.9.9'
         // required by the cached-resources plugin
         runtime ":cache-headers:1.1.6"
@@ -73,10 +73,10 @@ grails.project.dependency.resolution = {
         runtime (":rest:0.8") {
             excludes "httpclient", "httpcore"
         }
-        compile (":ala-web-theme:1.0.1")
+        compile ":ala-auth:1.0"
         runtime ":csv:0.3.1"
-        runtime ":lesscss-resources:1.3.3"
         compile ":markdown:1.1.1"
+        compile ":resources:1.2.8"
 
         build ":tomcat:$tomcatVersion"
 
@@ -89,7 +89,9 @@ grails.project.dependency.resolution = {
         compile ":excel-export:0.2.0"
         compile ":excel-import:1.0.1"
 
-        compile (":images-client-plugin:0.2.3")
+        compile (":images-client-plugin:0.2.3") {
+            exclude "ala-web-theme"
+        }
 
         test ":geb:0.9.3"
         test (":spock:0.7") {

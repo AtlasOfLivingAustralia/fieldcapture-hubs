@@ -38,7 +38,7 @@
             <span class="btn fileinput-button pull-right"
                   data-url="${createLink(controller: 'image', action:'upload')}"
                   data-role="banner"
-                  data-owner-key="hubId"
+                  data-owner-type="hubId"
                   data-bind="attr:{'data-owner-id':name}, stagedImageUpload:documents, visible:!bannerUrl()"><i class="icon-plus"></i> <input id="banner" type="file" name="files"><span>Attach Banner Image</span></span>
         </div>
     </div>
@@ -52,7 +52,7 @@
             <span class="btn fileinput-button pull-right"
                   data-url="${createLink(controller: 'image', action:'upload')}"
                   data-role="logo"
-                  data-owner-key="hubId"
+                  data-owner-type="hubId"
                   data-bind="attr:{'data-owner-id':name}, stagedImageUpload:documents, visible:!logoUrl()"><i class="icon-plus"></i> <input id="logo" type="file" name="files"><span>Attach Organisation Logo</span></span>
         </div>
     </div>

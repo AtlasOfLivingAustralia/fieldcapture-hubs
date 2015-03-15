@@ -47,21 +47,6 @@ class HomeController {
     }
 
     def citizenScience() {
-        def user = userService.getUser()
-        def userId = user?.userId
-        [user: user,
-         projects: projectService.list(false, true).collect {
-            // pass array instead of object to reduce size
-            [it.projectId,
-             it.coverage ?: '',
-             it.description,
-             userId && projectService.canUserEditProject(userId, it.projectId) ? 'y' : '',
-             it.name,
-             it.organisationName?:metadataService.getInstitutionName(it.organisationId),
-             it.status,
-             (it.urlAndroid ?: '') + ' ' + (it.urlITunes ?: ''),
-             it.urlWeb ?: '']
-        }];
     }
 
     /**
