@@ -80,7 +80,7 @@ grails.project.dependency.resolution = {
         runtime ":csv:0.3.1"
         runtime ":lesscss-resources:1.3.3"
         compile ":markdown:1.1.1"
-        compile ":resources:1.2.8"
+        compile ":resources:1.2.14"
 
         build ":tomcat:$tomcatVersion"
 
