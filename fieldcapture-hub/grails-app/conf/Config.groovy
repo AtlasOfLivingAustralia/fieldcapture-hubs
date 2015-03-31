@@ -48,8 +48,9 @@ grails.mime.types = [
     text:          'text/plain',
     xml:           ['text/xml', 'application/xml']
 ]
+grails.resources.resourceLocatorEnabled = true
 grails.resources.adhoc.patterns = ['/images/*', '/css/*', '/js/*', '/plugins/*']
-grails.resources.adhoc.includes = ['/images/**', '/css/**', '/js/**', '/plugins/**']
+grails.resources.adhoc.includes = ['/images/**', '/css/**', '/js/**', '/plugins/**', '/bootstrap/**', '/bootstrap-datepicker/**', '/fancybox/**', '/fuelux/**', '/slickgrid/**']
 
 // URL Mapping Cache Max Size, defaults to 5000
 //grails.urlmapping.cache.maxsize = 1000
@@ -219,10 +220,9 @@ environments {
     }
 }
 
+def loggingDir = (System.getProperty('catalina.base') ? System.getProperty('catalina.base') + '/logs' : './logs')
 // log4j configuration
-if (!logging.dir) {
-    logging.dir = (System.getProperty('catalina.base') ? System.getProperty('catalina.base') + '/logs'  : '/var/log/tomcat7')
-}
+
 log4j = {
     appenders {
         environments{
@@ -232,52 +232,52 @@ log4j = {
                         threshold: org.apache.log4j.Level.DEBUG
                 rollingFile name: "fieldcaptureLog",
                         maxFileSize: 104857600,
-                        file: logging.dir+"/fieldcapture-hub.log",
+                        file: loggingDir+"/fieldcapture-hub.log",
                         threshold: org.apache.log4j.Level.INFO,
                         layout: pattern(conversionPattern: "%d %-5p [%c{1}]  %m%n")
                 rollingFile name: "stacktrace",
                         maxFileSize: 104857600,
-                        file: logging.dir+"/fieldcapture-hub-stacktrace.log"
+                        file: loggingDir+"/fieldcapture-hub-stacktrace.log"
             }
             test {
                 rollingFile name: "fieldcaptureLog",
                         maxFileSize: 104857600,
-                        file: logging.dir+"/fieldcapture-hub.log",
+                        file: loggingDir+"/fieldcapture-hub.log",
                         threshold: org.apache.log4j.Level.INFO,
                         layout: pattern(conversionPattern: "%d %-5p [%c{1}]  %m%n")
                 rollingFile name: "stacktrace",
                         maxFileSize: 104857600,
-                        file: logging.dir+"fieldcapture-hub-stacktrace.log"
+                        file: loggingDir+"fieldcapture-hub-stacktrace.log"
             }
             nectar {
                 rollingFile name: "fieldcaptureLog",
                         maxFileSize: 104857600,
-                        file: logging.dir+"/fieldcapture-hub.log",
+                        file: loggingDir+"/fieldcapture-hub.log",
                         threshold: org.apache.log4j.Level.INFO,
                         layout: pattern(conversionPattern: "%d %-5p [%c{1}]  %m%n")
                 rollingFile name: "stacktrace",
                         maxFileSize: 104857600,
-                        file: config.logging.dir+"/fieldcapture-hub-stacktrace.log"
+                        file: loggingDir+"/fieldcapture-hub-stacktrace.log"
             }
             nectartest {
                 rollingFile name: "fieldcaptureLog",
                         maxFileSize: 104857600,
-                        file: logging.dir+"/fieldcapture-hub.log",
+                        file: loggingDir+"/fieldcapture-hub.log",
                         threshold: org.apache.log4j.Level.INFO,
                         layout: pattern(conversionPattern: "%d %-5p [%c{1}]  %m%n")
                 rollingFile name: "stacktrace",
                         maxFileSize: 104857600,
-                        file: logging.dir+"/fieldcapture-hub-stacktrace.log"
+                        file: loggingDir+"/fieldcapture-hub-stacktrace.log"
             }
             production {
                 rollingFile name: "fieldcaptureLog",
                         maxFileSize: 104857600,
-                        file: logging.dir+"/fieldcapture-hub.log",
+                        file: loggingDir+"/fieldcapture-hub.log",
                         threshold: org.apache.log4j.Level.INFO,
                         layout: pattern(conversionPattern: "%d %-5p [%c{1}]  %m%n")
                 rollingFile name: "stacktrace",
                         maxFileSize: 104857600,
-                        file: logging.dir+"/fieldcapture-hub-stacktrace.log"
+                        file: loggingDir+"/fieldcapture-hub-stacktrace.log"
             }
         }
     }
