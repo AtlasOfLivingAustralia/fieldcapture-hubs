@@ -6,6 +6,11 @@
    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
    <meta name="app.version" content="${g.meta(name:'app.version')}"/>
    <meta name="app.build" content="${g.meta(name:'app.build')}"/>
+    <meta name="description" content="Atlas of Living Australia Field Capture"/>
+    <meta name="author" content="Atlas of Living Australia">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="http://www.ala.org.au/wp-content/themes/ala2011/images/favicon.ico" rel="shortcut icon"  type="image/x-icon"/>
+
    <title><g:layoutTitle /></title>
    <r:require modules="ala2Skin, jquery_cookie" />
    <r:script disposition='head'>
@@ -61,21 +66,21 @@
     <r:layoutResources/>
     <g:layoutHead />
 </head>
-<body class="${pageProperty(name:'body.class')?:'nav-getinvolved'}" id="${pageProperty(name:'body.id')}" onload="${pageProperty(name:'body.onload')}">
+<body class="${pageProperty(name:'body.class')?:'nav-getinvolved'}" id="${pageProperty(name:'body.id')}" onload="${pageProperty(name:'body.onload')}" style="padding-top:50px;">
 <g:set var="introText"><fc:getSettingContent settingType="${SettingPageType.INTRO}"/></g:set>
 <g:set var="userLoggedIn"><fc:userIsLoggedIn/></g:set>
 <div id="body-wrapper">
 
-    <hf:banner logoutUrl="${grailsApplication.config.grails.serverURL}/logout/logout"/>
+    <hf:banner logoutUrl="${g.createLink(controller:"logout", action:"logout", absolute: true)}"/>
 
     <g:if test="${fc.announcementContent()}">
         <div id="announcement">
             ${fc.announcementContent()}
         </div>
     </g:if>
-    <div id="nav-site" class="clearfix ">
+    <div id="nav-site" class="clearfix">
 
-        <div class="navbar navbar-inner navbar-inverse container-fluid ">
+        <div class="navbar navbar-inner container-fluid ">
             %{--<a href="${g.createLink(uri:"/")}" class="brand">MERI data capture prototype</a>--}%
             <ul class="nav">
                 <li><a href="/fieldcapture/" class="active hidden-desktop"><i class="icon-home">&nbsp;</i>&nbsp;Home</a></li>

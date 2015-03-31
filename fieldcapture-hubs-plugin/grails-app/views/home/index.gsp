@@ -72,7 +72,8 @@
                 </a>
             </div>
             <h3 style="margin-bottom:0;">Filter results</h3>
-
+            <button class="btn btn-small facetSearch"><i class="icon-filter"></i>Refine</button>
+            <button class="btn btn-small clearFacet"><i class="icon-remove-sign"></i>Clear all</button>
             <g:if test="${params.fq}">
                 <div class="currentFilters">
                     <h4>Current filters</h4>
@@ -82,7 +83,7 @@
                         <g:each var="f" in="${fqList}">
                             <g:set var="fqBits" value="${f?.tokenize(':')}"/>
                             <g:set var="newUrl"><fc:formatParams params="${params}" requiredParams="${reqParams}" excludeParam="${f}"/></g:set>
-                            <li><g:message code="label.${fqBits[0]}" default="${fqBits[0]}"/>: <g:message code="label.${fqBits[1]}" default="${fqBits[1]}"/>
+                            <li><g:message code="label.${fqBits[0]}" default="${fqBits[0]}"/>: <g:message code="label.${fqBits[1]}" default="${fqBits[1].capitalize()}"/>
                                 <a href="${newUrl?:"?"}" class="btn btn-inverse btn-mini tooltips" title="remove filter">
                                     <i class="icon-white icon-remove"></i></a>
                             </li>
@@ -94,63 +95,71 @@
                 <g:set var="baseUrl"><fc:formatParams params="${params}" requiredParams="${reqParams}"/></g:set>
                 <g:set var="fqLink" value="${baseUrl?:"?"}"/>
             <!-- fqLink = ${fqLink} -->
-                <g:each var="fn" status="facetNum" in="${facetsList}">
+                <g:each var="fn" in="${facetsList}">
                     <g:set var="f" value="${results.facets.get(fn)}"/>
                     <g:set var="max" value="${5}"/>
-                    <g:set var="safeId" value="${'facet-'+facetNum}"/>
                     <g:if test="${fn != 'class' && f?.terms?.size() > 0}">
                         <g:set var="fName"><g:message code="label.${fn}" default="${fn?.capitalize()}"/></g:set>
-                        <h4 data-toggle="collapse" data-target="#${safeId}"><i id="chevron-${safeId}" class="${facetNum?'icon-chevron-right':'icon-chevron-down'}"></i> ${fName}</h4>
-                        <div id="${safeId}" class="collapse ${facetNum?'':'in'}">
-                            <ul class="facetValues">
-                                <g:each var="t" in="${f.terms}" status="i">
-                                    <g:if test="${i < max}">
-                                        <li><a href="${fqLink}&fq=${fn.encodeAsURL()}:${t.term.encodeAsURL()}"><g:message
-                                                code="label.${t.term}" default="${t.term}"/></a> (${t.count})
-                                        </li>
-                                    </g:if>
-                                </g:each>
-                            </ul>
-                            <g:if test="${f?.terms?.size() > max}">
-                                <a href="#${fn}Modal" role="button" class="moreFacets tooltips" data-toggle="modal" title="View full list of values"><i class="icon-hand-right"></i> choose more...</a>
-                                <div id="${fn}Modal" class="modal hide fade">
-                                    <div class="modal-header">
-                                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-                                        <h3>Filter by ${fName}</h3>
-                                    </div>
-                                    <div class="modal-body">
-                                        <ul class="facetValues">
-                                            <g:each var="t" in="${f.terms}">
-                                                <li data-sortalpha="${t.term.toLowerCase().trim()}" data-sortcount="${t.count}"><a href="${fqLink}&fq=${fn.encodeAsURL()}:${t.term.encodeAsURL()}"><g:message
-                                                        code="label.${t.term}" default="${t.term?:'[empty]'}"/></a> (<span class="fcount">${t.count}</span>)
-                                                </li>
-                                            </g:each>
-                                        </ul>
-                                    </div>
-                                    <div class="modal-footer">
-                                        <div class="pull-left">
-                                            <button class="btn btn-small sortAlpha"><i class="icon-filter"></i> Sort by name</button>
-                                            <button class="btn btn-small sortCount"><i class="icon-filter"></i> Sort by count</button>
-                                        </div>
+                        <h4>${fName}</h4>
+                        <ul style="list-style-type: none;" class="facetValues">
+                            <g:each var="t" in="${f.terms}" status="i">
+                                <g:if test="${i < max}">
+                                    <li>
+                                    		<input type="checkbox" class="facetSelection" name="facetSelection" value="fq=${fn.encodeAsURL()}:${t.term.encodeAsURL()}">
+                                    		<a href="${fqLink}&fq=${fn.encodeAsURL()}:${t.term.encodeAsURL()}"><g:message
+                                            code="label.${t.term.capitalize()}" default="${t.term.capitalize()}"/></a> (${t.count})
+                                    </li>
+                                </g:if>
+                            </g:each>
+                        </ul>
+                        <g:if test="${f?.terms?.size() > max}">
+                            <a href="#${fn}Modal" role="button" class="moreFacets tooltips" data-toggle="modal" title="View full list of values"><i class="icon-hand-right"></i> choose more...</a>
+                            <div id="${fn}Modal" class="modal hide fade">
+                               	<div class="modal-header">
+	                                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+	                                    <h3>Filter by ${fName}</h3>
+	                                </div>
+	                                <div class="modal-body">
+	                                    <ul style="list-style-type: none;" class="facetValues">
+	                                        <g:each var="t" in="${f.terms}">
+	                                        		
+	                                            <li data-sortalpha="${t.term.toLowerCase().trim()}" data-sortcount="${t.count}">
+	                                            		<input type="checkbox" class="facetSelection" name="facetSelection" value="fq=${fn.encodeAsURL()}:${t.term.encodeAsURL()}">
+	                                            		<a href="${fqLink}&fq=${fn.encodeAsURL()}:${t.term.encodeAsURL()}"><g:message
+	                                                    code="label.${t.term}" default="${t.term?:'[empty]'}"/></a> (<span class="fcount">${t.count}</span>)
+	                                            </li>
+	                                        </g:each>
+	                                    </ul>
+	                                </div>
+	                                <div class="modal-footer">
+	                                    <div class="pull-left">
+                                            <button class="btn btn-small facetSearch"><i class="icon-filter"></i>Refine</button>
+	                                        <button class="btn btn-small sortAlpha"><i class="icon-filter"></i> Sort by name</button>
+	                                        <button class="btn btn-small sortCount"><i class="icon-filter"></i> Sort by count</button>
+	                                    </div>
                                         <a href="#" class="btn" data-dismiss="modal">Close</a>
-                                    </div>
-                                </div>
-                            </g:if>
-                        </div>
+	                                </div>
+                            	 
+                            </div>
+                        </g:if>
                     </g:if>
                 </g:each>
             </div>
         </div>
         <div class="span8">
-
+			%{--<g:if test="${promotionalProjects?.size() > 1 }">--}%
+				%{--<g:render template="carousel" model="[promotionalProjects:promotionalProjects]"/>--}%
+			%{--</g:if>--}%
+			
             <div class="tabbable">
                 <ul class="nav nav-tabs" data-tabs="tabs">
                     <li class="active"><a id="mapView-tab" href="#mapView" data-toggle="tab">Map</a></li>
                     <li class=""><a id="projectsView-tab" href="#projectsView" data-toggle="tab">Projects</a></li>
-                %{--Temporarily hiding the reports from non-admin until they are ready for public consumption. --}%
-                <g:if test="${fc.userIsSiteAdmin()}">
                     <li class=""><a id="reportView-tab" href="#reportView" data-toggle="tab">Dashboard</a></li>
-                </g:if>
+                    <g:if test="${fc.userIsSiteAdmin()}">
+                        <li class=""><a id="downloadView-tab" href="#downloadView" data-toggle="tab">Download</a></li>
+                    </g:if>
+
                 </ul>
             </div>
 
@@ -175,7 +184,7 @@
                                         </g:if>
                                     </g:each>
                             </select>
-                            <img style="display:none;" id="map-colorby-status" width="23" height="23" src="${request.contextPath}/images/loading.gif" alt="Loading"/>
+                            <img style="display:none;" id="map-colorby-status" width="23" height="23" src="${request.contextPath}/images/loading-1.gif" alt="Loading"/>
                             <div id="legend-table">
                                 <table style="opacity:1.0; filter:alpha(opacity=50); border: none; font-size : 80%; display:inline-block;" id="legend-1" >
                                     <tbody>
@@ -189,7 +198,6 @@
                         </span>
                     </div>
                 </div>
-
 
                 <div class="tab-pane " id="projectsView">
                     <div class="scroll-list clearfix" id="projectList">
@@ -245,18 +253,76 @@
                                     <div class="descLine">
                                         <i class="icon-info-sign"></i>
                                     </div>
+                                    <g:if test="${fc.userIsSiteAdmin()}">
+                                        <div class="downloadLine">
+                                            <i class="icon-download"></i>
+                                            <a href="" target="_blank">Download (.xlsx)</a>
+                                        </div>
+                                        <div class="downloadJSONLine">
+                                            <i class="icon-download"></i>
+                                            <a href="" target="_blank">Download (.json)</a>
+                                        </div>
+                                    </g:if>
+
                                 </div>
                             </td>
                             <td class="td2">$date</td>
                         </tr>
                     </table>
                 </div>
-                %{--Temporarily hiding the reports from non-admin until they are ready for public consumption. --}%
-                <g:if test="${fc.userIsSiteAdmin()}">
+
                 <div class="tab-pane" id="reportView">
-                    <div class="loading-message">
-                        <r:img dir="images" file="loading.gif" alt="saving icon"/> Loading report...
+                    <div class="row-fluid">
+                        <g:if test="${fc.userIsAlaOrFcAdmin()}">
+                        <span class="span12">
+                            <h4>Report: </h4>
+                            <select id="dashboardType" name="dashboardType"><option value="outputs">Activity Outputs</option><option value="greenArmy">Green Army</option><option value="announcements">Announcements</option></select>
+                        </span>
+                        </g:if>
+                        <g:else>
+                            <select id="dashboardType" name="dashboardType" style="display:none"><option value="outputs">Activity Outputs</option><option value="greenArmy">Green Army</option></select>
+                        </g:else>
                     </div>
+                    <div class="loading-message">
+                        <r:img dir="images" file="loading.gif" alt="saving icon"/> Loading...
+                    </div>
+                    <div id="dashboard-content">
+
+                    </div>
+                </div>
+                %{-- hiding the downloads from non-admin until they are approved for public consumption. --}%
+                <g:if test="${fc.userIsSiteAdmin()}">
+                    <div class="tab-pane" id="downloadView">
+                        <h3>Download data for a filtered selection of projects</h3>
+                        <table style="width: 50%;">
+                            <thead>
+                            <tr><th></th>
+                                <th><b>Summary data</b></th>
+                                <th><b>All data</b></th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr>
+                                <td width="10%">1</td>
+                                <td width="45%">
+                                    <a target="_blank" href="${grailsApplication.config.grails.serverURL}/search/downloadSummaryData<fc:formatParams params="${params}"/>view=json">JSON</a>
+                                </td>
+                                <td width="45%">
+                                    <a target="_blank" href="${grailsApplication.config.grails.serverURL}/search/downloadAllData<fc:formatParams params="${params}"/>&view=json">JSON</a>
+                                </td>
+                             </tr>
+                            <tr>
+                                <td width="10%">2</td>
+                                <td width="45%">
+                                    <a target="_blank" href="${grailsApplication.config.grails.serverURL}/search/downloadSummaryData<fc:formatParams params="${params}"/>&view=xlsx">XLSX</a>
+                                </td>
+                                <td width="45%">
+                                    <a target="_blank" href="${grailsApplication.config.grails.serverURL}/search/downloadAllData<fc:formatParams params="${params}"/>&view=xlsx">XLSX</a>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+
                 </div>
                 </g:if>
             </div>
@@ -275,26 +341,25 @@
     </div>
 </g:else>
 
-<g:if env="development">
-<div class="expandable-debug">
-    <h3>Debug</h3>
-    <div>
-        <h4>Results</h4>
-        <pre>${results}</pre>
-        <h4>Geo Points</h4>
-        <pre>${geoPoints}</pre>
-        <h4>Projects</h4>
-        <pre>${projects}</pre>
-    </div>
-</div>
-</g:if>
-
 </div>
 
 <r:script>
     var projectListIds = [], facetList = [], mapDataHasChanged = false, mapBounds, projectSites; // globals
 
     $(window).load(function () {
+        $.fn.clicktoggle = function(a, b) {
+            return this.each(function() {
+                var clicked = false;
+                $(this).click(function() {
+                    if (clicked) {
+                        clicked = false;
+                        return b.apply(this, arguments);
+                    }
+                    clicked = true;
+                    return a.apply(this, arguments);
+                });
+            });
+        };
         var delay = (function(){
             var timer = 0;
             return function(callback, ms){
@@ -302,6 +367,20 @@
                 timer = setTimeout(callback, ms);
             };
         })();
+
+        var loadReport = function(reportType) {
+            var $content = $('#dashboard-content');
+            var $loading = $('.loading-message');
+            $content.hide();
+            $loading.show();
+
+            $.get(fcConfig.dashboardUrl,{report:reportType}, function(data) {
+                $content.show();
+                $loading.hide();
+                $content.html(data);
+                $('#reportView .helphover').popover({animation: true, trigger:'hover', container:'body'});
+            });
+        };
 
         var initialisedReport = false;
         // retain tab state for future re-visits
@@ -315,13 +394,18 @@
             else if (tab === '#reportView') {
                 if (!initialisedReport) {
                     initialisedReport = true;
-
-                    $.get(fcConfig.dashboardUrl, function(data) {
-                        $('#reportView').html(data);
-                        $('#reportView .helphover').popover({animation: true, trigger:'hover', container:'body'});
-                    });
-
+                    var reportType = amplify.store('report-type-state');
+                    var $reportSelector = $('#dashboardType');
+                    if (reportType) {
+                        $reportSelector.val(reportType);
+                    }
+                    $reportSelector.change(function() {
+                        var reportType = $reportSelector.val();
+                        amplify.store('report-type-state', reportType);
+                        loadReport(reportType);
+                    }).trigger('change');
                 }
+
             }
         });
         // re-establish the previous tab state
@@ -507,16 +591,6 @@
             $(this).addClass("btn-info");
         });
 
-        // Change chevron when a facet is collapsed.
-        $('#facetsContent').on('hide', function(e) {
-            var chevron = $('#chevron-'+e.target.id);
-            chevron.removeClass('icon-chevron-down').addClass('icon-chevron-right');
-        });
-        $('#facetsContent').on('show', function(e) {
-            var chevron = $('#chevron-'+e.target.id);
-            chevron.removeClass('icon-chevron-right').addClass('icon-chevron-down');
-        });
-
         // next/prev buttons in project list table
         $("#paginateTable .btn").not(".clearFilterBtn").click(function(el) {
             // Don't trigger if button is disabled
@@ -553,7 +627,7 @@
 //        });
 
         // sort facets in popups by term
-        $(".sortAlpha").toggle(function(el) {
+        $(".sortAlpha").clicktoggle(function(el) {
             var $list = $(this).closest(".modal").find(".facetValues");
             sortList($list, "sortalpha", ">");
             $(this).find("i").removeClass("icon-flipped180");
@@ -562,8 +636,24 @@
             sortList($list, "sortalpha", "<");
             $(this).find("i").addClass("icon-flipped180");
         });
+        
+        $(".clearFacet").click(function(e){
+       	 window.location.href ="${grailsApplication.config.grails.serverURL}";
+        });
+        
+        $(".facetSearch").click(function(e){
+        	var data = [];
+        	$('input[type="checkbox"][name="facetSelection"]').each(function(i){
+		        if(this.checked){
+		            data.push(this.value);
+		        }
+		    });
+			var url = "${baseUrl?:"?"}";
+		    window.location.href = url + "&" + data.join('&');
+        });
+
         // sort facets in popups by count
-        $(".sortCount").toggle(function(el) {
+        $(".sortCount").clicktoggle(function(el) {
             var $list = $(this).closest(".modal").find(".facetValues");
             sortList($list, "sortcount", "<");
             $(this).find("i").removeClass("icon-flipped180");
@@ -607,9 +697,9 @@
             <g:set var="fqList" value="${[params.fq].flatten()}"/>
             url += "&fq=${fqList.collect{it.encodeAsURL()}.join('&fq=')}";
         </g:if>
-        $("#legend-table").hide();
-        $("#map-colorby-status").show();
-        $.getJSON(url, function(data) {
+    $("#legend-table").hide();
+    $("#map-colorby-status").show();
+    $.getJSON(url, function(data) {
 
         var features = [];
         var projectIdMap = {};
@@ -626,7 +716,7 @@
                     var staticColors =
                     ['#458B00','#FF0000','#FF00FF','#282828','#8B4513','#FF8000','#1E90FF','#a549f6','#20988e','#afaec9',
                     '#dc0430','#aa7f69','#1077f1','#6da1ab','#3598e6','#95294d','#f27ad5','#dfd06e','#c16b54','#34f242'];
-                    $.each(geoPoints.selectedFacetTerms || [], function(i,facet){
+                    $.each(geoPoints.selectedFacetTerms, function(i,facet){
                         var legend = {};
                         var hex = i < staticColors.length ? staticColors[facet.index] : getRandomColor();
                         legend.color = hex;
@@ -681,7 +771,6 @@
                 }
             }
 
-
             //To reduce memory footprint and leak, make sure to clear feature before loading new feature.
             alaMap.map ? clearMap() : "";
             $("#legend-table").fadeIn();
@@ -704,7 +793,6 @@
             "highlightOnHover": false,
             "features": features
         };
-
         var layers = ${(geographicFacets as grails.converters.JSON).toString()};
         $.each(layers, function(i, layer) {
             layer.type = 'pid';
@@ -832,7 +920,6 @@
         controlText.style.paddingRight = '6px';
         controlText.innerHTML = '<i class="icon-list"></i>';
         controlUI.appendChild(controlText);
-
         // Setup the click event listeners
         google.maps.event.addDomListener(controlUI, 'click', function() {
            $("#map-legend").toggle();
@@ -979,6 +1066,10 @@
             $tr.find('a.zoom-out').data("id", id);
             $tr.find('.orgLine').append(src.organisationName);
             $tr.find('.descLine').append(src.description);
+            <g:if test="${fc.userIsSiteAdmin()}">
+                $tr.find('.downloadLine a').attr("href", "${createLink(controller: 'project',action: 'downloadProjectData')}" + "?id="+id+"&view=xlsx");
+                $tr.find('.downloadJSONLine a').attr("href", "${createLink(controller: 'project',action: 'downloadProjectData')}" + "?id="+id+"&view=json");
+            </g:if>
             $tr.find('.td2').text(formatDate(Date.parse(src.lastUpdated))); // relies on the js_iso8601 resource
             //console.log("appending row", $tr);
             $('#projectTable tbody').append($tr);
@@ -999,10 +1090,9 @@
         return yyyy + "-" + (mm[1]?mm:"0"+mm[0]) + "-" + (dd[1]?dd:"0"+dd[0]);
     }
 
-     function getRandomColor(h) {
-       return (function(h){return '#000000'.substr(0,7-h.length)+h})((~~(Math.random()*(1<<24))).toString(16));
-     }
-
+    function getRandomColor(h) {
+        return (function(h){return '#000000'.substr(0,7-h.length)+h})((~~(Math.random()*(1<<24))).toString(16));
+    }
 </r:script>
 </body>
 </html>

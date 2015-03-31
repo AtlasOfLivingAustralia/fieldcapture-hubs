@@ -431,7 +431,7 @@ class FCTagLib {
 
         def username = userService.currentUserDisplayName
         if (username) {
-            output = "<a href='${logoutUrl}" +
+            output = "<a id='logout-btn' href='${logoutUrl}" +
                     "?casUrl=${casLogoutUrl}" +
                     "&appUrl=${logoutReturnToUrl}' " +
                     "class='${cssClass}'><i class='icon-off ${(cssClass.contains("btn-login")) ? "icon-white" : ""}'></i> Logout</a>"

@@ -101,19 +101,6 @@
         }
     }
 
-    /**
-    * Roles have camelCase names and this is a work-around for printing them from AJAX
-    * responses.
-    * TODO implement i18n encoding with JS
-    *
-    * @param text
-    * @returns {string}
-    */
-    function decodeCamelCase(text) {
-        var result = text.replace( /([A-Z])/g, " $1" );
-        return result.charAt(0).toUpperCase() + result.slice(1); // capitalize the first letter - as an example.
-    }
-
     function updateStatusMessage(msg) {
         $('#status span').text(''); // clear previous message
         $('#status span').text(msg).parent().fadeIn();

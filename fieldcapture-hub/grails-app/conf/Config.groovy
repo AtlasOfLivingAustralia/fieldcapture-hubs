@@ -91,9 +91,6 @@ if (!ala.baseURL) {
 if (!collectory.baseURL) {
     collectory.baseURL = "http://collections.ala.org.au/"
 }
-if (!headerAndFooter.baseURL) {
-    headerAndFooter.baseURL = "http://www2.ala.org.au/commonui"
-}
 // spatial services
 if(!spatial.baseUrl){
     spatial.baseUrl = "http://spatial-dev.ala.org.au"
