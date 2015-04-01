@@ -2,7 +2,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <meta name="layout" content="${grailsApplication.config.layout.skin?:'main'}"/>
+  <meta name="layout" content="${hubConfig.skin}"/>
   <title>${site?.name?.encodeAsHTML()} | Field Capture</title>
   <script type="text/javascript" src="${grailsApplication.config.google.maps.url}"></script>
     <r:script disposition="head">

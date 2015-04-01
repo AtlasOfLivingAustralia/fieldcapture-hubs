@@ -32,6 +32,8 @@ class HubSettings {
     /** Home page map facets */
     List<String> availableMapFacets
 
+    String skin = "ala2"
+
     /**
      * Allows the property to be set using a JSONArray which has an implementation of join which is
      * incompatible with how this is used by the SearchService.

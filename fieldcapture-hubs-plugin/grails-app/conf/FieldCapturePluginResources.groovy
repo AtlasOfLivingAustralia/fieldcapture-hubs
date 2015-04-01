@@ -77,7 +77,9 @@ modules = {
     app_bootstrap {
         dependsOn 'application'
         resource url: 'bootstrap/js/bootstrap.min.js', plugin: 'fieldcapture-plugin'
-        resource url: 'bootstrap/less/bootstrap.less', plugin: 'fieldcapture-plugin',attrs:[rel: "stylesheet/less", type:'css', media:'screen,print'], bundle:'bundle_app_bootstrap'
+        // The less css resources plugin (1.3.3, resources plugin 1.2.14) is unable to resolve less files in a plugin so apps that use this plugin must supply their own bootstrap styles.
+        // However, commenting this section
+        resource url: [dir:'bootstrap/less/', file:'bootstrap.less', plugin: 'fieldcapture-plugin'],attrs:[rel: "stylesheet/less", type:'css', media:'screen,print'], bundle:'bundle_app_bootstrap'
         resource url: 'bootstrap/img/glyphicons-halflings-white.png', plugin: 'fieldcapture-plugin'
         resource url: 'bootstrap/img/glyphicons-halflings.png', plugin: 'fieldcapture-plugin'
         resource url: 'css/empty.css' , plugin: 'fieldcapture-plugin'// needed for less-resources plugin ?

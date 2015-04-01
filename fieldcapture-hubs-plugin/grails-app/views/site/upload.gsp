@@ -3,7 +3,7 @@
 <html>
 <head>
     <script type="text/javascript" src="${grailsApplication.config.google.maps.url}"></script>
-    <meta name="layout" content="${grailsApplication.config.layout.skin?:'main'}"/>
+    <meta name="layout" content="${hubConfig.skin}"/>
     <title> Upload | Sites | Field Capture</title>
     <script type="text/javascript" src="${grailsApplication.config.google.maps.url}"></script>
     <r:script disposition="head">

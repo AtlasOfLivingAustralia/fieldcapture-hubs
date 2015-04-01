@@ -2,7 +2,7 @@
 <%@ page contentType="text/html;charset=UTF-8" %>
 <html>
 <head>
-  <meta name="layout" content="${grailsApplication.config.layout.skin?:'main'}"/>
+  <meta name="layout" content="${hubConfig.skin}"/>
   <title>Create | Activity | Field Capture</title>
   <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/jstimezonedetect/1.0.4/jstz.min.js"></script>
   <r:script disposition="head">

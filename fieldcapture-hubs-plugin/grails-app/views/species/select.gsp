@@ -1,7 +1,7 @@
 <%@ page contentType="text/html;charset=UTF-8" %>
 <html>
 <head>
-    <meta name="layout" content="${grailsApplication.config.layout.skin?:'main'}"/>
+    <meta name="layout" content="${hubConfig.skin}"/>
     <title>${project.name} | Species | Field Capture</title>
     <r:require modules="knockout, jquery_ui, jquery_bootstrap_datatable"/>
 </head>

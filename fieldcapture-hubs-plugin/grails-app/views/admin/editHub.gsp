@@ -31,6 +31,13 @@
     </div>
 
     <div class="control-group">
+        <label class="control-label" for="skin">Skin</label>
+        <div class="controls required">
+            <select id="skin" data-bind="value:skin,options:transients.availableSkins" data-validation-engine="validate[required]"></select>
+        </div>
+    </div>
+
+    <div class="control-group">
         <label class="control-label" for="banner">Banner image</label>
         <div class="controls">
             <img data-bind="visible:bannerUrl(), attr:{src:bannerUrl}">
@@ -131,6 +138,7 @@
             var self = this;
 
             self.id = ko.observable();
+            self.skin = ko.observable();
             self.title = ko.observable();
             self.supportedPrograms = ko.observableArray();
             self.availableFacets = ko.observableArray();
@@ -173,7 +181,8 @@
                 adminFacets:['electFacet'],
                 programNames:programNames,
                 message:ko.observable(),
-                selectedHub:ko.observable()
+                selectedHub:ko.observable(),
+                availableSkins:['nrm', 'ala2']
             };
 
             self.removeDefaultFacetQuery = function(data) {
@@ -202,6 +211,7 @@
 
             self.loadSettings = function(settings) {
                self.id(settings.id);
+               self.skin(settings.skin);
                self.title(settings.title);
                self.supportedPrograms(self.orEmptyArray(settings.supportedPrograms));
                self.availableFacets(self.orEmptyArray(settings.availableFacets));

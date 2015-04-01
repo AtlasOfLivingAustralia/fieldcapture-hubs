@@ -1,4 +1,4 @@
-<g:applyLayout name="nrm">
+<g:applyLayout name="${hubConfig.skin}">
     <head>
         <title><g:layoutTitle /></title>
         <style type="text/css">
