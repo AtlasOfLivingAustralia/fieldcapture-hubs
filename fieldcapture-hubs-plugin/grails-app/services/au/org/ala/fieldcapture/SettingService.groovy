@@ -46,10 +46,10 @@ class SettingService {
     def loadHubConfig(hub) {
         def settings = getHubSettings(hub)
         if (!settings) {
-            log.warn("no settings returned!")
+            log.warn("no settings returned for hub ${hub}!")
             settings = new HubSettings(
                     title:'Default',
-                    skin:HubSettings.Skin.ALA2,
+                    skin:'ala2',
                     id:grailsApplication.config.app.default.hub?:'default',
                     availableFacets: ['status', 'organisationFacet','associatedProgramFacet','associatedSubProgramFacet','mainThemeFacet','stateFacet','nrmFacet','lgaFacet','mvgFacet','ibraFacet','imcra4_pbFacet','otherFacet', 'gerSubRegionFacet','electFacet'],
                     adminFacets: ['electFacet'],
