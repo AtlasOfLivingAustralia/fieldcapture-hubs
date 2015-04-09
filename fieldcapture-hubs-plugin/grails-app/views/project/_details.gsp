@@ -2,7 +2,15 @@
     <div class="span6">
         <h4 class="header"><g:message code="project.details.tell"/></h4>
 
-        <div class="control-group">
+        <div class="clearfix" data-bind="visible:organisationId()||organisationName()">
+            <h4>
+                Recipient:
+                <a data-bind="visible:organisationId(),text:organisationName,attr:{href:fcConfig.organisationLinkBaseUrl + organisationId()}"></a>
+                <span data-bind="visible:organisationName(),text:organisationName"></span>
+            </h4>
+        </div>
+
+        <div class="clearfix control-group">
             <label class="control-label span3" for="name"><g:message code="g.project.name"/>:</label>
 
             <div class="controls span9">
@@ -17,15 +25,6 @@
             <div class="controls span9">
                 <g:textArea class="span12" name="description" data-bind="value:description"
                             data-validation-engine="validate[required]" rows="3"/>
-            </div>
-        </div>
-
-        <div class="clearfix control-group">
-            <label class="control-label span3" for="aim"><g:message code="project.details.aim"/></label>
-
-            <div class="controls span9">
-                <g:textArea class="span12" name="aim" data-bind="value:aim"
-                            data-validation-engine="validate[required]" rows="2"/>
             </div>
         </div>
 
@@ -318,7 +317,7 @@ function initViewModel() {
         self.name = ko.observable(data.name);
         self.organisationId = ko.observable(data.organisationId || organisationsRMap[data.organisationName]);
         self.organisationName = ko.computed(function() {
-            return organisationsMap[self.organisationId()];
+            return organisationsMap[self.organisationId()] || "";
         });
         self.orgIdGrantee = ko.observable(data.orgIdGrantee);
         self.orgIdSponsor = ko.observable(data.orgIdSponsor);

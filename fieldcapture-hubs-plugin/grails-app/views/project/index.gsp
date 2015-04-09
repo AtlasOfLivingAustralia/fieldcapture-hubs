@@ -107,11 +107,11 @@
         <div class="tab-pane active" id="overview">
             <!-- OVERVIEW -->
             <div class="row-fluid">
-                <div class="clearfix" data-bind="visible:organisation()||organisationName()">
+                <div class="clearfix" data-bind="visible:organisationId()||organisationName()">
                     <h4>
                         Recipient:
-                        <a data-bind="visible:organisation(),text:transients.collectoryOrgName,attr:{href:fcConfig.organisationLinkBaseUrl + organisation()}"></a>
-                        <span data-bind="visible:organisationName(),text:organisationName"></span>
+                        <a data-bind="visible:organisationName()&&organisationId(),text:organisationName,attr:{href:fcConfig.organisationLinkBaseUrl + organisationId()}"></a>
+                        <span data-bind="visible:organisationName()&&!organisationId(),text:organisationName"></span>
                     </h4>
                 </div>
                 <div class="clearfix" data-bind="visible:serviceProviderName()">
@@ -437,9 +437,11 @@
     </g:if>
 </div>
     <r:script>
-        var organisations = ${institutions};
-
-
+        var organisations = ${institutions}, organisationsMap = {}, organisationsRMap = {};
+        organisations.map(function(org) {
+            organisationsMap[org.uid] = org.name;
+            organisationsRMap[org.name] = org.uid;
+        })
 
         $(window).load(function () {
             var map;
@@ -509,8 +511,10 @@
 				self.status = ko.observable(projectDefault.toLowerCase());
 				self.projectStatus = [{id: 'active', name:'Active'},{id:'completed',name:'Completed'}];
 
-                self.organisation = ko.observable(project.organisation);
-                self.organisationName = ko.observable(project.organisationName);
+                self.organisationId = ko.observable(project.organisationId || organisationsRMap[project.organisationName]);
+                self.organisationName = ko.computed(function() {
+                    return organisationsMap[self.organisationId()] || "";
+                });
                 self.serviceProviderName = ko.observable(project.serviceProviderName);
                 self.associatedProgram = ko.observable(); // don't initialise yet - we want the change to trigger dependents
                 self.associatedSubProgram = ko.observable(project.associatedSubProgram);
@@ -520,15 +524,6 @@
 
                 self.transients = {};
                 self.transients.organisations = organisations;
-                self.transients.collectoryOrgName = ko.computed(function () {
-                    if (self.organisation() === undefined || self.organisation() === '') {
-                        return "";
-                    } else {
-                        return $.grep(self.transients.organisations, function (obj) {
-                            return obj.uid === self.organisation();
-                        })[0].name;
-                    }
-                });
                 self.transients.programs = [];
                 self.transients.subprograms = {};
                 self.transients.subprogramsToDisplay = ko.computed(function () {
@@ -563,7 +558,7 @@
                             manager: self.manager(),
                             plannedStartDate: self.plannedStartDate(),
                             plannedEndDate: self.plannedEndDate(),
-                            organisation: self.organisation(),
+                            organisationId: self.organisationId(),
                             organisationName: self.organisationName(),
                             serviceProviderName: self.serviceProviderName(),
                             associatedProgram: self.associatedProgram(),
