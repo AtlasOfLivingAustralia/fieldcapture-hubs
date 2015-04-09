@@ -79,9 +79,10 @@
                 <td class="td1">
                     <a href="#" class="projectTitle" id="a_" data-id="" title="click to show/hide details">
                         <span class="showHideCaret">&#9658;</span> <span class="projectTitleName">$name</span></a>
-                    <div class="projectInfo" id="proj_$id" style="position:relative;margin-left:130px">
-                        <img style="position:absolute; left:-128px; width:120px; height:120px">
-                        <div style="float:left;width:1px;height:120px"></div>
+                    <div class="projectInfo" id="proj_$id" style="position:relative;height:auto;min-height:120px;margin-left:205px">
+                        <div style="position:absolute;left:-203px;width:200px;height:100%">
+                            <img style="max-width:100%;max-height:100%">
+                        </div>
                         <div class="homeLine">
                             <i class="icon-home"></i>
                             <a href="">View project page</a>

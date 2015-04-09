@@ -40,14 +40,9 @@
                           </div>
                         </form>
                     </span>
-                    <span class="span3">
-                        <button class="btn" data-bind="click: clearSites">Clear sites (<span data-bind="text: currentProjectSites().length"></span>)</button>
-                    </span>
-                    <span class="span4">
-                        <span class=" pull-right">
+                    <span class="span5 pull-right">
                         <button class="btn btn-primary" data-bind="click: useSelectedSites">Update sites</button>
                         <button class="btn" data-bind="click: cancelUpdate">Cancel</button>
-                        </span>
                     </span>
                 </div>
 

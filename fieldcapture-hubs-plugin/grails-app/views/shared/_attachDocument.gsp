@@ -56,7 +56,7 @@
                         <div class="controls">
                             <label class="checkbox" for="public">
                                 <input id="public" type="checkbox" data-bind="checked:public, enable: role() =='information'"/>
-                                make this document viewable by everyone
+                                make this document public on the project overview tab
                             </label>
                         </div>
 

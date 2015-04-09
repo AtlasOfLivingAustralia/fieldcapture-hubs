@@ -31,8 +31,13 @@
 # "temporary" build files
 /target
 
-*.iml
-
 /.idea
-/fieldcapture-hub/target
+/.settings
+*.iml
+*.sha1
 
+/node_modules
+/bower_components
+
+*.log
+out/
