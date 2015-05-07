@@ -4,9 +4,8 @@
         <div class="clearfix" data-bind="visible:organisationId()||organisationName()">
             <h4>
                 Organisation:
-                <a data-bind="visible:organisationId(),attr:{href:fcConfig.organisationLinkBaseUrl + organisationId()}">
-                    <span data-bind="visible:organisationName(),text:organisationName"></span>
-                </a>
+                <a data-bind="visible:organisationId(),text:organisationName,attr:{href:fcConfig.organisationLinkBaseUrl + organisationId()}"></a>
+                <span data-bind="visible:!organisationId(),text:organisationName"></span>
             </h4>
         </div>
         <h4 class="header"><g:message code="project.details.tell"/></h4>

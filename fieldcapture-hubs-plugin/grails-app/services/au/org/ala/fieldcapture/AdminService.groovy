@@ -191,4 +191,12 @@ class AdminService {
 
         return exif
     }
+
+
+    def syncCollectoryOrgs() {
+        def url = "${grailsApplication.config.ecodata.baseUrl}admin/syncCollectoryOrgs"
+        webService.doPost(url, [
+                api_key: grailsApplication.config.api_key
+        ])
+    }
 }

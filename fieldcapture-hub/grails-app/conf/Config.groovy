@@ -91,9 +91,6 @@ if (!biocache.baseURL) {
 if (!ala.baseURL) {
     ala.baseURL = "http://www.ala.org.au"
 }
-if (!collectory.baseURL) {
-    collectory.baseURL = "http://collections-dev.ala.org.au/"
-}
 // spatial services
 if(!spatial.baseUrl){
     spatial.baseUrl = "http://spatial-dev.ala.org.au"

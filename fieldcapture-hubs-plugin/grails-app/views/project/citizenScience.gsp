@@ -13,6 +13,7 @@
         spatialWmsUrl: "${grailsApplication.config.spatial.wms.url}",
         sldPolgonDefaultUrl: "${grailsApplication.config.sld.polgon.default.url}",
         sldPolgonHighlightUrl: "${grailsApplication.config.sld.polgon.highlight.url}",
+        organisationLinkBaseUrl: "${createLink(controller: 'organisation', action: 'index')}",
         dashboardUrl: "${g.createLink(controller: 'report', action: 'dashboardReport', params: params)}"
     }
     </r:script>
@@ -30,7 +31,7 @@
             <div class="pull-right space-after">
                 <button data-bind="click:newPortal" type="button" class="btn"><g:message
                         code="project.citizenScience.portalLink"/></button>
-                <a href="${createLink(action: 'create', params: [citizenScience: true])}"
+                <a href="${createLink(controller:'organisation', action: 'list', params: [citizenScience: true])}"
                    class="btn btn-small">
                     <i class="icon-file"></i>&nbsp;<g:message code="project.citizenScience.registerLink"/></a>
             </div>
@@ -135,12 +136,14 @@ $(document).ready(function () {
             urlWeb: props[9],
             urlAndroid: props[7],
             urlITunes: props[8],
-            urlImage: this.mainImageUrl = props[10]
+            urlImage: this.mainImageUrl = props[10],
+            orgId: props[11]
         }
         this.coverage = props[1];
         this.description = markdown.makeHtml(dl.description);
         this.descriptionTrimmed = moreless(this.description, 100);
         this.editable = props[3];
+        this.orgLine = dl.orgId? '<a href="' + fcConfig.organisationLinkBaseUrl + '/' + dl.orgId + '">' + dl.orgName + '</a>': dl.orgName;
         this.links = (dl.urlWeb? '<a href="' + dl.urlWeb + '">Website</a> ': '')
                    + (dl.urlAndroid? '<a href="' + dl.urlAndroid + '">Android</a> ': '')
                    + (dl.urlITunes? '<a href="' + dl.urlITunes + '">ITunes</a>': '');
@@ -206,7 +209,7 @@ $(document).ready(function () {
             $tr.find('.homeLine a').attr("href", "${createLink()}/" + id);
             $tr.find('a.zoom-in').data("id", id);
             $tr.find('a.zoom-out').data("id", id);
-            $tr.find('.orgLine').append(src.organisationName);
+            $tr.find('.orgLine').append(src.orgLine);
             $tr.find('.descLine').append(src.description);
             if (src.links)
                 $tr.find('.linksLine').append(src.links);

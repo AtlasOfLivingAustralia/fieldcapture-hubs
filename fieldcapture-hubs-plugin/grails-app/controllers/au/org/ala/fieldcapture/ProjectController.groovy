@@ -79,8 +79,14 @@ class ProjectController {
     }
 
     def create() {
+        boolean allowAdHocOrgNameOnCreate = true; // set true for MERIT
+        if (!allowAdHocOrgNameOnCreate && !params.organisationId)
+            render status: 400, text: 'Either an organisation id or ad hoc organisation name must be active'
+
         [
                 citizenScience: params.citizenScience,
+                organisationId: params.organisationId,
+                allowAdHocOrgNameOnCreate: allowAdHocOrgNameOnCreate,
                 siteDocuments: '[]',
                 organisations: organisationService.list().list,
                 programs: projectService.programsModel(),
@@ -103,12 +109,14 @@ class ProjectController {
               it.description,
               userId && projectService.canUserEditProject(userId, it.projectId) ? 'y' : '',
               it.name,
-              it.organisationName?:metadataService.getInstitutionName(it.organisationId),
+              it.organisationName?:metadataService.getOrganisationName(it.organisationId),
               it.status,
               it.urlAndroid,
               it.urlITunes,
               it.urlWeb,
-              imgUrl]
+              imgUrl,
+              it.organisationId
+             ]
          }];
     }
 

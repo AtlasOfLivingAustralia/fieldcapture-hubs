@@ -125,6 +125,12 @@
 
 
         <span class="span6">
+            <div>
+                <h4 class="demphasise">Type&nbsp;&nbsp;</h4>
+                <select class="well" id="orgType"
+                        data-bind="value:orgType,options:transients.orgTypes,optionsText:'name',optionsValue:'orgType',optionsCaption: 'Choose...'"
+                        data-validation-engine="validate[required]"></select>
+            </div>
             <button class="btn popup-edit" data-bind="click:editDescription"><i class="icon-edit"></i></button> <a data-bind="click:editDescription"><h4 class="demphasise">Description</h4></a>
             <div class="well">
 

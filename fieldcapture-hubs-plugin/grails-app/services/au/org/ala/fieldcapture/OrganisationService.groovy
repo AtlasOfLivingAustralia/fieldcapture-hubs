@@ -6,6 +6,8 @@ import org.codehaus.groovy.grails.web.json.JSONArray
 class OrganisationService {
 
     def grailsApplication, webService, projectService, userService
+
+
     def get(String id, view = '') {
 
         def url = "${grailsApplication.config.ecodata.baseUrl}organisation/$id?view=$view"
@@ -37,15 +39,16 @@ class OrganisationService {
         projects
     }
 
-
     def list() {
         def url = "${grailsApplication.config.ecodata.baseUrl}organisation/"
         webService.getJson(url)
     }
 
     def update(id, organisation) {
+
         def url = "${grailsApplication.config.ecodata.baseUrl}organisation/$id"
         webService.doPost(url, organisation)
+
     }
 
     def isUserAdminForOrganisation(organisationId) {

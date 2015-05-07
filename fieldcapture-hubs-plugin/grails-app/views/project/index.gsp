@@ -33,7 +33,7 @@
         spatialWmsUrl: "${grailsApplication.config.spatial.wms.url}",
         sldPolgonDefaultUrl: "${grailsApplication.config.sld.polgon.default.url}",
         sldPolgonHighlightUrl: "${grailsApplication.config.sld.polgon.highlight.url}",
-        organisationLinkBaseUrl: "${grailsApplication.config.collectory.baseURL + 'public/show/'}",
+        organisationLinkBaseUrl: "${createLink(controller: 'organisation', action: 'index')}",
         documentUpdateUrl: "${g.createLink(controller:"proxy", action:"documentUpdate")}",
         documentDeleteUrl: "${g.createLink(controller:"proxy", action:"deleteDocument")}",
         returnTo: "${createLink(controller: 'project', action: 'index', id: project.projectId)}"

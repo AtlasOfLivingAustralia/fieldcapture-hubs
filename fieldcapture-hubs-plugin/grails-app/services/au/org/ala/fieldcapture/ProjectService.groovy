@@ -4,34 +4,6 @@ class ProjectService {
 
     def webService, grailsApplication, siteService, activityService, authService, emailService, documentService, userService, metadataService, settingService
 
-    private def mapAttributesToCollectory(props) {
-        def mapKeyEcoDataToCollectory = [
-            description: 'pubDescription',
-            manager: 'email',
-            name: 'name',
-            dataSharingLicense: '', // ignore this property (mapped to dataResource)
-            organisation: '', // ignore this property
-            projectId: 'uid',
-            urlWeb: 'websiteUrl'
-        ]
-        def collectoryProps = [
-            api_key: grailsApplication.config.api_key
-        ]
-        def hiddenJSON = [:]
-        props.each { k, v ->
-            if (v != null) {
-                def keyCollectory = mapKeyEcoDataToCollectory[k]
-                if (keyCollectory == null) // not mapped to first class collectory property
-                    hiddenJSON[k] = v
-                else if (keyCollectory != '') // not to be ignored
-                    collectoryProps[keyCollectory] = v
-            }
-        }
-        collectoryProps.hiddenJSON = hiddenJSON
-        println("collectory hiddenJSON = " + hiddenJSON)
-        collectoryProps
-    }
-
     def list(brief = false, citizenScienceOnly = false) {
         def params = brief ? '?brief=true' : ''
         if (citizenScienceOnly) params += (brief ? '&' : '?') + 'citizenScienceOnly=true'
@@ -69,21 +41,7 @@ class ProjectService {
 
         def activities = props.remove('selectedActivities')
 
-        def collectoryProps = mapAttributesToCollectory(props)
-        def result = webService.doPost(grailsApplication.config.collectory.baseURL + 'ws/dataProvider/', collectoryProps)
-        def dataProviderId = extractCollectoryIdFromHttpHeaders(result?.headers)
-        if (dataProviderId) {
-            props.dataProviderId = dataProviderId
-            collectoryProps.remove('hiddenJSON')
-            collectoryProps.dataProvider = [uid: dataProviderId]
-            if (props.organisationId) {
-                collectoryProps.institution = [uid: props.organisationId]
-            }
-            collectoryProps.licenseType = props.dataSharingLicense
-            result = webService.doPost(grailsApplication.config.collectory.baseURL + 'ws/dataResource/', collectoryProps)
-            props.dataResourceId = extractCollectoryIdFromHttpHeaders(result?.headers)
-        }
-
+        // create a project in ecodata
         result = webService.doPost(grailsApplication.config.ecodata.baseUrl + 'project/', props)
         if (result?.resp?.projectId) {
             def projectId = result.resp.projectId
@@ -97,21 +55,8 @@ class ProjectService {
         result
     }
 
-    private def extractCollectoryIdFromHttpHeaders(headers) {
-        return headers?.location?.first().toString().tokenize('/').last()
-    }
-
     def update(id, body) {
-        def resp = webService.doPost(grailsApplication.config.ecodata.baseUrl + 'project/' + id, body)
-
-        if (body.dataProviderId) {
-            // recreate 'hiddenJSON' in collectory every time (minus some attributes)
-            body = getRich(id) as Map
-            ['id','dateCreated','documents','lastUpdated','organisationName','projectId','sites'].each { body.remove(it) }
-            webService.doPost(grailsApplication.config.collectory.baseURL + 'ws/dataProvider/' + body.dataProviderId, mapAttributesToCollectory(body))
-            webService.doPost(grailsApplication.config.collectory.baseURL + 'ws/dataResource/' + body.dataResourceId, [licenseType:body.dataSharingLicense])
-        }
-        resp
+        webService.doPost(grailsApplication.config.ecodata.baseUrl + 'project/' + id, body)
     }
 
     /**
@@ -130,7 +75,6 @@ class ProjectService {
      */
     def destroy(id) {
         webService.doDelete(grailsApplication.config.ecodata.baseUrl + 'project/' + id + '?destroy=true')
-        webService.doDelete(grailsApplication.config.collectory.baseURL + 'ws/dataProvider/' + id)
     }
 
     /**

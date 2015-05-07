@@ -203,15 +203,15 @@ class MetadataService {
         outputTypes
     }
 
-    def getInstitutionName(uid) {
-        def institutions = institutionList()
+    def getOrganisationName(orgId) {
+        def organisations = organisationList()
         // The result of the service call will be a JSONArray if it's successful
-        return uid ? institutions.find({ it.uid == uid })?.name : ''
+        return orgId ? organisations.find({ it.organisationId == orgId })?.name : ''
     }
 
-    def institutionList() {
-        return cacheService.get('institutions',{
-            webService.getJson(grailsApplication.config.collectory.baseURL + 'ws/institution')
+    def organisationList() {
+        return cacheService.get('organisations',{
+            webService.getJson(grailsApplication.config.ecodata.baseUrl + "organisation")
         })
     }
 

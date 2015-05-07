@@ -220,6 +220,11 @@ modules = {
 
     }
 
+    fuseSearch {
+        dependsOn 'jquery'
+        resource url: 'js/fuse.min.js', plugin: 'fieldcapture-plugin'
+    }
+
     wizard {
         dependsOn 'app_bootstrap_responsive'
         resource 'fuelux/js/wizard.js'

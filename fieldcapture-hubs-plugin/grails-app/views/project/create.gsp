@@ -5,7 +5,7 @@
     <title><g:message code="g.new"/> | <g:message code="g.projects"/> | <g:message code="g.fieldCapture"/></title>
     <r:script disposition="head">
     var fcConfig = {
-        organisationLinkBaseUrl: "${grailsApplication.config.collectory.baseURL + 'public/show/'}",
+        organisationLinkBaseUrl: "${createLink(controller: 'organisation', action: 'index')}",
         returnTo: "${createLink(controller: 'project', action: 'index', id: project?.projectId)}"
         },
         here = window.location.href;
@@ -38,11 +38,13 @@
                 <h3><g:message code="project.create.type.heading"/>:</h3>
 
                 <div class="control-group span12">
-                    <label class="control-label"
-                           for="organisationId"><g:message code="project.details.org"/>:</label>
-                    <select id="organisationId"
-                            data-validation-engine="validate[required]"
-                            data-bind="options:transients.organisations, optionsText:'name', optionsValue:'organisationId', value:organisationId, optionsCaption: 'Choose...'"></select>
+                    <h4>
+                        Organisation:
+                        <a data-bind="visible:organisationName()&&organisationId(),text:organisationName,attr:{href:fcConfig.organisationLinkBaseUrl + organisationId()}"></a>
+                        <g:if test="${allowAdHocOrgNameOnCreate}">
+                            <g:textField class="span8" name="adHocOrgName" data-bind="visible:!organisationId(),value:adHocOrgName" data-validation-engine="validate[required]"/>
+                        </g:if>
+                    </h4>
                 </div>
 
                 <div class="clearfix control-group span12">
@@ -135,6 +137,9 @@ $(function(){
     });
 
     var viewModel = initViewModel();
+<g:if test="${organisationId}">
+    viewModel.organisationId("${organisationId}");
+</g:if>
 <g:if test="${citizenScience}">
     $("#isCitizenScience").prop("disabled", true);
     viewModel.isCitizenScience(true);

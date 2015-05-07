@@ -90,6 +90,17 @@
                             });
                 });
 
+
+                $("#btnSyncCollectoryOrgs").click(function(e) {
+                    e.preventDefault();
+                    $.ajax("${createLink(controller: 'admin', action:'syncCollectoryOrgs')}"
+                    ).done(function(result) {
+                        alert("Ecodata organisations synchronized with Collectory!")
+                        document.location.reload();
+                    }).fail(function (result) {
+                        alert(result.statusText);
+                    });
+                });
             });
 
         </script>
@@ -151,6 +162,13 @@
                     </td>
                     <td>
                         Re-indexes all data in the search index.
+                    </td>
+                </tr>
+                <tr>
+                    <td><button id="btnSyncCollectoryOrgs" class="btn btn-small btn-info" title="Sync collectory organisations">Sync collectory orgs</button>
+                    </td>
+                    <td>
+                        Ensures that all institutions in collectory have a corresponding organisation in ecodata.
                     </td>
                 </tr>
             </tbody>

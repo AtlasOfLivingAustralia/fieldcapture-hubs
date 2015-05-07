@@ -33,6 +33,14 @@
             </div>
         </div>
         <div class="control-group">
+            <label class="control-label" for="name">Type</label>
+            <div class="controls required">
+                <select class="span12" id="orgType"
+                        data-bind="value:orgType,options:transients.orgTypes,optionsText:'name',optionsValue:'orgType',optionsCaption: 'Choose...'"
+                        data-validation-engine="validate[required]"></select>
+            </div>
+        </div>
+        <div class="control-group">
             <label class="control-label" for="description">Description</label>
             <div class="controls required">
                 <textarea rows="3" class="input-xxlarge" data-bind="value:description" data-validation-engine="validate[required]" id="description" placeholder="A description of the organisation"></textarea>

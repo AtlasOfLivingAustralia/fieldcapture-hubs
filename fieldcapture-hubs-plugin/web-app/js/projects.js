@@ -266,7 +266,7 @@ function ProjectViewModel(project, isUserEditor, organisations) {
 
     var organisationsMap = {}, organisationsRMap = {};
     $.map(organisations, function(org) {
-        organisationsMap[org.organisationId] = org.name;
+        organisationsMap[org.organisationId] = org;
         organisationsRMap[org.name] = org.organisationId;
     });
 
@@ -292,8 +292,13 @@ function ProjectViewModel(project, isUserEditor, organisations) {
     self.projectStatus = [{id: 'active', name:'Active'},{id:'completed',name:'Completed'}];
 
     self.organisationId = ko.observable(project.organisationId);
+    self.collectoryInstitutionId = ko.computed(function() {
+        return self.organisationId()? organisationsMap[self.organisationId()].collectoryInstitutionId: "";
+    });
+    self.adHocOrgName = ko.observable("");
     self.organisationName = ko.computed(function() {
-        return project.organisationName || organisationsMap[self.organisationId()] || "";
+        return self.organisationId()? organisationsMap[self.organisationId()].name
+          : (project.organisationName || self.adHocOrgName());
     });
     self.serviceProviderName = ko.observable(project.serviceProviderName);
     self.associatedProgram = ko.observable(); // don't initialise yet - we want the change to trigger dependents

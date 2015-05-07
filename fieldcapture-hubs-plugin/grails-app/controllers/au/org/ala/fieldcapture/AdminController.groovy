@@ -55,6 +55,15 @@ class AdminController {
         [user:user]
     }
 
+    @PreAuthorise(accessLevel = 'alaAdmin')
+    def syncCollectoryOrgs() {
+        def result = adminService.syncCollectoryOrgs()
+        if (result.statusCode == 200)
+            render (status: 200)
+        else
+            render (status: result.statusCode, error: result.error)
+    }
+
     @PreAuthorise(accessLevel = 'alaAdmin', redirectController = "admin")
     def uploadUserPermissionsCSV() {
 
