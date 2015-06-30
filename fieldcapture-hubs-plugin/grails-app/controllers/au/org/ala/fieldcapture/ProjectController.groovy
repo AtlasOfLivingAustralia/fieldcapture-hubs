@@ -4,7 +4,7 @@ import org.joda.time.DateTime
 
 class ProjectController {
 
-    def projectService, metadataService, organisationService, commonService, activityService, userService, webService, roleService, grailsApplication
+    def projectService, metadataService, organisationService, commonService, activityService, userService, webService, roleService, grailsApplication, projectActivityService
     def siteService, documentService
     static defaultAction = "index"
     static ignore = ['action','controller','id']
@@ -51,6 +51,14 @@ class ProjectController {
                 themes:metadataService.getThemesForProject(project),
                 projectContent:content.model
             ]
+
+            if(project.projectType == 'survey'){
+                def pActivityForms = []
+                def activityModel = metadataService.activitiesModel().activities.findAll { it.category == "Assessment & monitoring" }
+                activityModel.collect{ pActivityForms.add([name: it.name, images: it.images]) }
+                model.projectActivities = projectActivityService.getAllByProject(project.projectId)
+                model.pActivityForms =  pActivityForms
+            }
 
             render view:content.view, model:model
         }

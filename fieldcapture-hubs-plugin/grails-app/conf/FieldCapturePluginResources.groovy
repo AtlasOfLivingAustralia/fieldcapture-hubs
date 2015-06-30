@@ -201,6 +201,12 @@ modules = {
         resource url:'js/jquery.cookie.js', plugin: 'fieldcapture-plugin'
     }
 
+    projectActivity {
+        defaultBundle 'application'
+        dependsOn 'knockout'
+        resource url:'js/projectActivity.js', plugin: 'fieldcapture-plugin'
+    }
+
     species {
         defaultBundle 'application'
         dependsOn 'knockout'
@@ -216,8 +222,6 @@ modules = {
         resource url:'fancybox/fancybox_sprite@2x.png', plugin: 'fieldcapture-plugin'
         resource url:'fancybox/blank.gif', plugin: 'fieldcapture-plugin'
         resource url:'fancybox/fancybox_loading@2x.gif', plugin: 'fieldcapture-plugin'
-
-
     }
 
     fuelux {

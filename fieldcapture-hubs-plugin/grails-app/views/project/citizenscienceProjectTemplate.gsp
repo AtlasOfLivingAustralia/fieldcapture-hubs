@@ -35,6 +35,14 @@
         sldPolgonDefaultUrl: "${grailsApplication.config.sld.polgon.default.url}",
         sldPolgonHighlightUrl: "${grailsApplication.config.sld.polgon.highlight.url}",
         organisationLinkBaseUrl: "${createLink(controller: 'organisation', action: 'index')}",
+        projectActivityCreateUrl: "${createLink(controller: 'projectActivity', action: 'ajaxCreate')}",
+        projectActivityUpdateUrl: "${createLink(controller: 'projectActivity', action: 'ajaxUpdate')}",
+        addNewSpeciesListsUrl: "${createLink(controller: 'projectActivity', action: 'ajaxAddNewSpeciesLists')}",
+        speciesProfileUrl: "${createLink(controller: 'proxy', action: 'speciesProfile')}",
+        speciesListUrl: "${createLink(controller: 'search', action: 'searchSpeciesList')}",
+        speciesListsServerUrl: "${grailsApplication.config.lists.baseURL}",
+
+        bieUrl: "${grailsApplication.config.bie.baseURL}",
         returnTo: "${createLink(controller: 'project', action: 'index', id: project.projectId)}"
         },
         here = window.location.href;
@@ -61,7 +69,7 @@
             }
         </style>
     <![endif]-->
-    <r:require modules="gmap3,mapWithFeatures,knockout,datepicker,amplify,jqueryValidationEngine, projects, attachDocuments, wmd, sliderpro"/>
+    <r:require modules="gmap3,mapWithFeatures,knockout,datepicker,amplify,jqueryValidationEngine, projects, attachDocuments, wmd, sliderpro, projectActivity, species"/>
 </head>
 <body>
 
@@ -107,7 +115,7 @@
             <g:render template="/shared/listDocuments" model="[useExistingModel: true,editable:false, imageUrl:resource(dir:'/images/filetypes'),containerId:'overviewDocumentList']"/>
         </div>
         <div class="pill-pane" id="admin">
-            <g:render template="admin"/>
+            <g:render template="adminTabs"/>
         </div>
 
 
@@ -116,8 +124,11 @@
 </div>
 <r:script>
     $(function() {
+
         var organisations = <fc:modelAsJavascript model="${organisations?:[]}"/>;
         var project = <fc:modelAsJavascript model="${project}"/>;
+        var projectActivities = <fc:modelAsJavascript model="${projectActivities}"/>;
+        var pActivityForms = <fc:modelAsJavascript model="${pActivityForms}"/>;
         var projectViewModel = new ProjectViewModel(project, ${user?.isEditor?:false}, organisations);
 
         var ViewModel = function() {
@@ -138,6 +149,7 @@
 
         };
         ko.applyBindings(new ViewModel());
+
         if (projectViewModel.mainImageUrl()) {
             $( '#carousel' ).sliderPro({
                 width: '100%',
@@ -153,10 +165,12 @@
         }
 
         initialiseSites(project.sites);
-        $("#sitesList").hide();
+        initialiseProjectActivities(projectActivities, pActivityForms, project.projectId, project.sites);
     <g:if test="${isAdmin || fc.userIsAlaOrFcAdmin()}">
         populatePermissionsTable();
     </g:if>
+        $('.validationEngineContainer').validationEngine();
+        $('.helphover').popover({animation: true, trigger:'hover'});
     });
 </r:script>
 </body>
