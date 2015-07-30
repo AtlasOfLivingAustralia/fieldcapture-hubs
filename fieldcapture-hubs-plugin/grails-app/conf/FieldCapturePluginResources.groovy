@@ -1,6 +1,6 @@
 modules = {
     application {
-        dependsOn 'jquery'
+        dependsOn 'jquery,knockout'
         resource url: "${grailsApplication.config.ala.baseURL?:'http://www.ala.org.au'}/wp-content/themes/ala2011/images/favicon.ico", attrs:[type:'ico'], disposition: 'head'
         resource url: 'js/html5.js', plugin: "fieldcapture-plugin", wrapper: { s -> "<!--[if lt IE 9]>$s<![endif]-->" }, disposition: 'head'
         resource url: 'js/vkbeautify.0.99.00.beta.js', plugin: 'fieldcapture-plugin'
@@ -54,6 +54,7 @@ modules = {
     knockout {
         resource url:'js/knockout-3.3.0.debug.js', plugin: 'fieldcapture-plugin'
         resource url:'js/knockout.mapping-latest.js', plugin: 'fieldcapture-plugin'
+        resource url:'js/knockout-custom-bindings.js', plugin: 'fieldcapture-plugin'
         resource url:'js/knockout-dates.js', plugin: 'fieldcapture-plugin'
         resource url:'js/outputs.js', plugin: 'fieldcapture-plugin'
     }
@@ -201,6 +202,12 @@ modules = {
         resource url:'js/jquery.cookie.js', plugin: 'fieldcapture-plugin'
     }
 
+    projectActivity {
+        defaultBundle 'application'
+        dependsOn 'knockout'
+        resource url:'js/projectActivity.js', plugin: 'fieldcapture-plugin'
+    }
+
     species {
         defaultBundle 'application'
         dependsOn 'knockout'
@@ -216,8 +223,6 @@ modules = {
         resource url:'fancybox/fancybox_sprite@2x.png', plugin: 'fieldcapture-plugin'
         resource url:'fancybox/blank.gif', plugin: 'fieldcapture-plugin'
         resource url:'fancybox/fancybox_loading@2x.gif', plugin: 'fieldcapture-plugin'
-
-
     }
 
     fuelux {

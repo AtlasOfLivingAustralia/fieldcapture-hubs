@@ -182,6 +182,10 @@ if(!app.view.nocache){
 if(!merit.support.email) {
     merit.support.email = 'MERIT@environment.gov.au'
 }
+if(!merit.projectLogo) {
+    merit.projectLogo = 'merit_project_logo.jpg'
+}
+
 if (!user.registration.url) {
     user.registration.url = 'https://auth.ala.org.au/userdetails/registration/createAccount'
 }

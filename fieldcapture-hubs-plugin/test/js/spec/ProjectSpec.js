@@ -41,10 +41,6 @@ describe("ProjectViewModel Spec", function () {
         expect(new ProjectViewModel(projectData).transients.kindOfProject()).toBe('survey');
 
 
-        // default type is "works" for MERIT compatibility.
-        projectData.projectType = undefined;
-        expect(new ProjectViewModel(projectData).transients.kindOfProject()).toBe('works');
-
         project = new ProjectViewModel({});
         project.transients.kindOfProject('citizenScience');
         expect(project.isCitizenScience()).toBe(true);

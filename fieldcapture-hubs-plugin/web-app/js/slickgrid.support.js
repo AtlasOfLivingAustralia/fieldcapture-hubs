@@ -367,6 +367,11 @@ var ValidationSupport = function() {
 
 };
 
+function helpHover(helpText) {
+    return '<a href="#" class="helphover" data-original-title="" data-placement="top" data-container="body" data-content="'+helpText+'">'+
+        '<i class="icon-question-sign">&nbsp;</i>'+
+        '</a>';
+};
 
 var validationSupport = new ValidationSupport();
 /**
@@ -517,8 +522,11 @@ function LongTextEditor(args) {
         $wrapper = $("<DIV style='z-index:10000;position:absolute;background:white;padding:5px;border:3px solid gray; -moz-border-radius:10px; border-radius:10px;'/>")
             .appendTo($container);
 
-        $input = $("<TEXTAREA hidefocus rows=5 style='backround:white;width:250px;height:80px;border:0;outline:0'>")
-            .appendTo($wrapper);
+        $input = $("<TEXTAREA hidefocus rows=5 style='backround:white;width:250px;height:80px;border:0;outline:0'>");
+        if (args.column.maxlength) {
+            $input.attr('maxlength', args.column.maxlength);
+        }
+        $input.appendTo($wrapper);
 
         $("<DIV style='text-align:right'><BUTTON>Save</BUTTON><BUTTON>Cancel</BUTTON></DIV>")
             .appendTo($wrapper);
@@ -734,6 +742,9 @@ function BaseEditor(args) {
 
     self.setElement = function(element) {
         self.$element = element;
+        if (args.column.validationRules) {
+            element.addClass(args.column.validationRules)// Using class because of way jqueryValidationEngine determines the pattern used.
+        }
         validationSupport.addValidationSupport(element, args.item, args.column.field);
     };
 
@@ -796,7 +807,6 @@ function BodyAttachedEditor(args) {
     this.hide = function () {
         self.$element.hide();
     };
-
     this.show = function () {
         self.$element.show();
     };
@@ -814,8 +824,10 @@ function ComboBoxEditor(args) {
     this.init = function () {
 
         $select = $("<SELECT tabIndex='0' class='editor'></SELECT>");
+        var labelProperty = args.column.optionLabel || 'label';
+        var valueProperty = args.column.optionValue || 'value';
         for (var i=0; i<args.column.options.length; i++) {
-            $select.append($("<OPTION name=\""+args.column.options[i]+"\" value=\""+args.column.options[i]+"\">"+args.column.options[i]+"</OPTION>"));
+            $select.append($("<OPTION name=\""+args.column.options[i][labelProperty]+"\" value=\""+args.column.options[i][valueProperty]+"\">"+args.column.options[i][labelProperty]+"</OPTION>"));
         }
         $select.combobox({bsVersion:'2'});
         combobox = $select.data('combobox');
@@ -883,12 +895,15 @@ function SelectEditor(args) {
     this.init = function () {
 
         var $select = $("<SELECT tabIndex='0' class='editor' style='width:100%;'></SELECT>");
+        var labelProperty = args.column.optionLabel || 'label';
+        var valueProperty = args.column.optionValue || 'value';
+
         for (var i=0; i<args.column.options.length; i++) {
             var option = args.column.options[i];
             var value, label;
-            if (option.hasOwnProperty('value') && option.hasOwnProperty('label')) {
-                value = option.value;
-                label = option.label;
+            if (option.hasOwnProperty(labelProperty) && option.hasOwnProperty(valueProperty)) {
+                value = option[valueProperty];
+                label = option[labelProperty];
             }
             else {
                 value = option;
@@ -906,7 +921,119 @@ function SelectEditor(args) {
     this.init();
 }
 
+function CurrencyEditor(args) {
+    BaseEditor.apply(this, [args]);
+    var self = this;
 
+    this.init = function () {
+        var height = $(args.container).height();
+        var width = $(args.container).width();
+        var $container = $('<div class="input-append input-prepend" style="width:100%;"></div>');
+        $container.append('<span class="add-on">$</span>');
+        var $input = $('<input style="width:100%;" type="text">');
+        $container.append($input);
+        $container.append('<span class="add-on">.00</span>');
+        $container.appendTo(args.container);
+        $input.focus();
+        $container.height(height);
+        $input.height(height).width(width-68).css('padding-top', 0).css('padding-bottom', 0);
+        $container.find('span').height(height).css('padding-top', 0).css('padding-bottom', 0);
+
+        self.setElement($input);
+    };
+
+    this.init();
+}
+
+function DateEditor2(args) {
+    BaseEditor.apply(this, [args]);
+    var self = this;
+    var calendarOpen = false;
+
+    var focus = self.focus;
+    var extractValue = self.extractValue;
+
+    this.init = function () {
+        var $input = $("<INPUT type=text class='editor-text' />");
+        $input.appendTo(args.container);
+        $input.focus().select();
+        $input.datepicker({
+            format: 'dd-mm-yyyy',
+            autoclose: true
+        });
+        $input.on('changeDate', args.commitChanges);
+
+        $input.width(args.container.width);
+        self.setElement($input);
+        self.focus();
+    };
+
+    this.destroy = function () {
+        $.datepicker.dpDiv.stop(true, true);
+        self.$element.datepicker("hide");
+        self.$element.datepicker("destroy");
+        self.$element.remove();
+    };
+
+    this.extractValue = function(item) {
+        var original = extractValue(item);
+        if (!original) {
+            return '';
+        }
+        return convertToSimpleDate(original, false);
+    };
+
+    this.focus = function() {
+        self.$element.datepicker('show');
+        focus();
+    };
+    this.show = function () {
+        if (calendarOpen) {
+            $.datepicker.dpDiv.stop(true, true).show();
+        }
+    };
+
+    this.hide = function () {
+        if (calendarOpen) {
+            $.datepicker.dpDiv.stop(true, true).hide();
+        }
+    };
+
+    this.position = function (position) {
+        if (!calendarOpen) {
+            return;
+        }
+        $.datepicker.dpDiv
+            .css("top", position.top + 30)
+            .css("left", position.left);
+    };
+
+    this.serializeValue = function () {
+        var simpleDate = self.$element.val();
+        return convertToIsoDate(simpleDate);
+    };
+
+    this.init();
+}
+
+dateFormatter = function(row, cell, value, columnDef, dataContext) {
+    if (!value) {
+        return '';
+    }
+    return convertToSimpleDate(value, false);
+};
+
+optionsFormatter = function(row, cell, value, columnDef, dataContext) {
+    var labelProperty = columnDef.optionLabel || 'label';
+    var valueProperty = columnDef.optionValue || 'value';
+
+    for (var i=0; i<columnDef.options.length; i++) {
+        if (value == columnDef.options[i][valueProperty]) {
+            return columnDef.options[i][labelProperty];
+        }
+    }
+    return '';
+};
 
 progressFormatter = function( row, cell, value, columnDef, dataContext ) {
 
@@ -1027,6 +1154,37 @@ function validateOutput(output, outputModel) {
     });
     return results;
 };
+
+function parseValidationString(validationString) {
+    var validationFunctions = [];
+    if (!validationString) {
+        return [];
+    }
+    var validatePrefix = 'validate['
+    var index = validationString.indexOf(validatePrefix);
+    if (index >= 0) {
+        validationString = validationString.substring(validatePrefix.length, validationString.length-1);
+    }
+    var validations = validationString.split(',');
+    for (var i=0; i<validations.length; i++) {
+        var validation = validations[i];
+        var args = undefined;
+        var validatorName = validation;
+        var argsIndex = validation.indexOf('[');
+        if (argsIndex > 0) {
+            validatorName = validation.substring(0, argsIndex);
+            args = validation.substring(argsIndex+1, validation.length-1);
+        }
+        var validatorFn = validators[validatorName];
+        if (validatorFn) {
+            validationFunctions.push(
+                function(field, value) {
+                    return validatorFn(field, value, args);
+                });
+        }
+    }
+    return validationFunctions;
+}
 
 validators = {
     required: function(field, value) {

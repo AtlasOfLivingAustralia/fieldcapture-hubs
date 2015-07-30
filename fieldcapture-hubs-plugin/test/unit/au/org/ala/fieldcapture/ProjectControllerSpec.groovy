@@ -26,6 +26,7 @@ class ProjectControllerSpec extends Specification {
         controller.activityService = activityServiceStub
         controller.commonService = commonServiceStub
         metadataServiceStub.organisationList() >> [list:[buildOrganisation(), buildOrganisation(), buildOrganisation()]]
+        metadataServiceStub.activitiesModel() >> [activities: []]
         userServiceStub.getOrganisationIdsForUserId(_) >> ['1']
         projectServiceStub.getMembersForProjectId(_) >> []
         metadataServiceStub.organisationList() >> [list:[]]
@@ -262,7 +263,7 @@ class ProjectControllerSpec extends Specification {
 
         model.projectContent.activities.label == 'Surveys'
         model.projectContent.activities.wordForActivity == 'Survey'
-        model.projectContent.site.label == 'Locations'
+        model.projectContent.site.label == 'Location'
         model.projectContent.site.wordForSite == 'Location'
     }
 

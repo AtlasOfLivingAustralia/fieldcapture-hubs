@@ -4,7 +4,6 @@
 <head>
   <meta name="layout" content="${hubConfig.skin}"/>
   <title>${project?.name.encodeAsHTML()} | Project | Field Capture</title>
-    <script type="text/javascript" src="${grailsApplication.config.google.maps.url}"></script>
     <r:script disposition="head">
     var fcConfig = {
         serverUrl: "${grailsApplication.config.grails.serverURL}",
@@ -113,8 +112,8 @@
                 <div class="clearfix" data-bind="visible:organisationId()||organisationName()">
                     <h4>
                         Recipient:
-                        <a data-bind="visible:organisationName()&&organisationId(),text:organisationName,attr:{href:fcConfig.organisationLinkBaseUrl + '/' + organisationId()}"></a>
-                        <span data-bind="visible:organisationName()&&!organisationId(),text:organisationName"></span>
+                        <a data-bind="visible:organisationId(),text:organisationName,attr:{href:fcConfig.organisationLinkBaseUrl + '/' + organisationId()}"></a>
+                        <span data-bind="visible:!organisationId(),text:organisationName"></span>
                     </h4>
                 </div>
                 <div class="clearfix" data-bind="visible:serviceProviderName()">

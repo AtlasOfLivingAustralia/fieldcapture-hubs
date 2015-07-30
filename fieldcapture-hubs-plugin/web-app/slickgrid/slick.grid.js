@@ -2637,7 +2637,12 @@ if (typeof Slick === "undefined") {
       if (getEditorLock().commitCurrentEdit()) {
         setFocus();
         if (options.autoEdit) {
-          navigateDown();
+          if (options.editFocusRight) {
+            navigateRight();
+          }
+          else {
+            navigateDown();
+          }
         }
       }
     }

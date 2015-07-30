@@ -35,7 +35,7 @@
                         </div>
                     </div>
 
-					<div class="control-group" >
+                    <div class="control-group" >
                         <label class="control-label" for="documentStage">Associate to Stage</label>
                         <div class="controls">
                             <select id="documentStage" style="width: 35%;" data-bind="options:stages, optionsCaption: 'Please select', value:stage"></select>
@@ -47,10 +47,20 @@
 
                         <div class="controls">
                             <input id="documentLicense" type="text" data-bind="value:license"/>
-
                         </div>
                     </div>
-                    
+
+                    <div data-bind="visible: embeddedVideoVisible()">
+                        <label class="control-label" for="embeddedVideo">
+                            Embed video
+                        </label>
+                        <div class="controls">
+                            <textarea placeholder="Example: <iframe width='560' height='315' src='https://www.youtube.com/embed/j1bR-0XBfcs' frameborder='0' allowfullscreen></iframe> (Allowed host: Youtube, Vimeo, Ted, Wistia.)"
+                                      data-bind="value: embeddedVideo,  valueUpdate: 'keyup'" style="width: 97%;" rows="3" id="embeddedVideo" type="text">
+                            </textarea>
+                        </div>
+                    </div>
+
                     <div class="control-group" data-bind="visible:settings.showSettings">
                         <label class="control-label" for="public">Settings</label>
                         <div class="controls">
@@ -61,6 +71,17 @@
                         </div>
 
                     </div>
+
+                    <div class="control-group" data-bind="visible:thirdPartyConsentDeclarationRequired">
+                        <label for="thirdPartyConsentDeclarationMade" class="control-label">Privacy declaration</label>
+                        <div id="thirdPartyConsentDeclarationMade" class="controls">
+                            <label id="thirdPartyDeclarationText" class="checkbox" for="thirdPartyConsentDeclarationMade">
+                                <input id="thirdPartyConsentCheckbox" type="checkbox" name="thirdPartyConsentDeclarationMade" class="validate[required]" data-bind="checked:thirdPartyConsentDeclarationMade">
+                                <fc:getSettingContent settingType="${au.org.ala.fieldcapture.SettingPageType.THIRD_PARTY_PHOTO_CONSENT_DECLARATION}"/>
+                            </label>
+                        </div>
+                    </div>
+
 
                     <div data-bind="visible: !embeddedVideoVisible()">
                         <div class="control-group"  data-bind="visible:settings.showSettings">
@@ -73,16 +94,6 @@
                             </div>
                         </div>
 
-                        <div class="control-group" data-bind="visible:thirdPartyConsentDeclarationRequired">
-                            <label for="thirdPartyConsentDeclarationMade" class="control-label">Privacy declaration</label>
-                            <div id="thirdPartyConsentDeclarationMade" class="controls">
-                                <label id="thirdPartyDeclarationText" class="checkbox" for="thirdPartyConsentDeclarationMade">
-                                    <input id="thirdPartyConsentCheckbox" type="checkbox" name="thirdPartyConsentDeclarationMade" class="validate[required]" data-bind="checked:thirdPartyConsentDeclarationMade">
-                                    <fc:getSettingContent settingType="${au.org.ala.fieldcapture.SettingPageType.THIRD_PARTY_PHOTO_CONSENT_DECLARATION}"/>
-                                </label>
-                            </div>
-
-                        </div>
 
                         <div class="control-group">
                             <label class="control-label" for="documentFile">File</label>
@@ -135,16 +146,7 @@
                         </div>
                     </div>
 
-                    <div data-bind="visible: embeddedVideoVisible()">
-                        <label class="control-label" for="embeddedVideo">Embed video </label>
-                        <div class="controls">
-                            <textarea data-bind="value: embeddedVideo" style="width: 97%;" rows="5" id="embeddedVideo" type="text" ></textarea>
-                        </div>
-                    </div>
-
-
                 </form>
-
             </div>
             <div class="modal-footer control-group">
                 <div class="controls">

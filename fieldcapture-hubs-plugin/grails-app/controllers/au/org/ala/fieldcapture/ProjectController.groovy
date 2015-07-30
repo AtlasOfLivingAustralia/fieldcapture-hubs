@@ -4,7 +4,7 @@ import org.joda.time.DateTime
 
 class ProjectController {
 
-    def projectService, metadataService, organisationService, commonService, activityService, userService, webService, roleService, grailsApplication
+    def projectService, metadataService, organisationService, commonService, activityService, userService, webService, roleService, grailsApplication, projectActivityService
     def siteService, documentService
     static defaultAction = "index"
     static ignore = ['action','controller','id']
@@ -22,6 +22,8 @@ class ProjectController {
             redirect(controller: 'home', model: [error: flash.message])
         } else {
             project.sites?.sort {it.name}
+            project.projectSite = project.sites?.find{it.siteId == project.projectSiteId}
+
             def user = userService.getUser()
             def members = projectService.getMembersForProjectId(id)
             def admins = members.findAll{ it.role == "admin" }.collect{ it.userName }.join(",") // comma separated list of user email addresses
@@ -34,9 +36,11 @@ class ProjectController {
                 user.hasViewAccess = projectService.canUserViewProject(user.userId, id)?:false
             }
             def programs = projectService.programsModel()
+            def activities = activityService.activitiesForProject(id)
             def content = projectContent(project, user, programs)
+
             def model = [project: project,
-                activities: activityService.activitiesForProject(id),
+                activities: activities,
                 mapFeatures: commonService.getMapFeatures(project),
                 isProjectStarredByUser: userService.isProjectStarredByUser(user?.userId?:"0", project.projectId)?.isProjectStarredByUser,
                 user: user,
@@ -51,6 +55,12 @@ class ProjectController {
                 themes:metadataService.getThemesForProject(project),
                 projectContent:content.model
             ]
+
+            if(project.projectType == 'survey'){
+                def activityModel = metadataService.activitiesModel().activities.findAll { it.category == "Assessment & monitoring" }
+                model.projectActivities = projectActivityService?.getAllByProject(project.projectId)
+                model.pActivityForms = activityModel.collect{[name: it.name, images: it.images]}
+            }
 
             render view:content.view, model:model
         }
@@ -71,16 +81,19 @@ class ProjectController {
     }
 
     protected Map surveyProjectContent(project, user) {
-        [about:[label:'About', template:'aboutCitizenScienceProject', visible: true, default: true, type:'tab'],
+
+        [about:[label:'About', template:'aboutCitizenScienceProject', visible: true, default: true, type:'tab', projectSite:project.projectSite],
          news:[label:'News', visible: true, type:'tab'],
-         documents:[label:'Documents', visible: !project.isExternal, type:'tab'],
-         activities:[label:'Surveys', visible:!project.isExternal, disabled:!user?.hasViewAccess, wordForActivity:'Survey',type:'tab'],
-         site:[label:'Locations', visible: !project.isExternal, disabled:!user?.hasViewAccess, wordForSite:'Location', editable:user?.isEditor == true, type:'tab'],
-         admin:[label:'Admin', visible:(user?.isAdmin || user?.isCaseManager), type:'tab']]
+         documents:[label:'Documents', template:'/shared/listDocuments', useExistingModel: true, editable:user?.isEditor,  visible: !project.isExternal, imageUrl:resource(dir:'/images/filetypes'), containerId:'overviewDocumentList', type:'tab'],
+         activities:[label:'Surveys', visible:!project.isExternal, template:'/projectActivity/list', showSites:true, site:project.sites, wordForActivity:'Survey', type:'tab'],
+         data:[label:'Data', visible:!project.isExternal, template:'/projectActivity/data', showSites:true, site:project.sites, wordForActivity:'Data', type:'tab'],
+         site:[label:'Location', visible: !project.isExternal, stopBinding:true, wordForSite:'Location', template:'/site/sitesList', editable:user?.isEditor == true, type:'tab'],
+         admin:[label:'Admin', template:'adminTabs', visible:(user?.isAdmin || user?.isCaseManager), type:'tab']]
     }
 
+
     protected Map worksProjectContent(project, user) {
-        [overview:[label:'Overview', visible: true, default: true, type:'tab'],
+        [overview:[label:'Overview', visible: true, default: true, type:'tab', projectSite:project.projectSite],
          documents:[label:'Documents', visible: !project.isExternal, type:'tab'],
          activities:[label:'Activities', visible:!project.isExternal, disabled:!user?.hasViewAccess, wordForActivity:"Activity",type:'tab'],
          site:[label:'Sites', visible: !project.isExternal, disabled:!user?.hasViewAccess, wordForSite:'Site', editable:user?.isEditor == true, type:'tab'],
@@ -177,27 +190,26 @@ class ProjectController {
                     url: it.url
                 ]
             }
-            def startDate = it.plannedStartDate? DateUtils.parse(it.plannedStartDate): null
-            def endDate = it.plannedEndDate? DateUtils.parse(it.plannedEndDate): null
+            def siteGeom = siteService.getRaw(it.projectSiteId)?.site?.extent?.geometry
             [
                 projectId  : it.projectId,
                 aim        : it.aim,
-                coverage   : it.coverage ?: '',
-                daysRemaining: endDate? DateUtils.daysRemaining(today, endDate): -1,
-                daysSince: startDate? DateUtils.daysRemaining(startDate, today): -1,
-                daysTotal  : startDate && endDate? DateUtils.daysRemaining(startDate, endDate): -1,
+                coverage   : siteGeom,
+                description: it.description,
                 difficulty : it.difficulty,
-                hasTeachingMaterials: it.hasTeachingMaterials,
+                endDate    : it.plannedEndDate,
+                hasParticipantCost: it.hasParticipantCost && true, // force it to boolean
+                hasTeachingMaterials: it.hasTeachingMaterials && true, // force it to boolean
                 isDIY      : it.isDIY && true, // force it to boolean
-                isEditable : userId && projectService.canUserEditProject(userId, it.projectId),
                 isExternal : it.isExternal && true, // force it to boolean
-                isNoCost   : !it.hasParticipantCost,
-                isSuitableForChildren: it.isSuitableForChildren,
+                isSuitableForChildren: it.isSuitableForChildren && true, // force it to boolean
+                keywords   : it.keywords,
                 links      : trimmedLinks,
                 name       : it.name,
                 organisationId  : it.organisationId,
                 organisationName: it.organisationName ?: organisationService.getNameFromId(it.organisationId),
-                status     : it.status,
+                scienceType: it.scienceType,
+                startDate  : it.plannedStartDate,
                 urlImage   : urlImage,
                 urlWeb     : it.urlWeb
             ]
@@ -218,21 +230,21 @@ class ProjectController {
                       it.projectId,
                       it.aim,
                       it.coverage,
-                      it.daysRemaining,
-                      it.daysSince,
-                      it.daysTotal,
+                      it.description,
                       it.difficulty,
+                      it.endDate,
+                      it.hasParticipantCost,
                       it.hasTeachingMaterials,
                       it.isDIY,
-                      it.isEditable,
                       it.isExternal,
-                      it.isNoCost,
                       it.isSuitableForChildren,
+                      it.keywords,
                       it.links,
                       it.name,
                       it.organisationId,
                       it.organisationName,
-                      it.status,
+                      it.scienceType,
+                      it.startDate,
                       it.urlImage,
                       it.urlWeb
                     ]
@@ -296,7 +308,7 @@ class ProjectController {
             documents.each { doc ->
                 doc.projectId = id
                 doc.isPrimaryProjectImage = doc.role == 'mainImage'
-                if (doc.isPrimaryProjectImage) doc.public = true
+                if (doc.isPrimaryProjectImage || doc.role == documentService.ROLE_LOGO) doc.public = true
                 documentService.saveStagedImageDocument(doc)
             }
         }

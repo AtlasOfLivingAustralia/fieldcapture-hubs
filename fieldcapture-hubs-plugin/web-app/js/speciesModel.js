@@ -14,10 +14,13 @@ var SpeciesViewModel = function(data, speciesLists) {
     self.transients.availableLists = speciesLists;
     self.transients.editing = ko.observable(false);
     self.transients.textFieldValue = ko.observable();
+    self.transients.bioProfileUrl =  ko.computed(function (){
+        return  fcConfig.bieUrl + '/species/' + self.guid();
+    });
 
     self.speciesSelected = function(event, data) {
         if (!data.listId) {
-            data.listId = self.list();
+            data.listId = self.listId();
         }
 
         self.loadData(data);

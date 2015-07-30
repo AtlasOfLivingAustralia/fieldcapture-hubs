@@ -26,11 +26,11 @@ function DocumentViewModel (doc, owner, settings) {
     //Associate project document to stages.
     this.maxStages = doc.maxStages;
     for(i = 0; i < this.maxStages; i++){
-    	this.settings.stages.push((i+1))
+        this.settings.stages.push((i+1))
     }
     this.stage = ko.observable(doc ? doc.stage : 0);
     this.stages = this.settings.stages;
-    
+
     // NOTE that attaching a file is optional, ie you can have a document record without a physical file
     this.filename = ko.observable(doc ? doc.filename : '');
     this.filesize = ko.observable(doc ? doc.filesize : '');
@@ -84,7 +84,7 @@ function DocumentViewModel (doc, owner, settings) {
         $("#thirdPartyConsentCheckbox").closest('form').validationEngine("updatePromptsPosition")
     });
     this.thirdPartyConsentDeclarationRequired = ko.computed(function() {
-        return self.type() == 'image' && self.public();
+        return (self.type() == 'image' ||  self.role() == 'embeddedVideo')  && self.public();
     });
     this.thirdPartyConsentDeclarationRequired.subscribe(function(newValue) {
         if (newValue) {
@@ -95,17 +95,23 @@ function DocumentViewModel (doc, owner, settings) {
         return self.filename() && self.progress() === 0 && !self.error();
     });
     this.saveEnabled = ko.computed(function() {
-
         if (self.thirdPartyConsentDeclarationRequired() && !self.thirdPartyConsentDeclarationMade()) {
             return false;
         }
-        if(self.role() == 'embeddedVideo'){
-            return true;
+        else if(self.role() == 'embeddedVideo'){
+            return buildiFrame(self.embeddedVideo()) != "" ;
         }
+
         return self.fileReady();
     });
     this.saveHelp = ko.computed(function() {
-        if (!self.fileReady()) {
+        if(self.role() == 'embeddedVideo' && !buildiFrame(self.embeddedVideo())){
+            return 'Invalid embed video code';
+        }
+        else if(self.role() == 'embeddedVideo' && !self.saveEnabled()){
+            return 'You must accept the Privacy Declaration before an embed video can be made viewable by everyone';
+        }
+        else if (!self.fileReady()) {
             return 'Attach a file using the "+ Attach file" button';
         }
         else if (!self.saveEnabled()) {
@@ -207,11 +213,12 @@ function DocumentViewModel (doc, owner, settings) {
     this.toJSONString = function() {
         // These are not properties of the document object, just used by the view model.
         return JSON.stringify(self.modelForSaving());
-    }
+    };
 
     this.modelForSaving = function() {
         return ko.mapping.toJS(self, {'ignore':['embeddedVideoVisible','iframe','helper', 'progress', 'hasPreview', 'error', 'fileLabel', 'file', 'complete', 'fileButtonText', 'roles', 'stages','maxStages', 'settings', 'thirdPartyConsentDeclarationRequired', 'saveEnabled', 'saveHelp', 'fileReady']});
-    }
+    };
+
 }
 
 
@@ -226,6 +233,7 @@ function DocumentViewModel (doc, owner, settings) {
 function attachViewModelToFileUpload(uploadUrl, documentViewModel, uiSelector, previewElementSelector) {
 
     var fileUploadHelper;
+
     $(uiSelector).fileupload({
         url:uploadUrl,
         formData:function(form) {return [{name:'document', value:documentViewModel.toJSONString()}]},
@@ -347,7 +355,6 @@ function showDocumentAttachInModal(uploadUrl, documentViewModel, modalSelector, 
         $modal.modal('hide');
         $fileUpload.find(previewSelector).empty();
         ko.cleanNode($fileUpload[0]);
-        //$fileUpload.fileupload('destroy');
     };
 
     ko.applyBindings(documentViewModel, $fileUpload[0]);
@@ -356,7 +363,9 @@ function showDocumentAttachInModal(uploadUrl, documentViewModel, modalSelector, 
     $modal.modal({backdrop:'static'});
     $modal.on('shown', function() {
         $modal.find('form').validationEngine({'custom_error_messages': {
-            'required': {'message':'The privacy declaration is required for images viewable by everyone'}
+            '#thirdPartyConsentCheckbox': {
+                'required': {'message':'The privacy declaration is required for images viewable by everyone'}
+            }
         }, 'autoPositionUpdate':true, promptPosition:'inline'});
     });
 

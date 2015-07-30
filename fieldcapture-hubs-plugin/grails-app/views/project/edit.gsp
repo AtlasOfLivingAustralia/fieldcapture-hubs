@@ -35,8 +35,7 @@
     <li class="active"><g:message code="g.edit"/></li>
 </ul>
 <form id="projectDetails" class="form-horizontal">
-    <g:set var="template" value="${project.isCitizenScience?'externalCitizenScienceProjectDetails':'details'}"/>
-    <g:render template="${template}" model="${pageScope.variables}"/>
+    <g:render template="details" model="${pageScope.variables}"/>
 </form>
 <div class="form-actions">
     <button type="button" id="save" class="btn btn-primary"><g:message code="g.save"/></button>
@@ -68,12 +67,7 @@ $(function(){
     ko.applyBindings(viewModel, document.getElementById("projectDetails"));
 
     $('#cancel').click(function () {
-    <g:if test="${citizenScience}">
-        document.location.href = "${createLink(action: 'citizenScience')}";
-    </g:if>
-    <g:else>
         document.location.href = "${createLink(action: 'index', id: project?.projectId)}";
-    </g:else>
     });
     $('#save').click(function () {
         if ($('#projectDetails').validationEngine('validate')) {

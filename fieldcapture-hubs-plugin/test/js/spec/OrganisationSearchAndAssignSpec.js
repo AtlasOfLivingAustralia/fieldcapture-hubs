@@ -1,4 +1,12 @@
 describe("OrganisationSelectionViewModel Spec", function () {
+    beforeAll(function() {
+        window.fcConfig = {
+            imageLocation:'/'
+        }
+    });
+    afterAll(function() {
+        delete window.fcConfig;
+    });
 
     var organisations = [
         { name:'Org 1', organisationId:'1'},

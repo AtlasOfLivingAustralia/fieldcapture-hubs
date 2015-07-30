@@ -116,7 +116,7 @@ class OrganisationControllerSpec extends Specification {
 
         then:
         model.organisation == testOrg
-        model.content.projects.visible == true
+        model.content.about.visible == true
         model.content.sites.visible == false
         model.content.dashboard.visible == false
         model.content.admin.visible == false
@@ -133,7 +133,7 @@ class OrganisationControllerSpec extends Specification {
 
         then:
         model.organisation == testOrg
-        model.content.projects.visible == true
+        model.content.about.visible == true
         model.content.sites.visible == true
         model.content.dashboard.visible == true
         model.content.admin.visible == false
@@ -150,7 +150,7 @@ class OrganisationControllerSpec extends Specification {
 
         then:
         model.organisation == testOrg
-        model.content.projects.visible == true
+        model.content.about.visible == true
         model.content.sites.visible == true
         model.content.dashboard.visible == true
         model.content.admin.visible == true
@@ -167,7 +167,7 @@ class OrganisationControllerSpec extends Specification {
 
         then:
         model.organisation == testOrg
-        model.content.projects.visible == true
+        model.content.about.visible == true
         model.content.sites.visible == true
         model.content.dashboard.visible == true
         model.content.admin.visible == true
@@ -184,13 +184,13 @@ class OrganisationControllerSpec extends Specification {
 
         then:
         model.organisation == testOrg
-        model.content.projects.visible == true
+        model.content.about.visible == true
         model.content.sites.visible == true
         model.content.dashboard.visible == true
         model.content.admin.visible == false
     }
 
-    def "the project tab is the default"() {
+    def "the about tab is the default"() {
         setup:
         def testOrg = testOrganisation()
         organisationService.get(_,_) >> testOrg
@@ -200,7 +200,7 @@ class OrganisationControllerSpec extends Specification {
         def model = controller.index('id')
 
         then:
-        model.content.projects.default == true
+        model.content.about.default == true
         def numDefault = 0
         model.content.each { k, v ->
             if (v.default) {

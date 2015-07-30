@@ -49,10 +49,6 @@ OrganisationViewModel = function (props) {
         return self.name()?self.name():'New Organisation';
     });
 
-    self.detailsTemplate = ko.computed(function() {
-        return self.mainImageUrl() ? 'hasMainImageTemplate' : 'noMainImageTemplate';
-    });
-
     self.projects = props.projects;
 
     self.deleteOrganisation = function() {
@@ -64,11 +60,15 @@ OrganisationViewModel = function (props) {
         };
     };
 
+    self.editDescription = function() {
+        editWithMarkdown('Edit organisation description', self.description);
+    };
+
     self.editOrganisation = function() {
        window.location = fcConfig.organisationEditUrl;
     };
 
-    self.transients = {};
+    self.transients = self.transients || {};
     self.transients.orgTypes = [];
     for (var ot in orgTypesMap) {
         if (orgTypesMap.hasOwnProperty(ot))
@@ -76,10 +76,11 @@ OrganisationViewModel = function (props) {
     }
 
     self.toJS = function(includeDocuments) {
-        var ignore = self.ignore.concat(['detailsTemplate', 'breadcrumbName', 'orgTypeDisplayOnly', 'collectoryInstitutionId']);
+        var ignore = self.ignore.concat(['breadcrumbName', 'orgTypeDisplayOnly', 'collectoryInstitutionId']);
         var js = ko.mapping.toJS(self, {include:['documents'], ignore:ignore} );
         if (includeDocuments) {
             js.documents = ko.toJS(self.documents);
+            js.links = ko.mapping.toJS(self.links());
         }
         return js;
     };
@@ -117,12 +118,19 @@ OrganisationViewModel = function (props) {
         });
     }
 
+    // links
+    if (props.links) {
+        $.each(props.links, function(i, link) {
+            self.addLink(link.role, link.url);
+        });
+    }
+
     return self;
 
 };
 
 /**
- * Provides the ability to search a user's organsations and other organisations at the same time.  The results
+ * Provides the ability to search a user's organisations and other organisations at the same time.  The results
  * are maintained as separate lists for ease of display (so a users existing organisations can be prioritised).
  * @param organisations the organisations not belonging to the user.
  * @param userOrganisations the organisations that belong to the user.
@@ -215,5 +223,154 @@ OrganisationSelectionViewModel = function(organisations, userOrganisations, init
             self.select(orgToSelect);
         }
     }
+
+};
+
+var OrganisationsViewModel = function(organisations, userOrgIds) {
+    var self = this;
+
+    var userOrgList = [], otherOrgList = [];
+    for (var i=0; i<organisations.length; i++) {
+
+        // Attach images to each organisations for display
+        var orgView = new OrganisationViewModel(organisations[i]);
+        orgView.searchableName = organisations[i].name;
+        orgView.searchableDescription = organisations[i].description;
+
+        if (userOrgIds && userOrgIds.indexOf(organisations[i].organisationId) >= 0) {
+            userOrgList.push(orgView);
+        }
+        else {
+            otherOrgList.push(orgView)
+        }
+    }
+
+    var searchableUserList, searchableOtherList;
+
+    self.searchTerm = ko.observable('');
+    self.searchName = ko.observable(true);
+    self.searchDescription = ko.observable(false);
+    self.caseSensitive = ko.observable(false);
+
+    var buildSearch = function() {
+        var keys = [];
+        if (self.searchName()) {
+            keys.push('searchableName');
+        }
+        if (self.searchDescription()) {
+            keys.push('searchableDescription');
+        }
+
+        var options = {keys:keys, caseSensitive:self.caseSensitive()};
+
+        searchableUserList = new SearchableList(userOrgList, keys, options);
+        searchableOtherList = new SearchableList(otherOrgList, keys, options);
+    };
+
+    buildSearch();
+
+    self.delayedSearchTerm = ko.pureComputed(self.searchTerm).extend({rateLimit:{method:'notifyWhenChangesStop', timeout:400}});
+
+    self.delayedSearchTerm.subscribe(function(term) {
+        searchableUserList.term(term);
+        searchableOtherList.term(term);
+        self.pageNum(1);
+        self.pageList(buildPageList());
+    });
+
+    this.userOrganisations = searchableUserList.results;
+    this.otherOrganisations = searchableOtherList.results;
+
+    this.pageNum = ko.observable(1);
+    this.organisationsPerPage = 20;
+    var maxPageButtons = 10;
+
+    this.totalPages = ko.computed(function() {
+        var count = self.userOrganisations().length + self.otherOrganisations().length;
+        var pageCount = Math.floor(count / self.organisationsPerPage);
+        return count % self.organisationsPerPage > 0 ? pageCount + 1 : pageCount;
+    });
+
+    this.currentPage = ko.computed(function() {
+        var results = [].concat(self.userOrganisations(), self.otherOrganisations());
+        var first = (self.pageNum()-1) * self.organisationsPerPage;
+        return results.slice(first, first+self.organisationsPerPage);
+
+    });
+
+    function buildPageList() {
+        var pages = [];
+        var i;
+        var currentPage = self.pageNum();
+        var total = self.totalPages();
+        if (total <= maxPageButtons) {
+            for (i=1; i<=total; i++) {
+                pages.push(i);
+            }
+            return pages;
+        }
+
+        if (currentPage <= (maxPageButtons / 2) + 1) {
+            for (i=1; i<maxPageButtons; i++) {
+                pages.push(i);
+            }
+            pages.push('..');
+            pages.push(total);
+            return pages;
+
+        }
+
+        if (currentPage > (total - (maxPageButtons / 2))) {
+            pages.push(1);
+            pages.push('..');
+            for (i=total - maxPageButtons+2; i<=total; i++) {
+                pages.push(i);
+            }
+            return pages;
+        }
+
+        pages.push(1);
+        pages.push('..');
+        var start = currentPage-(maxPageButtons/2)+1;
+        for (i=start; i<start+maxPageButtons-2; i++) {
+            pages.push(i);
+        }
+        pages.push('..');
+        pages.push(total);
+        return pages;
+    };
+
+    this.pageList = ko.observableArray(buildPageList());
+
+    this.hasPrev = ko.computed(function() {
+        return self.pageNum() > 1;
+    });
+
+    this.hasNext = ko.computed(function() {
+        return self.pageNum() < self.totalPages();
+    });
+
+    this.next = function() {
+        if (self.hasNext()) {
+            self.gotoPage(self.pageNum()+1);
+        }
+    };
+    this.prev = function() {
+        if (self.hasPrev()) {
+            self.gotoPage(self.pageNum()-1);
+        }
+    };
+
+    this.gotoPage = function(page) {
+        if (page != '..') {
+            self.pageNum(page);
+            self.pageList(buildPageList());
+            self.pageList.notifySubscribers();
+        }
+    };
+
+    this.addOrganisation = function() {
+        window.location = fcConfig.createOrganisationUrl;
+    };
 
 };

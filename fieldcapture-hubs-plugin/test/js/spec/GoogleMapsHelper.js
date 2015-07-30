@@ -1,6 +1,4 @@
 
-fcConfig = {};
-
 // Stub the Google Maps API
 google = { maps : {
     drawing : { OverlayType: {RECTANGLE:'rectangle'} },

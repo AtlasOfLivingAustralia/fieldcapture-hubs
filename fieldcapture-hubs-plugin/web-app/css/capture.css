@@ -873,9 +873,47 @@ input[type="checkbox"] { -webkit-appearance: checkbox; !important }
     border-bottom: 1px solid #ddd;
 }
 
-.organisation-banner,.project-banner {
+.banner {
     background-repeat: no-repeat;
     background-position: right;
     background-color: #f0f0e8;
+    padding-left:20px;
+    padding-right:20px;
 }
 
+.banner .header-text {
+    float:left;
+    margin-left:10px;
+}
+.banner .header-text h2,.header-text h4 {
+    margin-top: 0;
+    margin-bottom: 0;
+}
+
+.banner .logo {
+    height:110px;
+    margin-bottom:10px;
+    float:left;
+}
+
+.links-table {
+    margin-bottom: 0;
+}
+.links-table td {
+    border: none;
+    padding: 4px;
+    vertical-align: middle;
+}
+
+#carousel {
+    max-height: 512px;
+    overflow: hidden;
+}
+
+.well-title {
+    border-bottom: 1px solid lightgrey;
+    font-weight: bold;
+    padding-bottom:5px;
+    margin-bottom:10px;
+    font-size:larger;
+}

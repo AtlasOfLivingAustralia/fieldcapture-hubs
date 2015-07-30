@@ -63,6 +63,10 @@ class DateUtils {
         return DATE_PARSER.parseDateTime(dateString)
     }
 
+    static DateTime parseDisplayDate(String displayDateString) {
+        return DISPLAY_DATE_FORMATTER.parseDateTime(displayDateString)
+    }
+
     static DateTime now() {
         return new DateTime()
     }

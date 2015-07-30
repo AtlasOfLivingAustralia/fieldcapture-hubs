@@ -13,6 +13,19 @@
             };
     </r:script>
     <r:require modules="knockout,mapWithFeatures,amplify,organisation,fuseSearch"/>
+    <style type="text/css">
+.organisation-logo {
+    width: 200px;
+    height: 150px;
+    line-height: 146px;
+    margin-right: 10px;
+    overflow: hidden;
+    padding: 1px;
+    text-align: center;
+    float:left;
+}
+</style>
+
 </head>
 
 <body>
@@ -23,13 +36,7 @@
         </li>
         <li class="active">Organisations<span class="divider"></span></li>
     </ul>
-
-    <g:if test="${user && citizenScienceOrgId != ''}">
-        <h5>Please select the organisation which will manage your citizen science project
-        If you are not a member of that organisation, you will need to contact that organisation's administrator to induct you as a member.
-        Alternatively, you may register a new organisation if it is not listed below.</h5>
-    </g:if>
-
+<g:if test="${allowOrganisationRegistration}">
     <div>
         <h2 style="display:inline">Registered
 
@@ -39,21 +46,23 @@
             <button class="btn btn-success pull-right" data-bind="click:addOrganisation">Register new organisation</button>
         </g:if>
     </div>
+</g:if>
 
     <div class="row-fluid">
-        <div class="span6">
-            <input id="searchText" class="span12" placeholder="Search..." />
+        <div class="span6 input-prepend">
+            <span class="add-on"><i class="icon-search"></i> </span>
+            <input id="searchText" data-bind="value:searchTerm, valueUpdate:'keyup'" class="span12" placeholder="Search..." />
         </div>
         <div class="span2">
-            <input id="searchByName" type="checkbox" checked="true" class="fuse-checkbox" />
+            <input id="searchByName" type="checkbox" checked="true" data-bind="checkbox:searchName"/>
             <label for="searchByName" style="display:inline">By name</label>
         </div>
         <div class="span2">
-            <input id="searchByDescription" type="checkbox" class="fuse-checkbox" />
+            <input id="searchByDescription" type="checkbox" data-bind="checkbox:searchDescription" />
             <label for="searchByDescription" style="display:inline">By description</label>
         </div>
         <div class="span2">
-            <input id="searchCaseSensitive" type="checkbox" class="fuse-checkbox" />
+            <input id="searchCaseSensitive" type="checkbox" data-bind="checkbox:caseSensitive" />
             <label for="searchCaseSensitive" style="display:inline">Case sensitive</label>
         </div>
     </div>
@@ -62,14 +71,18 @@
             <table class="table table-striped" id="organisations">
 
                 <tbody data-bind="foreach:currentPage">
-                <tr>
+                <tr class="banner">
+
                     <td class="organisation-banner" data-bind="style:{'backgroundImage':bannerUrl}">
-                        <h4>
-                            <a data-bind="visible:organisationId,attr:{href:fcConfig.viewOrganisationUrl+'/'+organisationId}"><span
-                            data-bind="text:name"></span></a>
-                            <span data-bind="visible:!organisationId,text:name"></span>
-                        </h4>
-                        <span data-bind="html:description.markdownToHtml()"></span>
+                        <div class="organisation-logo" data-bind="visible:logoUrl"><img class="logo" data-bind="attr:{'src':logoUrl}"></div>
+                        <div style="margin-left:20px;">
+                            <h4>
+                                <a data-bind="visible:organisationId,attr:{href:fcConfig.viewOrganisationUrl+'/'+organisationId}"><span
+                                data-bind="text:name"></span></a>
+                                <span data-bind="visible:!organisationId,text:name"></span>
+                            </h4>
+                            <span data-bind="html:description.markdownToHtml()"></span>
+                        </div>
                     </td>
                 </tr>
                 </tbody>
@@ -78,7 +91,7 @@
                     <td>
                         <button class="btn" data-bind="click:prev,enable:hasPrev()"><i class="icon-arrow-left"></i> Prev</button>
                         <!-- ko foreach: pageList -->
-                        <button class="btn" data-bind="click:$parent.pageNum($data),text:$data,css: {active:$data == $parent.pageNum()}"></button>
+                        <button class="btn" data-bind="click:function() {$parent.gotoPage($data)},text:$data,css: {active:$data == $parent.pageNum()}"></button>
                         <!-- /ko -->
                         <button class="btn" data-bind="click:next,enable:hasNext()">Next <i class="icon-arrow-right"></i></button>
 
@@ -101,149 +114,13 @@
 
         var userOrgs = [], otherOrgs = [], citizenScienceOrg;
 
-        var OrganisationsViewModel = function(organisations, userOrgIds) {
-            var self = this, userOrgIdsMap = {};
-            $.each(userOrgIds, function(i, id) {
-                userOrgIdsMap[id] = true;
-            });
-            $.each(organisations, function(i, org) {
-                var model = new OrganisationViewModel(org);
-                model.fuseName = model.name();
-                model.fuseDescription = model.description.markdownToHtml();
-                if (userOrgIdsMap[org.organisationId])
-                    userOrgs.push(model);
-<g:if test="${user && citizenScienceOrgId != ''}">
-                else if (org.organisationId == "${citizenScienceOrgId}")
-                    citizenScienceOrg = model;
-</g:if>
-                else
-                    otherOrgs.push(model);
-            });
-
-            this.allOrganisations = ko.observableArray();
-            this.pageNum = ko.observable(1);
-            this.organisationsPerPage = 10;
-            this.maxPageButtons = 5;
-
-            this.totalPages = ko.computed(function() {
-                var count = self.allOrganisations().length;
-                var pageCount = Math.floor(count / self.organisationsPerPage);
-                return count % self.organisationsPerPage > 0 ? pageCount + 1 : pageCount;
-            });
-
-            this.currentPage = ko.computed(function() {
-                var first = (self.pageNum()-1) * self.organisationsPerPage;
-                return self.allOrganisations().slice(first, first+self.organisationsPerPage);
-            });
-
-            this.pageList = ko.computed(function() {
-                var pages = [];
-
-                for (var i=1; i<=self.totalPages(); i++) {
-                    pages.push(i);
-                }
-
-                return pages;
-            });
-
-            this.hasPrev = ko.computed(function() {
-                return self.pageNum() > 1;
-            })
-
-            this.hasNext = ko.computed(function() {
-                return self.pageNum() < self.totalPages();
-            });
-
-            this.next = function() {
-                if (self.hasNext()) {
-                    self.pageNum(self.pageNum()+1);
-                }
-            };
-            this.prev = function() {
-                if (self.hasPrev()) {
-                    self.pageNum(self.pageNum()-1);
-                }
-            };
-
-            this.addOrganisation = function() {
-                window.location = fcConfig.createOrganisationUrl;
-            }
-
-        };
-
         var organisations = <fc:modelAsJavascript model="${organisations}" default="${[]}"/>;
         var userOrgIds = <fc:modelAsJavascript model="${userOrgIds}" default="${[]}"/>;
         var organisationsViewModel = new OrganisationsViewModel(organisations, userOrgIds);
 
         ko.applyBindings(organisationsViewModel);
 
-        (function() {
-            var fuseUserOrgs, fuseOtherOrgs, userOrgsBanner = {
-                  organisationId: null,
-                  bannerUrl: "",
-                  description: ko.observable("").extend({markdown:true}),
-                  name: "You are a member of the following organisations"
-                }, otherOrgsBanner = {
-                  organisationId: null,
-                  bannerUrl: "",
-                  description: ko.observable("").extend({markdown:true}),
-                  name: "You are NOT a member of the following organisations"
-                }, citizenScienceOrgBanner = {
-                  organisationId: null,
-                  bannerUrl: "",
-                  description: ko.observable("").extend({markdown:true}),
-                  name: "The following organisation may be used even by non-members to create or register citizen science projects"
-                };
 
-            function search() {
-              var orgs, key = $('#searchText').val();
-              organisationsViewModel.allOrganisations.removeAll();
-              orgs = fuseUserOrgs && key? fuseUserOrgs.search(key): userOrgs;
-              if (orgs.length) {
-                organisationsViewModel.allOrganisations.push(userOrgsBanner);
-                $.each(orgs , function(i, org) {
-                  organisationsViewModel.allOrganisations.push(org);
-                });
-              }
-              if (citizenScienceOrg) {
-                organisationsViewModel.allOrganisations.push(citizenScienceOrgBanner);
-                organisationsViewModel.allOrganisations.push(citizenScienceOrg);
-              }
-              orgs = fuseOtherOrgs && key? fuseOtherOrgs.search(key): otherOrgs;
-              if (orgs.length) {
-    <g:if test="${user}">
-                organisationsViewModel.allOrganisations.push(otherOrgsBanner);
-    </g:if>
-                $.each(orgs, function(i, org) {
-                  organisationsViewModel.allOrganisations.push(org);
-                });
-              }
-              if (organisationsViewModel.pageNum() === 1)
-                organisationsViewModel.pageNum.valueHasMutated();
-              else
-                organisationsViewModel.pageNum(1);
-            }
-            function mkfuse() {
-              var keys = [];
-              if ($('#searchByName').prop('checked')) keys.push('fuseName');
-              if ($('#searchByDescription').prop('checked')) keys.push('fuseDescription');
-              fuseUserOrgs = userOrgs && keys.length && new Fuse(userOrgs, {
-                keys: keys,
-                caseSensitive: $('#searchCaseSensitive').prop('checked')
-              });
-              fuseOtherOrgs = otherOrgs && keys.length && new Fuse(otherOrgs, {
-                keys: keys,
-                caseSensitive: $('#searchCaseSensitive').prop('checked')
-              });
-              search();
-            }
-
-            $('#searchByName').on('change', mkfuse);
-            $('#searchByDescription').on('change', mkfuse);
-            $('#searchCaseSensitive').on('change', mkfuse);
-            $('#searchText').on('keyup', search);
-            mkfuse();
-        })();
 });
 
 </r:script>

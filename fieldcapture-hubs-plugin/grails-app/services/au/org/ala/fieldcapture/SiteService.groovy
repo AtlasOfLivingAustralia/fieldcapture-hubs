@@ -97,6 +97,7 @@ class SiteService {
     }
 
     def get(id, Map urlParams = [:]) {
+        if (!id) return null
         webService.getJson(grailsApplication.config.ecodata.baseUrl + 'site/' + id +
                 commonService.buildUrlParamsFromMap(urlParams))
     }

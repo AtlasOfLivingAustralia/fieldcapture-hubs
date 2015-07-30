@@ -269,11 +269,6 @@
             activityModels.push(model);
         });
 
-        var helpHover = function(helpText) {
-            return '<a href="#" class="helphover" data-original-title="" data-placement="top" data-container="body" data-content="'+helpText+'">'+
-                       '<i class="icon-question-sign">&nbsp;</i>'+
-                   '</a>';
-        };
         var columns = [];
         $.each(outputModels, function(i, outputModel) {
             $.each(outputModel.annotatedModel, function(i, dataItem) {

@@ -335,17 +335,19 @@ function ProjectViewModel(project, isUserEditor, organisations) {
     self.dataSharingLicense = ko.observable(project.dataSharingLicense);
     self.difficulty = ko.observable(project.difficulty);
     self.gear = ko.observable(project.gear);
-    self.getInvolved = ko.observable(project.getInvolved);
+    self.getInvolved = ko.observable(project.getInvolved).extend({markdown:true});
     self.hasParticipantCost = ko.observable(project.hasParticipantCost);
     self.hasTeachingMaterials = ko.observable(project.hasTeachingMaterials);
     self.isCitizenScience = ko.observable(project.isCitizenScience);
     self.isDIY = ko.observable(project.isDIY);
     self.isExternal = ko.observable(project.isExternal);
+    self.isMERIT = ko.observable(project.isMERIT);
+    self.isMetadataSharing = ko.observable(project.isMetadataSharing);
     self.isSuitableForChildren = ko.observable(project.isSuitableForChildren);
     self.keywords = ko.observable(project.keywords);
     self.projectPrivacy = ko.observable(project.projectPrivacy);
     self.projectSiteId = project.projectSiteId;
-    self.projectType = ko.observable(project.projectType || "works");
+    self.projectType = ko.observable(project.projectType);
     self.scienceType = ko.observable(project.scienceType);
     self.task = ko.observable(project.task);
     self.urlWeb = ko.observable(project.urlWeb).extend({url:true});
@@ -354,6 +356,9 @@ function ProjectViewModel(project, isUserEditor, organisations) {
 
     self.transients = self.transients || {};
 
+    var isBeforeToday = function(date) {
+        return moment(date) < moment().startOf('day');
+    }
     var calculateDurationInDays = function(startDate, endDate) {
         var start = moment(startDate);
         var end = moment(endDate);
@@ -383,10 +388,40 @@ function ProjectViewModel(project, isUserEditor, organisations) {
     };
 
     self.transients.daysRemaining = ko.pureComputed(function() {
-        return self.plannedEndDate()? calculateDurationInDays(undefined, self.plannedEndDate()): -1;
+        var end = self.plannedEndDate();
+        return end? isBeforeToday(end)? 0: calculateDurationInDays(undefined, end) + 1: -1;
+    });
+    self.transients.daysSince = ko.pureComputed(function() {
+        var startDate = self.plannedStartDate();
+        if (!startDate) return -1;
+        var start = moment(startDate);
+        var today = moment();
+        return today.diff(start, 'days');
     });
     self.transients.daysTotal = ko.pureComputed(function() {
         return self.plannedEndDate()? calculateDurationInDays(self.plannedStartDate(), self.plannedEndDate()): -1;
+    });
+    self.daysStatus = ko.pureComputed(function(){
+        return self.transients.daysRemaining()? "active": "ended";
+    });
+    self.transients.since = ko.pureComputed(function(){
+        var daysSince = self.transients.daysSince();
+        if (daysSince < 0) {
+            daysSince = -daysSince;
+            if (daysSince === 1) return "tomorrow";
+            if (daysSince < 30) return "in " + daysSince + " days";
+            if (daysSince < 32) return "in about a month";
+            if (daysSince < 365) return "in " + (daysSince / 30).toFixed(1) + " months";
+            if (daysSince === 365) return "in one year";
+            return "in " + (daysSince / 365).toFixed(1) + " years";
+        }
+        if (daysSince === 0) return "today";
+        if (daysSince === 1) return "yesterday";
+        if (daysSince < 30) return daysSince + " days ago";
+        if (daysSince < 32) return "about a month ago";
+        if (daysSince < 365) return (daysSince / 30).toFixed(1) + " months ago";
+        if (daysSince === 365) return "one year ago";
+        return (daysSince / 365).toFixed(1) + " years ago";
     });
     var updatingDurations = false; // Flag to prevent endless loops during change of end date / duration.
     self.transients.plannedDuration = ko.observable(calculateDuration(self.plannedStartDate(), self.plannedEndDate()));
@@ -510,6 +545,7 @@ function ProjectViewModel(project, isUserEditor, organisations) {
         }
     });
 
+    self.transients.projectId = project.projectId;
     self.transients.programs = [];
     self.transients.subprograms = {};
     self.transients.subprogramsToDisplay = ko.computed(function () {
@@ -525,24 +561,38 @@ function ProjectViewModel(project, isUserEditor, organisations) {
 
     self.transients.difficultyLevels = [ "Easy", "Medium", "Hard" ];
 
-    self.transients.availableScienceTypes = [
+    var scienceTypesList = [
         {name:'Biodiversity', value:'biodiversity'},
         {name:'Ecology', value:'ecology'},
         {name:'Natural resource management', value:'nrm'}
     ];
+    self.transients.availableScienceTypes = scienceTypesList;
+    self.transients.scienceTypeDisplay = ko.pureComputed(function () {
+        for (var st = self.scienceType(), i = 0; i < scienceTypesList.length; i++)
+            if (st === scienceTypesList[i].value)
+                return scienceTypesList[i].name;
+    });
 
-    self.transients.availableProjectTypes = [
-        {name:'Citizen Science Project', value:'citizenScience'},
-        {name:'Ecological or biological survey / assessment (not citizen science)', value:'survey'},
-        {name:'Natural resource management works project', value:'works'}
+    var availableProjectTypes = [
+        {name:'Citizen Science Project', display:'Citizen\nScience', value:'citizenScience'},
+        {name:'Ecological or biological survey / assessment (not citizen science)', display:'Biological\nScience', value:'survey'},
+        {name:'Natural resource management works project', display:'Works\nProject', value:'works'}
     ];
+    self.transients.availableProjectTypes = availableProjectTypes;
+    self.transients.kindOfProjectDisplay = ko.pureComputed(function () {
+        for (var pt = self.transients.kindOfProject(), i = 0; i < availableProjectTypes.length; i++)
+            if (pt === availableProjectTypes[i].value)
+                return availableProjectTypes[i].display;
+    });
     /** Map between the available selection of project types and how the data is stored */
     self.transients.kindOfProject = ko.pureComputed({
         read: function() {
             if (self.isCitizenScience()) {
                 return 'citizenScience';
             }
-            return self.projectType() == 'survey' ? 'survey' : 'works';
+            if (self.projectType()) {
+                return self.projectType() == 'survey' ? 'survey' : 'works';
+            }
         },
         write: function(value) {
             if (value === 'citizenScience') {
@@ -569,7 +619,7 @@ function ProjectViewModel(project, isUserEditor, organisations) {
 
     self.toJS = function() {
         var toIgnore = self.ignore; // document properties to ignore.
-        toIgnore.concat(['transients', 'projectDatesChanged', 'collectoryInstitutionId', 'ignore', 'projectStatus']);
+        toIgnore.concat(['transients', 'daysStatus', 'projectDatesChanged', 'collectoryInstitutionId', 'ignore', 'projectStatus']);
         return ko.mapping.toJS(self, {ignore:toIgnore});
     }
 
@@ -607,6 +657,7 @@ function ProjectViewModel(project, isUserEditor, organisations) {
 
     if (project.documents) {
         $.each(project.documents, function(i, doc) {
+            if (doc.role === "logo") doc.public = true; // for backward compatibility
             self.addDocument(doc);
         });
     }
@@ -618,6 +669,45 @@ function ProjectViewModel(project, isUserEditor, organisations) {
         });
     }
 };
+
+/**
+ * View model for use by the citizen science project finder page.
+ * @param props array of project attributes
+ * @constructor
+ */
+function CitizenScienceFinderProjectViewModel(props) {
+    ProjectViewModel.apply(this, [{
+        projectId: props[0],
+        aim: props[1],
+        description: props[3],
+        difficulty: props[4],
+        plannedEndDate: props[5] && new Date(props[5]),
+        hasParticipantCost: props[6],
+        hasTeachingMaterials: props[7],
+        isDIY: props[8],
+        isExternal: props[9],
+        isSuitableForChildren: props[10],
+        keywords: props[11],
+        links: props[12],
+        name: props[13],
+        organisationId: props[14],
+        organisationName: props[15],
+        scienceType: props[16],
+        plannedStartDate: props[17] && new Date(props[17]),
+        documents: [
+            {
+                public: true,
+                role: 'logo',
+                url: props[18]
+            }
+        ],
+        urlWeb: props[19]
+    }, false, []]);
+
+    var self = this;
+    self.transients.locality = props[2] && props[2].locality;
+    self.transients.state = props[2] && props[2].state;
+}
 
 /**
  * View model for use by the project create and edit pages.  Extends the ProjectViewModel to provide support
@@ -681,9 +771,3 @@ function CreateEditProjectViewModel(project, isUserEditor, userOrganisations, or
 
     autoSaveModel(self, config.projectSaveUrl, {blockUIOnSave:config.blockUIOnSave, blockUISaveMessage:"Saving project...", storageKey:config.storageKey});
 };
-
-function getHostName(href) {
-    var l = document.createElement("a");
-    l.href = href;
-    return l.hostname;
-}

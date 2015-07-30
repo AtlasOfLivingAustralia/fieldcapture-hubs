@@ -32,7 +32,9 @@
 /target
 
 *.iml
-
-/.idea
+.idea/
 /fieldcapture-hub/target
+/fieldcapture-hub/out
+/fieldcapture-hub/logs
 
+/fieldcapture-hubs-plugin/node_modules

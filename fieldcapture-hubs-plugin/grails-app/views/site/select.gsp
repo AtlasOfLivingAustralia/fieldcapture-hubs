@@ -185,7 +185,6 @@
 
             }
             self.removeSite = function(site){
-                console.log('Remove ' + site);
                 var idxOfSite = self.sites.indexOf(site);
                 var _site = self.sites()[idxOfSite];
                 _site.isProjectSite(false);

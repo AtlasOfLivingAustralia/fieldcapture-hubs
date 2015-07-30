@@ -1,7 +1,6 @@
 <style type="text/css">
     .logo {
-        height:75px;
-
+        height:110px;
         margin-left:10px;
         margin-bottom:10px;
         float:left;
@@ -9,6 +8,9 @@
     .header-days {
         float:right;
         margin-right:10px;
+    }
+    .header-dates {
+        color: grey;
     }
     .header-text {
         float:left;
@@ -26,11 +28,7 @@
 </style>
 <div class="project-header project-banner" data-bind="style:{'backgroundImage':asBackgroundImage(bannerUrl())}">
     <div class="row-fluid" style="margin-left:10px;">
-        <g:if test="${user?.isEditor}">
-            <button class="btn btn-small pull-right" data-bind="click:editProject"><i class="icon-edit"></i> Edit</button>
-        </g:if>
         <ul class="breadcrumb">
-
             <li>
                 <g:link controller="home">Home</g:link> <span class="divider">/</span>
             </li>
@@ -42,10 +40,16 @@
         <span data-bind="visible:logoUrl"><img class="logo" data-bind="attr:{'src':logoUrl}"></span>
         <div class="header-text">
             <h2 data-bind="text:name"></h2>
-            <h4 class="organisation" data-bind="text:organisationName"></h4>
+            <h4 class="organisation" data-bind="visible:!organisationId(),text:organisationName"></h4>
+            <a data-bind="visible:organisationId(),attr:{href:fcConfig.organisationLinkBaseUrl + '/' + organisationId()}">
+              <h4 class="organisation" data-bind="text:organisationName"></h4>
+            </a>
         </div>
         <div class="header-days">
             <g:render template="dayscount"/>
+            <span class="header-dates" data-bind="visible:plannedStartDate,text:'Start date: ' + moment(plannedStartDate()).format('DD MMMM, YYYY')"></span>
+            <br/>
+            <span class="header-dates" data-bind="visible:plannedEndDate,text:'End date: ' + moment(plannedEndDate()).format('DD MMMM, YYYY')"></span>
         </div>
     </div>
     <g:render template="daysline"/>

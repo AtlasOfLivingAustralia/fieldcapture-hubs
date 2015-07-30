@@ -26,6 +26,10 @@ class SearchController {
 
     }
 
+    def searchSpeciesList(String sort, Integer max, Integer offset){
+        render speciesService.searchSpeciesList(sort, max, offset) as JSON
+    }
+
     @PreAuthorise(accessLevel = 'siteReadOnly', redirectController ='home', redirectAction = 'index')
     def downloadSearchResults() {
         def path = 'search/downloadSearchResults'

@@ -259,8 +259,6 @@ function stringToDate(date) {
                     widget.setDate(widget.date);
                 }
             }
-
-
         }
     };
 
@@ -553,6 +551,84 @@ ko.bindingHandlers.sortIcon = {
     }
 };
 
+/*
+ * Fused Autocomplete supports two versions of autocomplete (original autocomplete implementation by Jorn Zaefferer and jquery_ui)
+ * Expects three parameters source, name and guid.
+ * Ajax response lists needs name attribute.
+ * Doco url: http://bassistance.de/jquery-plugins/jquery-plugin-autocomplete/
+ * Note: Autocomplete implementation by Jorn Zaefferer is now been deprecated and its been migrated to jquery_ui.
+ *
+*/
+
+ko.bindingHandlers.fusedAutocomplete = {
+
+    init: function (element, params) {
+        var params = params();
+        var options = {};
+        var url = ko.utils.unwrapObservable(params.source);
+        options.source = function(request, response) {
+            $(element).addClass("ac_loading");
+            $.ajax({
+                url: url,
+                dataType:'json',
+                data: {q:request.term},
+                success: function(data) {
+                    var items = $.map(data.autoCompleteList, function(item) {
+                        return {
+                            label:item.name,
+                            value: item.name,
+                            source: item
+                        }
+                    });
+                    response(items);
+
+                },
+                error: function() {
+                    items = [{label:"Error during species lookup", value:request.term, source: {listId:'error-unmatched', name: request.term}}];
+                    response(items);
+                },
+                complete: function() {
+                    $(element).removeClass("ac_loading");
+                }
+            });
+        };
+        options.select = function(event, ui) {
+            var selectedItem = ui.item;
+            params.name(selectedItem.source.name);
+            params.guid(selectedItem.source.guid);
+        };
+
+        if(!$(element).autocomplete(options).data("ui-autocomplete")){
+            // Fall back mechanism to handle deprecated version of autocomplete.
+            var options = {};
+            options.source = url;
+            options.matchSubset = false;
+            options.formatItem = function(row, i, n) {
+                return row.name;
+            };
+            options.highlight = false;
+            options.parse = function(data) {
+                var rows = new Array();
+                data = data.autoCompleteList;
+                for(var i=0; i < data.length; i++) {
+                    rows[i] = {
+                        data: data[i],
+                        value: data[i],
+                        result: data[i].name
+                    };
+                }
+                return rows;
+            };
+
+            $(element).autocomplete(options.source, options).result(function(event, data, formatted) {
+                if (data) {
+                    params.name(data.name);
+                    params.guid(data.guid);
+                }
+            });
+        }
+    }
+};
 
 ko.bindingHandlers.autocomplete = {
     init: function (element, params) {
@@ -602,7 +678,7 @@ ko.bindingHandlers.autocomplete = {
         };
 
         var render = ko.utils.unwrapObservable(param.render);
-        if (render) {
+        if (render && $(element).autocomplete(options).data("ui-autocomplete")) {
 
             $(element).autocomplete(options).data("ui-autocomplete")._renderItem = function(ul, item) {
                 var result = $('<li></li>').html(render(item.source));
@@ -745,71 +821,6 @@ ko.vetoableObservable = function(initialValue, vetoCheck, noVetoCallback, vetoCa
     });
 
     return result;
-};
-
-/**
- * Attaches a bootstrap popover to the bound element.  The details for the popover should be supplied as the
- * value of this binding.
- * e.g.  <a href="#" data-bind="popover: {title:"Popover title", content:"Popover content"}>My link with popover</a>
- *
- * The content and title must be supplied, other popover options have defaults.
- *
- */
-ko.bindingHandlers.popover = {
-
-    init: function(element, valueAccessor) {
-        ko.bindingHandlers.popover.initPopover(element, valueAccessor);
-    },
-    update: function(element, valueAccessor) {
-
-        var $element = $(element);
-        $element.popover('destroy');
-        var options = ko.bindingHandlers.popover.initPopover(element, valueAccessor);
-        if (options.autoShow) {
-            if ($element.data('firstPopover') === false) {
-                $element.popover('show');
-                $('body').on('click', function(e) {
-
-                    if (e.target != element && $element.find(e.target).length == 0) {
-                        $element.popover('hide');
-                    }
-                });
-            }
-            $element.data('firstPopover', false);
-        }
-
-    },
-
-    defaultOptions: {
-        placement: "right",
-        animation: true,
-        html: true,
-        trigger: "hover"
-    },
-
-    initPopover: function(element, valueAccessor) {
-        var options = ko.utils.unwrapObservable(valueAccessor());
-
-        var combinedOptions = ko.utils.extend({}, ko.bindingHandlers.popover.defaultOptions);
-        var content = ko.utils.unwrapObservable(options.content);
-        ko.utils.extend(combinedOptions, options);
-        combinedOptions.description = content;
-
-        $(element).popover(combinedOptions);
-
-        ko.utils.domNodeDisposal.addDisposeCallback(element, function() {
-            $(element).popover("destroy");
-        });
-        return options;
-    }
-};
-
-ko.bindingHandlers.independentlyValidated = {
-    init: function(element, valueAccessor) {
-        $(element).addClass('validationEngineContainer');
-        $(element).find('thead').attr('data-validation-engine', 'validate'); // Horrible hack.
-        $(element).validationEngine('attach', {scroll:false});
-    }
 };
 
 /**
@@ -991,44 +1002,11 @@ var ACTIVITY_PROGRESS_CLASSES = {
     'cancelled':'btn-inverse'
 };
 
-ko.bindingHandlers.activityProgress = {
-    update: function(element, valueAccessor) {
-        var progressValue = ko.utils.unwrapObservable(valueAccessor());
-
-        for (progress in ACTIVITY_PROGRESS_CLASSES) {
-            ko.utils.toggleDomNodeCssClass(element, ACTIVITY_PROGRESS_CLASSES[progress], progress === progressValue);
-        }
-    }
-}
 
 /** Returns a bootstrap class used to style activity progress labels */
 function activityProgressClass(progress) {
     return ACTIVITY_PROGRESS_CLASSES[progress];
 }
-
-ko.bindingHandlers.numeric = {
-    init: function (element, valueAccessor) {
-        $(element).on("keydown", function (event) {
-            // Allow: backspace, delete, tab, escape, and enter
-            if (event.keyCode == 46 || event.keyCode == 8 || event.keyCode == 9 || event.keyCode == 27 || event.keyCode == 13 ||
-                    // Allow: Ctrl+A
-                (event.keyCode == 65 && event.ctrlKey === true) ||
-                    // Allow: . ,
-                (event.keyCode == 190 || event.keyCode == 110) ||
-                    // Allow: home, end, left, right
-                (event.keyCode >= 35 && event.keyCode <= 39)) {
-                // let it happen, don't do anything
-                return;
-            }
-            else {
-                // Ensure that it is a number and stop the keypress
-                if (event.shiftKey || (event.keyCode < 48 || event.keyCode > 57) && (event.keyCode < 96 || event.keyCode > 105)) {
-                    event.preventDefault();
-                }
-            }
-        });
-    }
-};
 
 /** Allows a subscription to an observable that passes both the old and new value to the callback */
 ko.subscribable.fn.subscribeChanged = function (callback) {
@@ -1085,34 +1063,3 @@ ko.extenders.url = function(target) {
     return result;
 };
 
-// Here's a custom Knockout binding that makes elements shown/hidden via jQuery's fadeIn()/fadeOut() methods
-// Could be stored in a separate utility library
-ko.bindingHandlers.slideVisible = {
-    init: function(element, valueAccessor) {
-        // Initially set the element to be instantly visible/hidden depending on the value
-        var value = valueAccessor();
-        $(element).toggle(ko.unwrap(value)); // Use "unwrapObservable" so we can handle values that may or may not be observable
-    },
-    update: function(element, valueAccessor) {
-        // Whenever the value subsequently changes, slowly fade the element in or out
-        var value = valueAccessor();
-        ko.unwrap(value) ? $(element).slideDown() : $(element).slideUp();
-    }
-};
-
-ko.bindingHandlers.booleanValue = {
-    'after': ['options', 'foreach'],
-    init: function(element, valueAccessor, allBindingsAccessor) {
-        var observable = valueAccessor(),
-            interceptor = ko.computed({
-                read: function() {
-                    return (observable() !== undefined ? observable().toString() : undefined);
-                },
-                write: function(newValue) {
-                    observable(newValue === "true");
-                }
-            });
-
-        ko.applyBindingsToNode(element, { value: interceptor });
-    }
-};

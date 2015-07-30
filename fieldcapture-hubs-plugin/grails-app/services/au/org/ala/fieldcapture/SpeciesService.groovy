@@ -56,4 +56,13 @@ class SpeciesService {
 
         webService.getJson(url)
     }
+
+    def searchSpeciesList(sort = 'listName', max = 100, offset = 0) {
+        webService.getJson("${grailsApplication.config.lists.baseURL}/ws/speciesList?sort=${sort}&max=${max}&offset=${offset}")
+    }
+
+    def addSpeciesList(postBody) {
+       webService.doPost("${grailsApplication.config.lists.baseURL}/ws/speciesList", postBody)
+    }
+
 }

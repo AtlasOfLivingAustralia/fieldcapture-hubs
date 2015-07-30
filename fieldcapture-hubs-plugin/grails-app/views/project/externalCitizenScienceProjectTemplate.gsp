@@ -4,9 +4,9 @@
 <head>
     <meta name="layout" content="${hubConfig.skin}"/>
     <title>${project?.name.encodeAsHTML()} | Project | Field Capture</title>
-    <script type="text/javascript" src="${grailsApplication.config.google.maps.url}"></script>
     <r:script disposition="head">
     var fcConfig = {
+        imageLocation:"${resource(dir:'/images')}",
         serverUrl: "${grailsApplication.config.grails.serverURL}",
         projectUpdateUrl: "${createLink(action: 'ajaxUpdate', id: project.projectId)}",
         projectEditUrl:"${createLink(action:'edit', id:project.projectId)}",
@@ -65,8 +65,7 @@
 
         <div class="pill-content">
             <div class="pill-pane active" id="about">
-
-                <g:render template="aboutCitizenScienceProject"/>
+                <g:render template="aboutCitizenScienceProject" model="${projectContent.about}"/>
             </div>
             <div class="pill-pane" id="admin">
                 <g:render template="admin"/>
@@ -77,9 +76,6 @@
 <g:else>
     <g:render template="aboutCitizenScienceProject"/>
 </g:else>
-<!-- ko stopBinding:true -->
-<g:render template="/site/sitesList" model="${[config:[editable:user?.isEditor]]}"/>
-<!-- /ko -->
 
 <r:script>
     $(function() {
@@ -110,7 +106,8 @@
         if (viewModel.mainImageUrl()) {
             $( '#carousel' ).sliderPro({
                 width: '100%',
-                height: 400,
+                height: 'auto',
+                autoHeight: true,
                 arrows: false, // at the moment we only support 1 image
                 buttons: false,
                 waitForLayers: true,
@@ -120,8 +117,7 @@
                 touchSwipe:false // at the moment we only support 1 image
             });
         }
-        initialiseSites(project.sites);
-        $("#sitesList").hide();
+        initialiseProjectArea();
     <g:if test="${isAdmin || fc.userIsAlaOrFcAdmin()}">
         populatePermissionsTable();
     </g:if>

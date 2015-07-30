@@ -631,16 +631,20 @@ class FCTagLib {
     /** Render the content for a list of tabs based on content definitions */
     def tabContent = {attrs ->
 
-
+        def tabClass = attrs.tabClass ?: 'tab-pane'
         attrs.tabs.each { name, details ->
 
             if (details.type == 'tab' && details.visible) {
-                def divClass = details.default ? 'tab-pane active':'tab-pane'
-                out << "<!-- ko stopBinding:true -->"
+                def divClass = details.default ? "${tabClass} active":tabClass
+                if (details.stopBinding) {
+                    out << "<!-- ko stopBinding:true -->"
+                }
                 out << """<div id="${name}" class="${divClass}">"""
                 out << g.render(template:details.template?:name, model:details)
                 out << "</div>"
-                out << "<!-- /ko -->"
+                if (details.stopBinding) {
+                    out << "<!-- /ko -->"
+                }
             }
         }
     }

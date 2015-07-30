@@ -1,8 +1,5 @@
 package au.org.ala.fieldcapture
 
-import org.codehaus.groovy.grails.web.json.JSONArray
-
-
 class OrganisationService {
 
     def grailsApplication, webService, metadataService, projectService, userService
