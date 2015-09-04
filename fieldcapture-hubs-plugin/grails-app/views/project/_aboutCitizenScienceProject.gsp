@@ -93,7 +93,7 @@
             zoomLimit:16,
             highlightOnHover:true,
             features:[projectArea],
-            featureS rvice: "${createLink(controller: 'proxy', action: 'feature')}",
+            featureService: "${createLink(controller: 'proxy', action: 'feature')}",
             wmsServer: "${grailsApplication.config.spatial.geoserverUrl}"
         };
 

@@ -9,6 +9,7 @@ modules = {
         resource url: 'js/bootbox.min.js', plugin: 'fieldcapture-plugin'
         resource url: 'js/jquery.columnizer.js', plugin: 'fieldcapture-plugin'
         resource url: 'js/jquery.blockUI.js', plugin: 'fieldcapture-plugin'
+        resource url: 'css/common.css', plugin: 'fieldcapture-plugin'
     }
 
     defaultSkin {
@@ -76,7 +77,7 @@ modules = {
     }
 
     app_bootstrap {
-        dependsOn 'application'
+        dependsOn 'application', 'font-awesome-44'
         resource url: 'bootstrap/js/bootstrap.min.js', plugin: 'fieldcapture-plugin'
         // The less css resources plugin (1.3.3, resources plugin 1.2.14) is unable to resolve less files in a plugin so apps that use this plugin must supply their own bootstrap styles.
         // However, commenting this section
@@ -294,4 +295,12 @@ modules = {
 
     }
 
+    leaflet {
+        resource url: 'vendor/leaflet/0.7.3/leaflet.js', plugin: 'fieldcapture-plugin'
+        resource url: 'vendor/leaflet/0.7.3/leaflet.css', plugin: 'fieldcapture-plugin'
+    }
+
+    'font-awesome-44' {
+        resource url: 'vendor/font-awesome/4.4.0/css/font-awesome.min.css', attrs:[media:'all'], plugin: 'fieldcapture-plugin'
+    }
 }

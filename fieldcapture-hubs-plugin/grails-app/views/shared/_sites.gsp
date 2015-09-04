@@ -19,7 +19,7 @@
                     </g:if>
                 </g:each>
             </select>
-            <img style="display:none;" id="map-colorby-status" width="23" height="23" src="${request.contextPath}/images/loading-1.gif" alt="Loading"/>
+            <r:img style="display:none;" id="map-colorby-status" width="23" height="23" dir="images" file="loading-1.gif" alt="Loading"/>
             <div id="legend-table">
                 <table style="opacity:1.0; filter:alpha(opacity=50); border: none; font-size : 80%; display:inline-block;" id="legend-1" >
                     <tbody>

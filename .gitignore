@@ -16,6 +16,7 @@
 /stacktrace.log
 /test/reports
 /logs
+*.log
 
 # project release file
 /*.war
@@ -29,7 +30,9 @@
 /web-app/plugins
 
 # "temporary" build files
-/target
+target
+coverage
+
 
 *.iml
 .idea/

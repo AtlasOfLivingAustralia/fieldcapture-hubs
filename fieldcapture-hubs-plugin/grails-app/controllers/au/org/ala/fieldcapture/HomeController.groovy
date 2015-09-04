@@ -30,7 +30,8 @@ class HomeController {
             forward(hubSettings.getHomePageControllerAndAction())
             return
         }
-        return projectFinder()
+
+        projectFinder()
     }
 
     def projectFinder() {
@@ -49,14 +50,16 @@ class HomeController {
 
         def resp = searchService.HomePageFacets(params)
 
-        [   facetsList: facetsList,
+        render view:'index', model:[   facetsList: facetsList,
             mapFacets: mapFacets,
             geographicFacets:selectedGeographicFacets,
             description: settingService.getSettingText(SettingPageType.DESCRIPTION),
             results: resp ]
     }
 
-    def citizenScience() {
+    def publicHome() {
+
+        render view:'public'
     }
 
     /**

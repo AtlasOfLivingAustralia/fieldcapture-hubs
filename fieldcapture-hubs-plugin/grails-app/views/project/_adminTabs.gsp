@@ -7,7 +7,7 @@
                 <li><a href="#projectActivity" id="projectActivity-tab" data-toggle="tab"><i class="icon-chevron-right"></i> Survey settings</a></li>
                 <li><a href="#editNewsAndEvents" id="editnewsandevents-tab" data-toggle="tab"><i class="icon-chevron-right"></i> News and events</a></li>
                 <li><a href="#editProjectStories" id="editProjectStories-tab" data-toggle="tab"><i class="icon-chevron-right"></i> Project stories</a></li>
-                <li><a href="#edit-documents" id="documents-tab" data-toggle="tab"><i class="icon-chevron-right"></i> Documents</a></li>
+                <li><a href="#edit-documents" id="documents-tab" data-toggle="tab"><i class="icon-chevron-right"></i> Resources</a></li>
                 <li><a href="#permissions" id="permissions-tab" data-toggle="tab"><i class="icon-chevron-right"></i> Members</a></li>
 
             </ul>
@@ -51,10 +51,17 @@
 
                 <!-- DOCUMENTS -->
                 <div id="edit-documents" class="pill-pane">
-                    <h3>Project Documents</h3>
+                    <h3>Project Resources</h3>
                     <div class="row-fluid">
                         <div class="span10">
+                            <g:render plugin="fieldcapture-plugin" template="/shared/editDocuments"
+                                    model="[useExistingModel: true,editable:true, filterBy: 'all', ignore: '', imageUrl:resource(dir:'/images'),containerId:'adminDocumentList']"/>
                         </div>
+                    </div>
+                    %{--The modal view containing the contents for a modal dialog used to attach a document--}%
+                    <g:render plugin="fieldcapture-plugin" template="/shared/attachDocument"/>
+                    <div class="row-fluid attachDocumentModal">
+                        <button class="btn" id="doAttach" data-bind="click:attachDocument">Attach Document</button>
                     </div>
                 </div>
 
