@@ -137,6 +137,9 @@ class DashboardTagLib {
                 out << "<div><b>${score.score.label}</b>${helpText(score)} : ${g.formatNumber(type:'number',number:result, maxFractionDigits: 2, groupingUsed:true)}</div>"
                 break
             case 'HISTOGRAM':
+                if (score.results.size() == 1 && score.results[0].count == 1) {
+                    return
+                }
                 def chartData = toArray(score.results[0].result)
                 def chartType = score.score.displayType?:'piechart'
                 drawChart(chartType, score.score.label, score.score.label, helpText(score), [['string', score.score.label], ['number', 'Count']], chartData)
@@ -163,6 +166,9 @@ class DashboardTagLib {
     }
 
     private void renderGroupedScore(score) {
+        if (score.results.size() == 1 && score.results[0].count == 1) {
+            return
+        }
         switch (score.score.aggregationType.name) {
             case 'SUM':
             case 'AVERAGE':
