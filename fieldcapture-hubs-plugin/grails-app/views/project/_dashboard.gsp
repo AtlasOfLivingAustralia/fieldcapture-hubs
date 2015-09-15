@@ -6,7 +6,7 @@
 <g:if test="${targets || other}">
 
     <g:if test="${targets}">
-    <h3 style="margin-top:0;">Output Targets</h3>
+    <h3 style="margin-top:0;">Progress against Output Targets</h3>
     <div class="row-fluid">
         <div class="span4">
             <g:set var="count" value="${targets.size()}"/>
@@ -29,7 +29,7 @@
 
     <g:if test="${other}">
 
-        <h3>Outputs without targets</h3>
+        <h3>Progress of Outputs without targets</h3>
         <div class="row-fluid outputs-without-targets">
         <g:each in="${other?.entrySet()}" var="metric" status="i">
 
