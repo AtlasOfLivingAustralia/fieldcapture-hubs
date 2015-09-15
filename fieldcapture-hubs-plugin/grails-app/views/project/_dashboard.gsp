@@ -58,6 +58,9 @@
             content.columnize({ columns: 2, lastNeverTallest:true, accuracy: 10 });
         }
 
+        // We need to reinitialise the popovers as the content has been moved by the columnizer.
+        $('.helphover').data('popover', null);
+        $('.helphover').popover({container:'body', animation: true, trigger:'hover'});
     });
 </script>
 
