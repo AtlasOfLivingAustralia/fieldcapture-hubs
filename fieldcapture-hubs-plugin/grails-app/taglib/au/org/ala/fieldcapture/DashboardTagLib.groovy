@@ -118,12 +118,14 @@ class DashboardTagLib {
     private void renderTarget(score, double target) {
         def result = score.results ? score.results[0].result as Double : 0
         def percentComplete = result / target * 100
-
+        percentComplete = Math.min(100, percentComplete)
+        percentComplete = Math.max(0, percentComplete)
 
         out << """
-            <strong>${score.score.label}</strong><span class="pull-right progress-label ${percentComplete >= 99 ? 'progress-100':''}">${result}/${score.target}</span>
-                <div class="progress progress-info active ">
+            <strong>${score.score.label}</strong>
+            <div class="progress progress-info active " style="position:relative">
                 <div class="bar" style="width: ${percentComplete}%;"></div>
+                <span class="pull-right progress-label ${percentComplete >= 99 ? 'progress-100':''}" style="position:absolute; top:0; right:0;">${result}/${score.target}</span>
             </div>"""
     }
 
@@ -137,6 +139,9 @@ class DashboardTagLib {
                 out << "<div><b>${score.score.label}</b>${helpText(score)} : ${g.formatNumber(type:'number',number:result, maxFractionDigits: 2, groupingUsed:true)}</div>"
                 break
             case 'HISTOGRAM':
+                if (score.results.size() == 1 && score.results[0].count == 1) {
+                    return
+                }
                 def chartData = toArray(score.results[0].result)
                 def chartType = score.score.displayType?:'piechart'
                 drawChart(chartType, score.score.label, score.score.label, helpText(score), [['string', score.score.label], ['number', 'Count']], chartData)
@@ -163,6 +168,9 @@ class DashboardTagLib {
     }
 
     private void renderGroupedScore(score) {
+        if (score.results.size() == 1 && score.results[0].count == 1) {
+            return
+        }
         switch (score.score.aggregationType.name) {
             case 'SUM':
             case 'AVERAGE':

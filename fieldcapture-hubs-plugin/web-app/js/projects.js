@@ -156,14 +156,14 @@ function getSixMonthPeriodContainingDate (date) {
 
 /**
  * Returns the stage within the timeline that contains the specified date.
- * @param timeline
+ * @param stages array of stage reports for the project.
  * @param UTCDateStr date must be an ISO8601 string
  * @returns {string}
  */
-function findStageFromDate (timeline, UTCDateStr) {
+function findStageFromDate (stages, UTCDateStr) {
     var stage = 'unknown';
     // try a simple lexical comparison
-    $.each(timeline, function (i, period) {
+    $.each(stages, function (i, period) {
         if (UTCDateStr > period.fromDate && UTCDateStr <= period.toDate) {
             stage = period.name;
         }
@@ -179,69 +179,19 @@ function findStageFromDate (timeline, UTCDateStr) {
  */
 function isStageReportable (project, stage) {
 
-    //is current stage a last stage?
-    if(project.timeline && project.timeline.length > 0 &&
-        project.timeline[project.timeline.length-1].name == stage.name){
-       return project.plannedEndDate < new Date().toISOStringNoMillis();
-    }
-    else{
-        return stage.toDate < new Date().toISOStringNoMillis();
-    }
-}
-/**
- * Returns the activities associated with the stage.
- * @param activities
- * @param timeline
- * @param stage stage name
- * @returns {[]}
- */
-function findActivitiesForStage (activities, timeline, stage) {
-	var stageFromDate = '';
-	var stageToDate = '';
-
-	$.each(timeline, function (i, period) {
-		if(period.name == stage){
-			stageFromDate = period.fromDate;
-			stageToDate = period.toDate;
-		}
-	});
-
-    stageActivities = $.map(activities, function(act, i) {
-    	var endDate = act.endDate ? act.endDate : act.plannedEndDate;
-    	var startDate = act.startDate ? act.startDate : act.plannedStartDate;
-        if(startDate >= stageFromDate && endDate <= stageToDate){
-        	return act;
-        }
-    });
-    return stageActivities;
+    var now =  new Date().toISOStringNoMillis();
+    // We want projects that finish before the end of the current reporting period to be able to be reported on
+    // without having to wait for the scheduled reporting period.  (e.g. reporting period is 1 July / 1 Jan but the
+    // project finishes in October)
+    return stage.toDate < now || project.plannedEndDate < now;
 }
 
-/**
- * Is it a current or past stage
- * @param timeline
- * @param stage current stage name
- * @param period stage period
- * @returns true if past stage.
- */
-function isPastStage(timeline, currentStage, period) {
-
-	var stageFromDate = '';
-	var stageToDate = '';
-	$.each(timeline, function (i, period) {
-		if(period.name == currentStage){
-			stageFromDate = period.fromDate;
-			stageToDate = period.toDate;
-		}
-	});
-	return period.toDate <= stageToDate;
-}
-
-function getBugetHeaders(timeline) {
+function getBudgetHeaders(project) {
 	var headers = [];
-    var startYr = moment(timeline[0].fromDate).format('YYYY');
-    var endYr = moment(timeline[timeline.length-1].toDate).format('YYYY');;
-    var startMonth = moment(timeline[0].fromDate).format('M');
-    var endMonth = moment(timeline[timeline.length-1].toDate).format('M');
+    var startYr = moment(project.plannedStartDate).format('YYYY');
+    var endYr = moment(project.plannedEndDate).format('YYYY');;
+    var startMonth = moment(project.plannedStartDate).format('M');
+    var endMonth = moment(project.plannedEndDate).format('M');
 
     //Is startYr is between jan to june?
     if(startMonth >= 1 &&  startMonth <= 6 ){
