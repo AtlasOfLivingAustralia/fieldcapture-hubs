@@ -13,7 +13,7 @@ before_install:
 - curl -s get.gvmtool.net > ~/install_sdkman.sh
 - chmod 775 ~/install_sdkman.sh
 - ~/install_sdkman.sh
-- echo "skdman_auto_answer=true" > ~/.sdkman/etc/config
+- echo "sdkman_auto_answer=true" > ~/.sdkman/etc/config
 - source ~/.sdkman/bin/sdkman-init.sh
 - GRAILS_VERSION=`grep '^app\.grails\.version=' ./fieldcapture-hubs-plugin/application.properties | sed -e
   's/^app\.grails\.version=//g'`
