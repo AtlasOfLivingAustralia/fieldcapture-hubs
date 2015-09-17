@@ -7,6 +7,8 @@ import grails.converters.JSON
  */
 class OrganisationController {
 
+    static allowedMethods = [ajaxDelete: "POST", delete:"POST", ajaxUpdate: "POST"]
+
     def organisationService, searchService, documentService, userService, roleService, commonService, webService
     def citizenScienceOrgId = null
 
@@ -89,15 +91,25 @@ class OrganisationController {
     }
 
     def delete(String id) {
-        organisationService.update(id, [status:'deleted'])
-
+        if (organisationService.isUserAdminForOrganisation(id)) {
+            organisationService.update(id, [status: 'deleted'])
+        }
+        else {
+            flash.message = 'You do not have permission to perform that action'
+        }
         redirect action: 'list'
     }
 
     def ajaxDelete(String id) {
-        def result = organisationService.update(id, [status:'deleted'])
 
-        respond result
+        if (organisationService.isUserAdminForOrganisation(id)) {
+            def result = organisationService.update(id, [status: 'deleted'])
+
+            respond result
+        }
+        else {
+            render status:403, text:'You do not have permission to perform that action'
+        }
     }
 
     def ajaxUpdate() {
