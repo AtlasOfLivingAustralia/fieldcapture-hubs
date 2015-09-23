@@ -10,11 +10,28 @@ class ReportController {
     }
 
     def dashboardReport() {
+        // The _ parameter is appended by jquery ajax calls and will stop the report contents from being cached.
+        params.remove("_")
+        render view:'_dashboard', model:processActivityOutputs(params)
+
+    }
+
+    def activityOutputs() {
+        // The _ parameter is appended by jquery ajax calls and will stop the report contents from being cached.
+        params.remove("_")
+        params.remove('action') // We want the same parameters as the original call so we can use the cache.
+
+        def selectedCategory = params.remove('category')
+        def model = processActivityOutputs(params)
+        model.category = selectedCategory
+        render view:'_activityOutputs', model:model
+    }
+
+    def processActivityOutputs(params) {
 
         def defaultCategory = "Not categorized"
         def categories = metadataService.getReportCategories()
-        // The _ parameter is appended by jquery ajax calls and will stop the report contents from being cached.
-        params.remove("_")
+
         def results = searchService.dashboardReport(params)
         def scores = results.outputData
 
@@ -61,9 +78,7 @@ class ReportController {
         sortedCategories.addAll(categories)
         sortedCategories.sort()
 
-        def model = [categories:categories.sort(), scores:doubleGroupedScores, metadata:results.metadata]
-
-        render view:'_dashboard', model:model
+        [categories:categories.sort(), scores:doubleGroupedScores, metadata:results.metadata]
 
     }
 
