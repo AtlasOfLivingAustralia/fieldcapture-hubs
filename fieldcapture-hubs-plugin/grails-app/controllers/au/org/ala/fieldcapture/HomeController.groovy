@@ -63,7 +63,15 @@ class HomeController {
 
         def statistics = reportService.getHighlightedStatistics()
 
-        render view:'public', model:[statistics:statistics]
+        def helpPage = g.createLink([action:'help'])
+        def helpLinks = [[title:'QUICK REFERENCE GUIDE', icon:'pdf.png', url:''],
+                        [title:'USER GUIDE', icon:'pdf.png', url:''],
+                        [title:'MERIT TUTORIAL', icon:'pdf.png', url:''],
+                        [title:'ACTIVITY REFERENCE', icon:'pdf.png', url:''],
+                        [title:'DEMONSTRATOR PROJECT', icon:'pdf.png', url:''],
+                        [title:'MORE RESOURCES', icon:'pdf.png', url:helpPage]]
+
+        render view:'public', model:[statistics:statistics, helpLinks:helpLinks]
     }
 
     /**
