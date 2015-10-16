@@ -92,6 +92,15 @@ class ActivityController {
             }
             def model = activityModel(activity, activity.projectId)
 
+            model.earliestStartDate = model.project.plannedStartDate
+            model.reports?.each { report ->
+                if (report.publicationStatus == 'published' || report.publicationStatus == 'pendingApproval') {
+                    if (report.toDate > model.earlistStartDate) {
+                        model.earliestStartDate = report.toDate
+                    }
+                }
+            }
+            model.latestEndDate = model.project.plannedEndDate
             model.activityTypes = metadataService.activityTypesList()
             model.hasPhotopointData = activity.documents?.find {it.poiId}
             model

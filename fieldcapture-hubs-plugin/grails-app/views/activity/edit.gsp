@@ -24,8 +24,8 @@
         here = document.location.href;
     </r:script>
     <r:require modules="knockout,jqueryValidationEngine,datepicker,jQueryFileUploadUI,mapWithFeatures"/>
-    <g:set var="formattedStartDate" value="${au.org.ala.fieldcapture.DateUtils.isoToDisplayFormat(project.plannedStartDate)}"/>
-    <g:set var="formattedEndDate" value="${au.org.ala.fieldcapture.DateUtils.isoToDisplayFormat(project.plannedEndDate)}"/>
+    <g:set var="formattedStartDate" value="${au.org.ala.fieldcapture.DateUtils.isoToDisplayFormat(earliestStartDate)}"/>
+    <g:set var="formattedEndDate" value="${au.org.ala.fieldcapture.DateUtils.isoToDisplayFormat(latestEndDate)}"/>
 </head>
 <body>
 <div class="container-fluid validationEngineContainer" id="validation-container">
@@ -127,28 +127,6 @@
 
         </div>
 
-        <g:if env="developkjkment" test="${!printView}">
-          <div class="expandable-debug">
-              <hr />
-              <h3>Debug</h3>
-              <div>
-                  <h4>KO model</h4>
-                  <pre data-bind="text:ko.toJSON($root.modelForSaving(),null,2)"></pre>
-                  <h4>Activity</h4>
-                  <pre>${activity?.encodeAsHTML()}</pre>
-                  <h4>Site</h4>
-                  <pre>${site?.encodeAsHTML()}</pre>
-                  <h4>Sites</h4>
-                  <pre>${(sites as JSON).toString()}</pre>
-                  <h4>Project</h4>
-                  <pre>${project?.encodeAsHTML()}</pre>
-                  <h4>Themes</h4>
-                  <pre>${themes.toString()}</pre>
-                  <h4>Map features</h4>
-                  <pre>${mapFeatures.toString()}</pre>
-              </div>
-          </div>
-        </g:if>
     </div>
 
     <g:if test="${!printView}">
