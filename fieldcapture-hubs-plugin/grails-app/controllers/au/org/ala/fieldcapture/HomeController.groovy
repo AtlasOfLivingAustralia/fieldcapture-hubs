@@ -12,6 +12,7 @@ class HomeController {
     def settingService
     def metadataService
     def userService
+    def reportService
 
     @PreAuthorise(accessLevel = 'alaAdmin', redirectController = "admin")
     def advanced() {
@@ -49,6 +50,7 @@ class HomeController {
         def selectedGeographicFacets = findSelectedGeographicFacets(allFacets)
 
         def resp = searchService.HomePageFacets(params)
+        println resp
 
         render view:'index', model:[   facetsList: facetsList,
             mapFacets: mapFacets,
@@ -59,7 +61,9 @@ class HomeController {
 
     def publicHome() {
 
-        render view:'public'
+        def statistics = reportService.getHighlightedStatistics()
+
+        render view:'public', model:[statistics:statistics]
     }
 
     /**

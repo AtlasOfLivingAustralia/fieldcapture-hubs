@@ -858,4 +858,26 @@ function showFloatingMessage(message, alertType) {
 
     }
     messageContainer.slideDown(400);
-}
+};
+
+var BlogEntry = function(blogEntry) {
+    var self = this;
+    self.title = ko.observable(blogEntry.title);
+    self.text = ko.observable(blogEntry.text);
+    self.date = ko.observable(blogEntry.date).extend({simpleDate:true});
+    self.imageDocumentId = ko.observable(blogEntry.imageDocumentId);
+    self.stockImageName = ko.observable(blogEntry.stockImageName);
+};
+
+var BlogViewModel = function(entries) {
+    var self = this;
+    self.entries = ko.observableArray();
+
+    self.loadMore = function() {
+
+    };
+
+    for (var i=0; i<entries.length; i++) {
+        self.entries.push(new BlogEntry(entries[i]));
+    }
+};
