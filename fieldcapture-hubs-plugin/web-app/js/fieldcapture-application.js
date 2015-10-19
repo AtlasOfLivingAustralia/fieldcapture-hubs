@@ -860,6 +860,21 @@ function showFloatingMessage(message, alertType) {
     messageContainer.slideDown(400);
 };
 
+/**
+ * Format a date given an Unix time number (output of Date.parse)
+ *
+ * @param t
+ * @returns {string}
+ */
+function formatDate(t) {
+    var d = new Date(t);
+    var yyyy = d.getFullYear().toString();
+    var mm = (d.getMonth()+1).toString(); // getMonth() is zero-based
+    var dd  = d.getDate().toString();
+    return yyyy + "-" + (mm[1]?mm:"0"+mm[0]) + "-" + (dd[1]?dd:"0"+dd[0]);
+};
+
+
 var BlogEntry = function(blogEntry) {
     var self = this;
     self.title = ko.observable(blogEntry.title);

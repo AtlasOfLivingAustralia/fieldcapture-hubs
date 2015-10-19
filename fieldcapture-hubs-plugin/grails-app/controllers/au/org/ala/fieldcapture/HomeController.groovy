@@ -32,10 +32,21 @@ class HomeController {
             return
         }
 
-        projectFinder()
+        projectExplorer()
     }
 
-    def projectFinder() {
+    def projectExplorer() {
+
+        def model = projectExplorerModel()
+
+        render view:'index', model:model
+    }
+
+    def ajaxprojectExplorer() {
+        render template: 'projectExplorer', model:projectExplorerModel(), layout: 'ajax'
+    }
+
+    private Map projectExplorerModel() {
         def facetsList = SettingService.getHubConfig().availableFacets
         def mapFacets = SettingService.getHubConfig().availableMapFacets
 
@@ -50,13 +61,12 @@ class HomeController {
         def selectedGeographicFacets = findSelectedGeographicFacets(allFacets)
 
         def resp = searchService.HomePageFacets(params)
-        println resp
 
-        render view:'index', model:[   facetsList: facetsList,
-            mapFacets: mapFacets,
-            geographicFacets:selectedGeographicFacets,
-            description: settingService.getSettingText(SettingPageType.DESCRIPTION),
-            results: resp ]
+        [  facetsList: facetsList,
+           mapFacets: mapFacets,
+           geographicFacets:selectedGeographicFacets,
+           description: settingService.getSettingText(SettingPageType.DESCRIPTION),
+           results: resp ]
     }
 
     def publicHome() {
