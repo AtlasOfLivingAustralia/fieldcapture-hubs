@@ -44,7 +44,7 @@ Data presented in this dashboard has been extracted from grant recipient progres
         var loadingTemplate = '<div class="accordian-inner row-fluid">'+
             '<r:img width="50" height="50" dir="images" file="loading.gif" alt="saving icon"/> Loading...'+
             '</div>';
-        $('.collapse').on('show', function() {
+        $('#reports .collapse').on('show', function() {
             var $div = $(this);
 
             var category = $div.data('category');
