@@ -1,4 +1,3 @@
-<script type="text/javascript" src="${grailsApplication.config.google.maps.url}"></script>
 <g:set var="wordForSite" value="${wordForSite?:'site'}"/>
 <div id="sitesList">
     <div data-bind="visible: sites.length == 0">
