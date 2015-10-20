@@ -32,7 +32,7 @@ class HomeController {
             return
         }
 
-        projectExplorer()
+        publicHome()
     }
 
     def projectExplorer() {
@@ -42,8 +42,8 @@ class HomeController {
         render view:'index', model:model
     }
 
-    def ajaxprojectExplorer() {
-        render template: 'projectExplorer', model:projectExplorerModel(), layout: 'ajax'
+    def ajaxProjectExplorer() {
+        render template: 'projectFinder', model:projectExplorerModel(), layout: 'ajax'
     }
 
     private Map projectExplorerModel() {
@@ -81,7 +81,12 @@ class HomeController {
                         [title:'DEMONSTRATOR PROJECT', icon:'pdf.png', url:''],
                         [title:'MORE RESOURCES', icon:'pdf.png', url:helpPage]]
 
-        render view:'public', model:[statistics:statistics, helpLinks:helpLinks]
+        def model = [statistics:statistics, helpLinks:helpLinks]
+        if (params.fq) {
+            model.putAll(projectExplorerModel())
+            model.showProjectExplorer = true
+        }
+        render view:'public', model:model
     }
 
     /**
