@@ -74,12 +74,12 @@ class HomeController {
         def statistics = reportService.getHighlightedStatistics()
 
         def helpPage = g.createLink([action:'help'])
-        def helpLinks = [[title:'QUICK REFERENCE GUIDE', icon:'pdf.png', url:''],
-                        [title:'USER GUIDE', icon:'pdf.png', url:''],
-                        [title:'MERIT TUTORIAL', icon:'pdf.png', url:''],
-                        [title:'ACTIVITY REFERENCE', icon:'pdf.png', url:''],
-                        [title:'DEMONSTRATOR PROJECT', icon:'pdf.png', url:''],
-                        [title:'MORE RESOURCES', icon:'pdf.png', url:helpPage]]
+        def helpLinks = [[title:'QUICK REFERENCE GUIDE', type:'text', url:''],
+                        [title:'USER GUIDE', type:'text', url:''],
+                        [title:'MERIT TUTORIAL', type:'video', url:''],
+                        [title:'ACTIVITY REFERENCE', type:'text', url:''],
+                        [title:'DEMONSTRATOR PROJECT', type:'text', url:''],
+                        [title:'MORE RESOURCES', type:'text', url:helpPage]]
 
         def model = [statistics:statistics, helpLinks:helpLinks]
         if (params.fq) {

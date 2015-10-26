@@ -879,7 +879,7 @@ var BlogEntry = function(blogEntry) {
     var self = this;
     self.title = ko.observable(blogEntry.title);
     self.text = ko.observable(blogEntry.text);
-    self.date = ko.observable(blogEntry.date).extend({simpleDate:true});
+    self.date = ko.observable(blogEntry.date);
     self.imageDocumentId = ko.observable(blogEntry.imageDocumentId);
     self.stockImageName = ko.observable(blogEntry.stockImageName);
 };
@@ -896,3 +896,17 @@ var BlogViewModel = function(entries) {
         self.entries.push(new BlogEntry(entries[i]));
     }
 };
+
+$(function() {
+    $('#logout-btn').click(function() {
+        if (window.localStorage) {
+            window.localStorage.setItem('logout', new Date().getTime());
+        }
+    });
+    $('#logout-warning a').click(function(){ $('#logout-warning').hide(); });
+    window.addEventListener('storage', function(e) {
+        if (e.key == 'logout') {
+            $('#logout-warning').show();
+        }
+    });
+});
