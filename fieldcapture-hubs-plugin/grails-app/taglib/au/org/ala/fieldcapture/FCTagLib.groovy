@@ -204,29 +204,29 @@ class FCTagLib {
 
         def navbarConfig = [
                 home:[
-                        icon:"icon-home",
+                        //icon:"icon-home",
                         link:createLink(controller: 'home'),
                         cssClass:'visible-desktop',
                         label:'Home'
                 ],
                 projectExplorer:[
-                        icon:"icon-search",
+                        //icon:"icon-search",
                         link:createLink(controller: 'home', action:'projectExplorer'),
                         cssClass:'visible-desktop',
                         label:'Project Explorer'
                 ],
                 about:[
-                        icon:"icon-info-sign",
+                        //icon:"icon-info-sign",
                         link:createLink(controller: 'home', action: 'about'),
                         label:'About'
                 ],
                 help:[
-                        icon:"icon-question-sign",
+                        //icon:"icon-question-sign",
                         link:createLink(controller: 'home', action: "help"),
                         label:'Help'
                 ],
                 contacts:[
-                        icon:"icon-envelope",
+                        //icon:"icon-envelope",
                         link:createLink(controller: 'home', action: 'contacts'),
                         label:'Contacts'
                 ]
