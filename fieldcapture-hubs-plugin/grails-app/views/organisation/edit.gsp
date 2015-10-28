@@ -9,8 +9,8 @@
         var fcConfig = {
             serverUrl: "${grailsApplication.config.grails.serverURL}",
             viewProjectUrl: "${createLink(controller:'project', action:'index')}",
-            documentUpdateUrl: '${g.createLink(controller:"proxy", action:"documentUpdate")}',
-            documentDeleteUrl: '${g.createLink(controller:"proxy", action:"deleteDocument")}',
+            documentUpdateUrl: '${g.createLink(controller:"document", action:"documentUpdate")}',
+            documentDeleteUrl: '${g.createLink(controller:"document", action:"deleteDocument")}',
             organisationDeleteUrl: '${g.createLink(action:"ajaxDelete", id:"${organisation.organisationId}")}',
             organisationEditUrl: '${g.createLink(action:"edit", id:"${organisation.organisationId}")}',
             organisationViewUrl: '${g.createLink(action:"index")}',

@@ -1,6 +1,7 @@
 package au.org.ala.fieldcapture
 
 import grails.converters.JSON
+import static org.apache.http.HttpStatus.*;
 
 /**
  * Proxies to the ecodata DocumentController/DocumentService.
@@ -18,6 +19,15 @@ class DocumentService {
     def createTextDocument(doc, content) {
         doc.content = content
         updateDocument(doc)
+    }
+
+    def findAllHelpResources() {
+        def url = "${grailsApplication.config.ecodata.baseUrl}document/search"
+        def result = webService.doPost(url, [role:'helpResource'])
+        if (result.statusCode == SC_OK) {
+            return result.resp.documents
+        }
+        return []
     }
 
     def updateDocument(doc) {

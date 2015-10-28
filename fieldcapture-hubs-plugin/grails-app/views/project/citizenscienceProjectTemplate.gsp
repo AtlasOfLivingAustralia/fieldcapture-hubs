@@ -42,7 +42,7 @@
         speciesListsServerUrl: "${grailsApplication.config.lists.baseURL}",
         speciesSearchUrl: "${createLink(controller: 'search', action: 'species')}",
         bieUrl: "${grailsApplication.config.bie.baseURL}",
-        documentUpdateUrl: "${createLink(controller:"proxy", action:"documentUpdate")}",
+        documentUpdateUrl: "${createLink(controller:"document", action:"documentUpdate")}",
         imageLocation:"${resource(dir:'/images')}",
         pdfgenUrl: "${createLink(controller: 'resource', action: 'pdfUrl')}",
         pdfViewer: "${createLink(controller: 'resource', action: 'viewer')}",

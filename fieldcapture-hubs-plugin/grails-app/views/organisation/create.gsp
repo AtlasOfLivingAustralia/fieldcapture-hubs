@@ -10,7 +10,7 @@
             serverUrl: "${grailsApplication.config.grails.serverURL}",
             organisationSaveUrl: "${createLink(action:'ajaxUpdate')}",
             organisationViewUrl: "${createLink(action:'index')}",
-            documentUpdateUrl: "${createLink(controller:"proxy", action:"documentUpdate")}",
+            documentUpdateUrl: "${createLink(controller:"document", action:"documentUpdate")}",
             returnTo: "${params.returnTo}"
             };
     </r:script>
