@@ -13,6 +13,7 @@ class HomeController {
     def metadataService
     def userService
     def reportService
+    def documentService
 
     @PreAuthorise(accessLevel = 'alaAdmin', redirectController = "admin")
     def advanced() {
@@ -74,12 +75,8 @@ class HomeController {
         def statistics = reportService.getHighlightedStatistics()
 
         def helpPage = g.createLink([action:'help'])
-        def helpLinks = [[title:'QUICK REFERENCE GUIDE', type:'text', url:''],
-                        [title:'USER GUIDE', type:'text', url:''],
-                        [title:'MERIT TUTORIAL', type:'video', url:''],
-                        [title:'ACTIVITY REFERENCE', type:'text', url:''],
-                        [title:'DEMONSTRATOR PROJECT', type:'text', url:''],
-                        [title:'MORE RESOURCES', type:'text', url:helpPage]]
+        def helpLinks = documentService.findAllHelpResources()
+        helpLinks << [name:'MORE RESOURCES', type:'text', url:helpPage]
 
         def model = [statistics:statistics, helpLinks:helpLinks]
         if (params.fq) {
