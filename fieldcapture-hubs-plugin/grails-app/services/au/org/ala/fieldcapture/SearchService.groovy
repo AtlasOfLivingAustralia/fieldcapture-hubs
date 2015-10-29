@@ -174,4 +174,13 @@ class SearchService {
             webService.getJson(url, 1200000)
         })
     }
+
+    def reportOnScores(List<String> scoreLabels, List<String> facets) {
+        def reportParams = [scores:scoreLabels]
+        if (facets) {
+            reportParams.fq = facets
+        }
+        def url = grailsApplication.config.ecodata.baseUrl + 'search/scoresByLabel' + commonService.buildUrlParamsFromMap(reportParams)
+        webService.getJson(url, 1200000)
+    }
 }
