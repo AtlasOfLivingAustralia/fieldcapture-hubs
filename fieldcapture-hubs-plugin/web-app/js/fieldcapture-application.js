@@ -897,6 +897,34 @@ var BlogViewModel = function(entries) {
     }
 };
 
+/**
+ * Animates the replacement of an element with a new element obtained via an ajax (GET) call.
+ * @param contentSelector identifies the element to replace.
+ * @param url the URL to call to get the replacement content.
+ * @returns a promise that will complete when the content is replaced.
+ */
+function replaceContentSection(contentSelector, url) {
+
+    var $existingContent = $(contentSelector);
+    var $parent = $existingContent.parent();
+
+    var newStats;
+
+    var animation = $.Deferred();
+    $existingContent.slideUp(400, function() {
+        $existingContent.remove();
+        animation.resolve();
+    });
+
+    var ajax = $.get(url).done(function(data) {
+        newStats = $(data);
+    });
+
+    return $.when(animation, ajax).done(function() {
+        newStats.hide().appendTo($parent).slideDown();
+    });
+}
+
 $(function() {
     $('#logout-btn').click(function() {
         if (window.localStorage) {

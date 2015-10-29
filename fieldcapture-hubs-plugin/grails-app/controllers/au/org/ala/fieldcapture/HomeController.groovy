@@ -14,6 +14,7 @@ class HomeController {
     def userService
     def reportService
     def documentService
+    def statisticsFactory
 
     @PreAuthorise(accessLevel = 'alaAdmin', redirectController = "admin")
     def advanced() {
@@ -72,7 +73,7 @@ class HomeController {
 
     def publicHome() {
 
-        def statistics = reportService.getHighlightedStatistics()
+        def statistics = statisticsFactory.randomGroup()
 
         def helpPage = g.createLink([action:'help'])
         def helpLinks = documentService.findAllHelpResources()
