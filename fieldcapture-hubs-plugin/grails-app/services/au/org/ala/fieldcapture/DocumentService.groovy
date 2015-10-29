@@ -79,4 +79,13 @@ class DocumentService {
         link.externalUrl = link.remove('url')
         updateDocument(link)
     }
+
+    def Map search(Map params) {
+        def url = "${grailsApplication.config.ecodata.baseUrl}document/search"
+        def resp = webService.doPost(url, params)
+        if (resp && !resp.error) {
+            return resp.resp
+        }
+        return resp
+    }
 }
