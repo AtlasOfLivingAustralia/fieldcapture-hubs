@@ -74,12 +74,13 @@ class HomeController {
     def publicHome() {
 
         def statistics = statisticsFactory.randomGroup()
+        def images = searchService.selectProjectImages()
 
         def helpPage = g.createLink([action:'help'])
         def helpLinks = documentService.findAllHelpResources()
         helpLinks << [name:'MORE RESOURCES', type:'text', url:helpPage]
 
-        def model = [statistics:statistics, helpLinks:helpLinks]
+        def model = [statistics:statistics, helpLinks:helpLinks, images:images]
         if (params.fq) {
             model.putAll(projectExplorerModel())
             model.showProjectExplorer = true
