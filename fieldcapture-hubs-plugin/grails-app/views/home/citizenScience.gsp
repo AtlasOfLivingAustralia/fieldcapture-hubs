@@ -19,7 +19,7 @@
 </head>
 
 <body>
-<div id="wrapper" class="container-fluid">
+<div id="wrapper" class="${containerType}">
     <div class="row-fluid">
         <div class="span4">
             <h2>Citizen Science</h2>

@@ -61,7 +61,7 @@
     <r:require modules="gmap3,mapWithFeatures,knockout,datepicker,amplify,jqueryValidationEngine, projects, attachDocuments, wmd"/>
 </head>
 <body>
-<div class="container-fluid">
+<div class="${containerType}">
 
     <ul class="breadcrumb">
         <li>

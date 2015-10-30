@@ -36,7 +36,7 @@
     </head>
 
     <body>
-    <div class="container-fluid">
+    <div class="${containerType}">
 
         <ul class="breadcrumb">
             <li>
@@ -75,7 +75,7 @@
 
             <div class="span9">
                 <g:if test="${flash.errorMessage}">
-                    <div class="container-fluid">
+                    <div class="${containerType}">
                         <div class="alert alert-error">
                             ${flash.errorMessage}
                         </div>
@@ -83,7 +83,7 @@
                 </g:if>
 
                 <g:if test="${flash.message}">
-                    <div class="container-fluid">
+                    <div class="${containerType}">
                         <div class="alert alert-info">
                             ${flash.message}
                         </div>

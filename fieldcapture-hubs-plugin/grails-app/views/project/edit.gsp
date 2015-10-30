@@ -25,7 +25,7 @@
 </head>
 
 <body>
-<div class="container-fluid validationEngineContainer" id="validation-container">
+<div class="${containerType} validationEngineContainer" id="validation-container">
 
 <ul class="breadcrumb">
     <li><g:link controller="home"><g:message code="g.home"/></g:link> <span class="divider">/</span></li>

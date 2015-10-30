@@ -27,7 +27,7 @@
 </head>
 <body>
 
-<div class="container-fluid organisation-header organisation-banner image-box" data-bind="style:{'backgroundImage':asBackgroundImage(bannerUrl())}">
+<div class="${containerType} organisation-header organisation-banner image-box" data-bind="style:{'backgroundImage':asBackgroundImage(bannerUrl())}">
 
     <div class="row-fluid">
         <ul class="breadcrumb demphasise">

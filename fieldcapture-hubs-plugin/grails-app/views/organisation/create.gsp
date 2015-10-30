@@ -18,7 +18,7 @@
 
 </head>
 <body>
-<div class="container-fluid">
+<div class="${containerType}">
     <ul class="breadcrumb">
         <li>
             <g:link controller="home">Home</g:link> <span class="divider">/</span>

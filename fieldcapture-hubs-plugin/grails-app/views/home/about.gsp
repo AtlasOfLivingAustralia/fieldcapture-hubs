@@ -16,7 +16,7 @@
   </r:script>
 </head>
 <body>
-    <div id="wrapper" class="container-fluid">
+    <div id="wrapper" class="${containerType}">
         <div class="row-fluid">
             <div class="span8" id="">
                 <h1>${settingType.title?:'About the website'}

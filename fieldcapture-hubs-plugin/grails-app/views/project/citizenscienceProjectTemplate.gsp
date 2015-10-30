@@ -75,7 +75,7 @@
 <body>
 
 <g:render template="banner"/>
-<div class="container-fluid">
+<div class="${containerType}">
     <div class="row-fluid">
         <div class="row-fluid">
             <div class="clearfix">

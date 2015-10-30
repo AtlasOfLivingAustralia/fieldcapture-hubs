@@ -1,5 +1,5 @@
 <!-- ko stopBinding: true -->
-<div class="container-fluid" id="pActivitiesList">
+<div class="${containerType}" id="pActivitiesList">
 
     <!-- ko if: projectActivities().length == 0 -->
     <div class="row-fluid">

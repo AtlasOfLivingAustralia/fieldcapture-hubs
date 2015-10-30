@@ -48,7 +48,7 @@
         <div class="navbar navbar-inverse navbar-static-top" id="header">
     </g:else>
         %{--<div class="navbar-inner">--}%
-            <div class="container-fluid">
+            <div class="${containerType}">
                 <g:if test="${hubConfig.logoUrl}">
                 <div class="nav logo">
 
@@ -69,14 +69,14 @@
                         </p>
                     </g:form>
                 </div>
-            </div><!--/.container-fluid -->
+            </div><!--/.${containerType} -->
 
         %{--</div><!--/.navbar-inner -->--}%
     </div><!--/.navbar -->
 
     <div id="dcNav" class="clearfix ">
 
-        <div class="navbar navbar-inverse container-fluid ">
+        <div class="navbar navbar-inverse ${containerType} ">
             %{--<a href="${g.createLink(uri:"/")}" class="brand">MERI data capture prototype</a>--}%
             <ul class="nav">
                 <li><a href="/fieldcapture/" class="active hidden-desktop"><i class="icon-home">&nbsp;</i>&nbsp;Home</a></li>
@@ -106,10 +106,10 @@
 
     <div id="footer">
         <div id="footer-wrapper">
-            <div class="container-fluid">
+            <div class="${containerType}">
                 <fc:footerContent />
             </div>
-            <div class="container-fluid">
+            <div class="${containerType}">
                 <div class="large-space-before">
                     <button class="btn btn-mini" id="toggleFluid">toggle fixed/fluid width</button>
                     <g:if test="${userLoggedIn && introText}">

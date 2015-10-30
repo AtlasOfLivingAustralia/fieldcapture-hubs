@@ -52,7 +52,7 @@
     </div>
 </div>
 <g:if test="${user?.isAdmin}">
-    <div class="container-fluid">
+    <div class="${containerType}">
         <div class="row-fluid">
             <!-- content  -->
             <ul class="nav nav-pills">
