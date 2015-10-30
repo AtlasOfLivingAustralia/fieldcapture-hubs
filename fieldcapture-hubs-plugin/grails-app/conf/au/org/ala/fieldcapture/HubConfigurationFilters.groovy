@@ -7,6 +7,7 @@ class HubConfigurationFilters {
     def filters = {
         all(controller: '*', action: '*') {
             before = {
+                request.containerType = 'container' // Default to fixed width for most pages.
                 settingService.loadHubConfig(params.hub)
             }
             after = { Map model ->

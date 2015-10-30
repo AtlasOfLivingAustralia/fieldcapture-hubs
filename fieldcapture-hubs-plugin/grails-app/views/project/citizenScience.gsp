@@ -22,7 +22,7 @@
     <r:require modules="js_iso8601,projects"/>
 </head>
 <body>
-<div id="wrapper" class="content container-fluid">
+<div id="wrapper" class="content ${containerType}">
     <div class="row-fluid">
         <div class="span6" id="heading">
             <h1 class="pull-left"><g:message code="project.citizenScience.heading"/></h1>

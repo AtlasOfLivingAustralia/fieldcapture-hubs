@@ -18,7 +18,7 @@
     <r:require modules="knockout"/>
 </head>
 <body>
-<div id="wrapper" class="container-fluid">
+<div id="wrapper" class="${containerType}">
 
     <div class="row-fluid large-space-after large-space-before button-set">
         <g:link controller="project" action="create" class="btn btn-medium"><r:img dir="images/icons" file="project.png"/> Add a project</g:link>

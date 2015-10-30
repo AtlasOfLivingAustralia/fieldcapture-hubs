@@ -1,6 +1,6 @@
 <div class="row-fluid">
     <g:if test="${flash.errorMessage}">
-        <div class="container-fluid">
+        <div class="${containerType}">
             <div class="alert alert-error">
                 ${flash.errorMessage}
             </div>

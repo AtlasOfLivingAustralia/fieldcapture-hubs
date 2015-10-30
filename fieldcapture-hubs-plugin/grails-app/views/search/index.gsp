@@ -13,7 +13,7 @@
     <title>Search Results | Field Capture</title>
 </head>
 <body>
-<div id="wrapper" class="container-fluid">
+<div id="wrapper" class="${containerType}">
     <div class="row-fluid">
         <div class="span12" id="header">
             <h1 class="pull-left">Search Results</h1>

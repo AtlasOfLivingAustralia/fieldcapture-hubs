@@ -25,7 +25,7 @@
     <div data-bind="visible:urlWeb()"><strong><g:message code="g.visitUsAt" /> <a data-bind="attr:{href:urlWeb}"><span data-bind="text:urlWeb"></span></a></strong></div>
 </div>
 
-<div class="container-fluid">
+<div class="${containerType}">
     <hr/>
     <div class="row-fluid">
         <div class="span6 well">

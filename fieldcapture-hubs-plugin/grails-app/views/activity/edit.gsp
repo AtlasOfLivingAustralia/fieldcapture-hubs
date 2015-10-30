@@ -28,7 +28,7 @@
     <g:set var="formattedEndDate" value="${au.org.ala.fieldcapture.DateUtils.isoToDisplayFormat(latestEndDate)}"/>
 </head>
 <body>
-<div class="container-fluid validationEngineContainer" id="validation-container">
+<div class="${containerType} validationEngineContainer" id="validation-container">
     <div id="koActivityMainBlock">
         <g:if test="${!printView}">
             <ul class="breadcrumb">

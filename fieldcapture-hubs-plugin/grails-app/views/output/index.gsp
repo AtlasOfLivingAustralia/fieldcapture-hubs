@@ -8,7 +8,7 @@
     <r:require modules="jstimezonedetect,knockout,jqueryValidationEngine,datepicker"/>
 </head>
 <body>
-<div class="container-fluid">
+<div class="${containerType}">
     <legend>
         <table style="width: 100%">
             <tr>

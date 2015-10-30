@@ -23,7 +23,7 @@
     <r:require modules="knockout,mapWithFeatures,amplify,jqueryValidationEngine"/>
 </head>
 <body>
-<div class="container-fluid validationEngineContainer" id="validation-container">
+<div class="${containerType} validationEngineContainer" id="validation-container">
     <ul class="breadcrumb">
         <li><g:link controller="home">Home</g:link> <span class="divider">/</span></li>
         <li>Sites<span class="divider">/</span></li>
@@ -31,7 +31,7 @@
     </ul>
 </div>
 
-<div class="container-fluid">
+<div class="${containerType}">
 
     <g:if test="${!shapeFileId}">
 

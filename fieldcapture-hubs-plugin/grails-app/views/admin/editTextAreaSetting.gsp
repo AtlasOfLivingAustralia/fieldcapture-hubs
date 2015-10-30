@@ -21,7 +21,7 @@
                 });
         </r:script>
         <content tag="pageTitle">Static pages</content>
-        <div id="wrapper" class="container-fluid">
+        <div id="wrapper" class="${container}">
             <div class="row-fluid">
                 <div class="span12" id="">
                     <g:if test="${!ajax}">
