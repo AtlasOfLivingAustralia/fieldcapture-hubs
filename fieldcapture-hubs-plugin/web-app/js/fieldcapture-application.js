@@ -880,7 +880,7 @@ var BlogEntry = function(blogEntry) {
     self.title = ko.observable(blogEntry.title);
     self.text = ko.observable(blogEntry.text);
     self.date = ko.observable(blogEntry.date);
-    self.imageDocumentId = ko.observable(blogEntry.imageDocumentId);
+    self.imageUrl = ko.observable(blogEntry.imageUrl);
     self.stockImageName = ko.observable(blogEntry.stockImageName);
 };
 
