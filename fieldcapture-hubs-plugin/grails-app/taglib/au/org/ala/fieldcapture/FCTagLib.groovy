@@ -655,6 +655,19 @@ class FCTagLib {
         }
     }
 
+    def truncate = { attrs ->
+        String value = attrs.value
+        int maxLength = Integer.parseInt(attrs.maxLength)
+
+        String result = value
+
+        if (value?.length() > maxLength) {
+            result = value.substring(0, maxLength-3) + "..."
+        }
+
+        out << result
+    }
+
     private void renderObject(Object object, MarkupBuilder mb) {
 
         if (object instanceof JSONObject) {
