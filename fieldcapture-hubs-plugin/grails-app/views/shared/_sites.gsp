@@ -59,6 +59,7 @@
             var bounds = new google.maps.LatLngBounds();
             var geoPoints = data;
             var legends = [];
+            var heatMapPoints = [];
 
             if (geoPoints.total) {
                 var projectLinkPrefix = "${createLink(controller:'project')}/";
@@ -77,34 +78,45 @@
                         legend.count = facet.count;
                         legends.push(legend);
                     });
+                    var useHeatMap = (geoPoints.projects.length > 250 && (!geoPoints.selectedFacetTerms || geoPoints.selectedFacetTerms.length == 0));
                     $.each(geoPoints.projects, function(j, project) {
+
                         var projectId = project.projectId
                         var projectName = project.name
 
                         if (project.geo && project.geo.length > 0) {
                             $.each(project.geo, function(k, el) {
-                                var point = {
-                                    type: "dot",
-                                    id: projectId,
-                                    name: projectName,
-                                    popup: generatePopup(projectLinkPrefix,projectId,projectName,project.org,siteLinkPrefix,el.siteId, el.siteName),
-                                    latitude: el.loc.lat,
-                                    longitude: el.loc.lon,
-                                    color: "-1"
-                                }
-                                var lat = parseFloat(point.latitude);
-                                var lon = parseFloat(point.longitude);
+
+                                var lat = parseFloat(el.loc.lat);
+                                var lon = parseFloat(el.loc.lon);
+                                var latLng = new google.maps.LatLng(lat,lon);
                                 if (!isNaN(lat) && !isNaN(lon)) {
                                     if (lat >= -90 && lat <=90 && lon >= -180 && lon <= 180) {
-                                        if(el.index !== undefined && el.index != null){
-                                            point.color = legends[el.index].color;
-                                            point.legendName = el.legendName;
+                                        if (!useHeatMap) {
+                                            var point = {
+                                                type: "dot",
+                                                id: projectId,
+                                                name: projectName,
+                                                popup: generatePopup(projectLinkPrefix,projectId,projectName,project.org,siteLinkPrefix,el.siteId, el.siteName),
+                                                latitude:lat,
+                                                longitude:lon,
+                                                color: "-1"
+                                            }
+
+                                            if(el.index !== undefined && el.index != null){
+                                                point.color = legends[el.index].color;
+                                                point.legendName = el.legendName;
+                                            }
+                                            features.push(point);
+
+                                            if (projectId) {
+                                                projectIdMap[projectId] = true;
+                                            }
                                         }
-                                        features.push(point);
-                                        bounds.extend(new google.maps.LatLng(el.loc.lat,el.loc.lon));
-                                        if (projectId) {
-                                            projectIdMap[projectId] = true;
+                                        else {
+                                            heatMapPoints.push(latLng);
                                         }
+                                        bounds.extend(latLng);
                                     }
                                 }
 
@@ -130,12 +142,30 @@
             $("#map-colorby-status").hide();
 
             initialiseMap(features, bounds, mapOptions);
+            if (heatMapPoints) {
+
+                var heatMap = new google.maps.visualization.HeatmapLayer({
+                    data: heatMapPoints,
+                    map: alaMap.map
+                    });
+
+            }
             mapBounds = bounds;
             features.length > 0 ? showLegends(legends) : "";
 
-        }).error(function (request, status, error) {
-            console.error("AJAX error", status, error);
-        });
+            var numSitesHtml = "";
+            var siteCount = features.length || heatMapPoints.length;
+            if(siteCount > 0){
+                numSitesHtml = siteCount + " sites";
+            } else {
+                numSitesHtml = "0 sites <span class=\"label label-important\">No georeferenced points for the selected projects</span>";
+            }
+
+            $("#numberOfSites").html(numSitesHtml);
+
+            }).error(function (request, status, error) {
+                console.error("AJAX error", status, error);
+            });
     }
 
     function initialiseMap(features, bounds, mapOptions){
@@ -192,14 +222,6 @@
             homeToggleControlDiv.index = 1;
             alaMap.map.controls[google.maps.ControlPosition.BOTTOM_LEFT].push(homeToggleControlDiv);
         }
-        var numSitesHtml = "";
-        if(features.length > 0){
-            numSitesHtml = features.length + " sites";
-        } else {
-            numSitesHtml = "0 sites <span class=\"label label-important\">No georeferenced points for the selected projects</span>";
-        }
-
-        $("#numberOfSites").html(numSitesHtml);
     }
 
 
