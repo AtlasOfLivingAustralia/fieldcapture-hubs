@@ -37,6 +37,7 @@ class ProjectController {
             }
             def programs = projectService.programsModel()
             def activities = activityService.activitiesForProject(id)
+            project.activities = activities
             def content = projectContent(project, user, programs)
 
             def model = [project: project,
@@ -93,6 +94,7 @@ class ProjectController {
 
 
     protected Map worksProjectContent(project, user) {
+
         [overview:[label:'Overview', visible: true, default: true, type:'tab', projectSite:project.projectSite],
          documents:[label:'Documents', visible: !project.isExternal, type:'tab'],
          activities:[label:'Activities', visible:!project.isExternal, disabled:!user?.hasViewAccess, wordForActivity:"Activity",type:'tab'],
