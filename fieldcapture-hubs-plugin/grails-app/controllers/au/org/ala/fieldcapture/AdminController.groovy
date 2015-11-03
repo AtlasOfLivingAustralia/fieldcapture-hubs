@@ -178,7 +178,7 @@ class AdminController {
         [settings: settings, grailsStuff: grailsStuff]
     }
 
-    @PreAuthorise(accessLevel = 'alaAdmin', redirectController = "admin")
+    @PreAuthorise(accessLevel = 'siteAdmin', redirectController = "admin")
     def editHelpLinks() {
         def helpLinks = documentService.findAllHelpResources()?:[]
 
