@@ -12,9 +12,6 @@ class HomeController {
     def settingService
     def metadataService
     def userService
-    def reportService
-    def documentService
-    def statisticsFactory
 
     @PreAuthorise(accessLevel = 'alaAdmin', redirectController = "admin")
     def advanced() {
@@ -34,21 +31,10 @@ class HomeController {
             return
         }
 
-        publicHome()
+        projectFinder()
     }
 
-    def projectExplorer() {
-
-        def model = projectExplorerModel()
-
-        render view:'index', model:model
-    }
-
-    def ajaxProjectExplorer() {
-        render template: 'projectFinder', model:projectExplorerModel(), layout: 'ajax'
-    }
-
-    private Map projectExplorerModel() {
+    def projectFinder() {
         def facetsList = SettingService.getHubConfig().availableFacets
         def mapFacets = SettingService.getHubConfig().availableMapFacets
 
@@ -64,28 +50,11 @@ class HomeController {
 
         def resp = searchService.HomePageFacets(params)
 
-        [  facetsList: facetsList,
-           mapFacets: mapFacets,
-           geographicFacets:selectedGeographicFacets,
-           description: settingService.getSettingText(SettingPageType.DESCRIPTION),
-           results: resp ]
-    }
-
-    def publicHome() {
-
-        def statistics = statisticsFactory.randomGroup()
-        def images = searchService.selectProjectImages()
-
-        def helpPage = g.createLink([action:'help'])
-        def helpLinks = documentService.findAllHelpResources()
-        helpLinks << [name:'MORE RESOURCES', type:'text', url:helpPage]
-
-        def model = [statistics:statistics, helpLinks:helpLinks, images:images]
-        if (params.fq) {
-            model.putAll(projectExplorerModel())
-            model.showProjectExplorer = true
-        }
-        render view:'public', model:model
+        render view:'index', model:[   facetsList: facetsList,
+            mapFacets: mapFacets,
+            geographicFacets:selectedGeographicFacets,
+            description: settingService.getSettingText(SettingPageType.DESCRIPTION),
+            results: resp ]
     }
 
     /**

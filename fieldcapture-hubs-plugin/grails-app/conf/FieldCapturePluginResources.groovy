@@ -224,6 +224,8 @@ modules = {
         resource url:'fancybox/fancybox_sprite@2x.png', plugin: 'fieldcapture-plugin'
         resource url:'fancybox/blank.gif', plugin: 'fieldcapture-plugin'
         resource url:'fancybox/fancybox_loading@2x.gif', plugin: 'fieldcapture-plugin'
+        resource url: 'vendor/thumbnail.scroller/2.0.3/jquery.mThumbnailScroller.css', plugin:'fieldcapture-plugin'
+        resource url: 'vendor/thumbnail.scroller/2.0.3/jquery.mThumbnailScroller.js', plugin:'fieldcapture-plugin'
     }
 
     fuelux {
@@ -292,7 +294,6 @@ modules = {
         resource url: 'slider-pro-master/js/jquery.sliderPro.min.js', plugin: 'fieldcapture-plugin'
         resource url: 'slider-pro-master/css/slider-pro.min.css', plugin: 'fieldcapture-plugin'
         resource url: 'slider-pro-master/css/images/blank.gif', plugin: 'fieldcapture-plugin'
-
     }
 
     leaflet {
