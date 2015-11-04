@@ -902,6 +902,11 @@ var BlogEntryViewModel = function(blogEntry) {
         return self.documents()[0];
     });
     self.type = ko.observable();
+    self.formattedDate = ko.computed(function() {
+        console.log(moment(self.date()));
+
+        return moment(self.date()).format('Do MMM')
+    });
     //self.imageUrl = ko.computed(function() {
     //    if (self.image()) {
     //        return self.image().url;
@@ -921,7 +926,7 @@ var EditableBlogEntryViewModel = function(blogEntry, options) {
     var self = this;
     var now = convertToSimpleDate(new Date());
     self.blogEntryId = ko.observable(blogEntry.blogEntryId);
-    self.projectId = ko.observable(blogEntry.projectId);
+    self.projectId = ko.observable(blogEntry.projectId || undefined);
     self.title = ko.observable(blogEntry.title || '');
     self.date = ko.observable(blogEntry.date || now).extend({simpleDate:false});
     self.content = ko.observable(blogEntry.content);
@@ -951,7 +956,7 @@ var EditableBlogEntryViewModel = function(blogEntry, options) {
     };
 
     self.save = function() {
-        if ($(validationElementSelector).validationEngine('validate')) {
+        if ($(config.validationElementSelector).validationEngine('validate')) {
             self.saveWithErrorDetection(function() {document.location.href = config.returnTo});
         }
     };
