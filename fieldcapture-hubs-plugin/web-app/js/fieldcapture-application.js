@@ -875,27 +875,104 @@ function formatDate(t) {
 };
 
 
-var BlogEntry = function(blogEntry) {
-    var self = this;
-    self.title = ko.observable(blogEntry.title);
-    self.text = ko.observable(blogEntry.text);
-    self.date = ko.observable(blogEntry.date);
-    self.imageUrl = ko.observable(blogEntry.imageUrl);
-    self.stockImageName = ko.observable(blogEntry.stockImageName);
-};
 
-var BlogViewModel = function(entries) {
+var BlogViewModel = function(entries, type) {
     var self = this;
     self.entries = ko.observableArray();
 
-    self.loadMore = function() {
-
-    };
-
     for (var i=0; i<entries.length; i++) {
-        self.entries.push(new BlogEntry(entries[i]));
+        if (!type || entries[i].type == type) {
+            self.entries.push(new BlogEntryViewModel(entries[i]));
+        }
     }
 };
+
+var BlogEntryViewModel = function(blogEntry) {
+    var self = this;
+    var now = convertToSimpleDate(new Date());
+    self.blogEntryId = ko.observable(blogEntry.blogEntryId);
+    self.projectId = ko.observable(blogEntry.projectId);
+    self.title = ko.observable(blogEntry.title || '');
+    self.date = ko.observable(blogEntry.date || now).extend({simpleDate:false});
+    self.content = ko.observable(blogEntry.content);
+    self.imageUrl = ko.observable(blogEntry.imageUrl);
+    self.stockImageName = ko.observable(blogEntry.stockImageName);
+    self.documents = ko.observableArray();
+    self.image = ko.computed(function() {
+        return self.documents()[0];
+    });
+    self.type = ko.observable();
+    self.formattedDate = ko.computed(function() {
+        console.log(moment(self.date()));
+
+        return moment(self.date()).format('Do MMM')
+    });
+    //self.imageUrl = ko.computed(function() {
+    //    if (self.image()) {
+    //        return self.image().url;
+    //    }
+    //});
+};
+
+var EditableBlogEntryViewModel = function(blogEntry, options) {
+
+    var defaults = {
+        validationElementSelector:'.validationEngineContainer',
+        types:['News and events', 'Project Stories'],
+        returnTo:fcConfig.returnTo,
+        blogUpdateUrl:fcConfig.blogUpdateUrl
+    };
+    var config = $.extend(defaults, options);
+    var self = this;
+    var now = convertToSimpleDate(new Date());
+    self.blogEntryId = ko.observable(blogEntry.blogEntryId);
+    self.projectId = ko.observable(blogEntry.projectId || undefined);
+    self.title = ko.observable(blogEntry.title || '');
+    self.date = ko.observable(blogEntry.date || now).extend({simpleDate:false});
+    self.content = ko.observable(blogEntry.content);
+    self.imageUrl = ko.observable(blogEntry.imageUrl);
+    self.stockImageName = ko.observable(blogEntry.stockImageName);
+    self.documents = ko.observableArray();
+    self.image = ko.computed(function() {
+        return self.documents()[0];
+    });
+    self.type = ko.observable();
+    self.imageUrl = ko.computed(function() {
+        if (self.image()) {
+            return self.image().url;
+        }
+    });
+    self.removeBlogImage = function() {
+        self.documents([]);
+    };
+
+    self.modelAsJSON = function() {
+        var js = ko.mapping.toJS(self, {ignore:['transients', 'documents']});
+        return JSON.stringify(js);
+    };
+
+    self.editContent = function() {
+        editWithMarkdown('Blog content', self.content);
+    };
+
+    self.save = function() {
+        if ($(config.validationElementSelector).validationEngine('validate')) {
+            self.saveWithErrorDetection(function() {document.location.href = config.returnTo});
+        }
+    };
+
+    self.cancel = function() {
+        document.location.href = config.returnTo;
+    };
+
+    self.transients = {};
+    self.transients.blogEntryTypes = config.types;
+
+    $(config.validationElementSelector).validationEngine();
+    autoSaveModel(self, config.blogUpdateUrl, {blockUIOnSave:true});
+};
+
+
 
 /**
  * Animates the replacement of an element with a new element obtained via an ajax (GET) call.
