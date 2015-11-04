@@ -701,7 +701,9 @@ class FCTagLib {
 
     def attributeSafeValue = { attrs ->
         String value = attrs.value
-        out << value.replaceAll(/[^A-Za-z0-9]/, "")
+        if (value) {
+            out << value.replaceAll(/[^A-Za-z0-9]/, "")
+        }
     }
 
 
