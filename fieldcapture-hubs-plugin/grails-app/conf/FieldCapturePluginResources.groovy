@@ -58,6 +58,7 @@ modules = {
         resource url:'js/knockout-custom-bindings.js', plugin: 'fieldcapture-plugin'
         resource url:'js/knockout-dates.js', plugin: 'fieldcapture-plugin'
         resource url:'js/outputs.js', plugin: 'fieldcapture-plugin'
+        resource url:'vendor/knockout-repeat/2.1/knockout-repeat.js', plugin: 'fieldcapture-plugin'
     }
 
     knockout_sortable {
