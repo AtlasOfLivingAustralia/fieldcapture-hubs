@@ -894,10 +894,11 @@ var BlogEntryViewModel = function(blogEntry) {
     self.projectId = ko.observable(blogEntry.projectId);
     self.title = ko.observable(blogEntry.title || '');
     self.date = ko.observable(blogEntry.date || now).extend({simpleDate:false});
-    self.content = ko.observable(blogEntry.content);
+    self.content = ko.observable(blogEntry.content).extend({markdown:true});
     self.imageUrl = ko.observable(blogEntry.imageUrl);
     self.stockImageName = ko.observable(blogEntry.stockImageName);
     self.documents = ko.observableArray();
+    self.viewMoreUrl = ko.observable(blogEntry.viewMoreUrl);
     self.image = ko.computed(function() {
         return self.documents()[0];
     });
@@ -937,6 +938,8 @@ var EditableBlogEntryViewModel = function(blogEntry, options) {
         return self.documents()[0];
     });
     self.type = ko.observable();
+    self.viewMoreUrl = ko.observable(blogEntry.viewMoreUrl).extend({url:true});
+
     self.imageUrl = ko.computed(function() {
         if (self.image()) {
             return self.image().url;
