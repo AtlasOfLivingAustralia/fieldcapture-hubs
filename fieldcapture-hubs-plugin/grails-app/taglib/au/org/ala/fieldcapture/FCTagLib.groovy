@@ -543,6 +543,48 @@ class FCTagLib {
         }
     }
 
+    /**
+     * Build HTML for drop down menu "My Organisations"
+     */
+    def userOrganisationList = { attrs ->
+        def user = userService.user
+        def maxItems = 10 // total for both list combined
+        def mb = new MarkupBuilder(out)
+        // common code as closures
+        def maxItemsLink = {
+            mb.p {
+                a(href: g.createLink(controller: "user"), "[showing top ${maxItems} - see full list]")
+            }
+        }
+        def listItem = { org ->
+            mb.li {
+                span {
+                    a(href: g.createLink(controller: 'organisation', id: org.organisationId), org.name)
+                }
+            }
+        }
+
+        if (user) {
+            List memberOrgs = userService.getOrganisationsForUserId(user.userId)
+            mb.ul {
+                memberOrgs.eachWithIndex { org, i ->
+                    if (i < maxItems) {
+                        if (org && org.organisation){
+                            listItem(org.organisation)
+                        }
+                    }
+                }?:mkp.yield("[You aren't a member of any organisations]")
+            }
+            if (memberOrgs.size() >= maxItems) {
+                maxItemsLink()
+                return // don't show starred projects as we've exceeded limit
+            }
+
+        } else {
+            mb.div { mkp.yield("Error: User not found") }
+        }
+    }
+
     def modelAsJavascript = { attrs ->
         def model = attrs.model
         if (!(model instanceof JSONObject) && !(model instanceof JSONArray)) {
