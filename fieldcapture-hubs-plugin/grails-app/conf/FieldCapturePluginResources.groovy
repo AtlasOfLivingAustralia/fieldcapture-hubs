@@ -9,6 +9,7 @@ modules = {
         resource url: 'js/bootbox.min.js', plugin: 'fieldcapture-plugin'
         resource url: 'js/jquery.columnizer.js', plugin: 'fieldcapture-plugin'
         resource url: 'js/jquery.blockUI.js', plugin: 'fieldcapture-plugin'
+        resource url: 'js/pagination.js', plugin:'fieldcapture-plugin'
         resource url: 'css/common.css', plugin: 'fieldcapture-plugin'
     }
 

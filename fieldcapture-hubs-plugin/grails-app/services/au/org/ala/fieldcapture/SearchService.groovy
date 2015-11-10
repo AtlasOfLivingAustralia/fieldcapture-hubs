@@ -184,25 +184,4 @@ class SearchService {
         def url = grailsApplication.config.ecodata.baseUrl + 'search/scoresByLabel' + commonService.buildUrlParamsFromMap(reportParams)
         webService.getJson(url, 1200000)
     }
-
-    List selectProjectImages() {
-        def criteria = [
-                type:'image',
-                public:true,
-                thirdPartyConsentDeclarationMade: true,
-                max:1,
-                offset:0
-        ]
-
-        def count = documentService.search(criteria).count
-
-        criteria.offset = (int)Math.floor(Math.random()*count)
-
-        def randomImage = documentService.search(criteria).documents[0]
-
-        def project = projectService.get(randomImage.projectId, 'all')
-        def projectImages = project.documents.findAll{it.public == true && it.thirdPartyConsentDeclarationMade == true && it.type == 'image'}
-
-        projectImages.collect {[name:it.name, projectName:project.name, url:it.url, projectId:project.projectId]}
-    }
 }
