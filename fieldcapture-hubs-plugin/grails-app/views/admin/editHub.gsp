@@ -185,9 +185,9 @@
                return program.name;
             });
             self.transients = {
-                availableFacets:['status','organisationFacet','associatedProgramFacet','associatedSubProgramFacet','mainThemeFacet','stateFacet','nrmFacet','lgaFacet','mvgFacet','ibraFacet','imcra4_pbFacet','otherFacet', 'gerSubRegionFacet','electFacet','cmzFacet','meriPlanAssetFacet', 'partnerOrganisationTypeFacet'],
+                availableFacets:['status','organisationFacet','associatedProgramFacet','associatedSubProgramFacet','mainThemeFacet','stateFacet','nrmFacet','lgaFacet','mvgFacet','ibraFacet','imcra4_pbFacet','otherFacet', 'gerSubRegionFacet','electFacet','cmzFacet','meriPlanAssetFacet', 'partnerOrganisationTypeFacet', 'promoteOnHomepage', 'custom.details.caseStudy'],
                 availableMapFacets:['status', 'organisationFacet','associatedProgramFacet','associatedSubProgramFacet','stateFacet','nrmFacet','lgaFacet','mvgFacet','ibraFacet','imcra4_pbFacet','electFacet', 'cmzFacet'],
-                adminFacets:['electFacet', 'cmzFacet','meriPlanAssetFacet', 'partnerOrganisationTypeFacet'],
+                adminFacets:['electFacet', 'cmzFacet','meriPlanAssetFacet', 'partnerOrganisationTypeFacet', 'promoteOnHomepage', 'custom.details.caseStudy'],
                 programNames:programNames,
                 message:ko.observable(),
                 selectedHub:ko.observable(),
