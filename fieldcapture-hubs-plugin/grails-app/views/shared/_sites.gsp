@@ -46,9 +46,11 @@
         if (facetList && facetList.length > 0) {
             url += "&fq=" + facetList.join("&fq=");
         }
+        var facetsUsed = false;
         <g:if test="${params.fq}">
             <g:set var="fqList" value="${[params.fq].flatten()}"/>
             url += "&fq=${fqList.collect{it.encodeAsURL()}.join('&fq=')}";
+            facetsUsed = true;
         </g:if>
         $("#legend-table").hide();
         $("#map-colorby-status").show();
@@ -78,7 +80,7 @@
                         legend.count = facet.count;
                         legends.push(legend);
                     });
-                    var useHeatMap = (geoPoints.projects.length > 250 && (!geoPoints.selectedFacetTerms || geoPoints.selectedFacetTerms.length == 0));
+                    var useHeatMap = (!facetsUsed && geoPoints.projects.length > 250 && (!geoPoints.selectedFacetTerms || geoPoints.selectedFacetTerms.length == 0));
                     $.each(geoPoints.projects, function(j, project) {
 
                         var projectId = project.projectId
