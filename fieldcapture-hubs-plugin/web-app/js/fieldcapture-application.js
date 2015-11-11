@@ -906,6 +906,13 @@ var BlogEntryViewModel = function(blogEntry) {
     self.formattedDate = ko.computed(function() {
         return moment(self.date()).format('Do MMM')
     });
+    self.shortContent = ko.computed(function() {
+        var content = self.content() || '';
+        if (content.length > 60) {
+            content = content.substring(0, 100)+'...';
+        }
+        return content;
+    });
     //self.imageUrl = ko.computed(function() {
     //    if (self.image()) {
     //        return self.image().url;
