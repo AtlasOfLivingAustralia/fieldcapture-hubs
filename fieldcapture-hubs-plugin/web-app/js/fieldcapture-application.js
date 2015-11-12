@@ -895,7 +895,7 @@ var BlogEntryViewModel = function(blogEntry) {
     self.title = ko.observable(blogEntry.title || '');
     self.date = ko.observable(blogEntry.date || now).extend({simpleDate:false});
     self.content = ko.observable(blogEntry.content).extend({markdown:true});
-    self.stockImageName = ko.observable(blogEntry.stockImageName);
+    self.stockIcon = ko.observable(blogEntry.stockIcon);
     self.documents = ko.observableArray(blogEntry.documents || []);
     self.viewMoreUrl = ko.observable(blogEntry.viewMoreUrl);
     self.image = ko.computed(function() {
@@ -935,7 +935,7 @@ var EditableBlogEntryViewModel = function(blogEntry, options) {
     self.title = ko.observable(blogEntry.title || '');
     self.date = ko.observable(blogEntry.date || now).extend({simpleDate:false});
     self.content = ko.observable(blogEntry.content);
-    self.stockImageName = ko.observable(blogEntry.stockImageName);
+    self.stockIcon = ko.observable(blogEntry.stockImageName);
     self.documents = ko.observableArray();
     self.image = ko.observable();
     self.type = ko.observable();
@@ -956,7 +956,7 @@ var EditableBlogEntryViewModel = function(blogEntry, options) {
            self.image(new DocumentViewModel(self.documents()[0]));
         }
         else {
-            self.image({});
+            self.image(undefined);
         }
     });
     self.removeBlogImage = function() {
