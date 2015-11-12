@@ -36,12 +36,17 @@ class DocumentService {
         return webService.doPost(url, doc)
     }
 
-    def createDocument(doc, contentType, inputStream) {
-
+    def updateDocument(doc, contentType, inputStream) {
         def url = grailsApplication.config.ecodata.baseUrl + "document"
-
+        if (doc.documentId) {
+            url+="/"+doc.documentId
+        }
         def params = [document:doc as JSON]
         return webService.postMultipart(url, params, inputStream, contentType, doc.filename)
+    }
+
+    def createDocument(doc, contentType, inputStream) {
+        updateDocument(doc, contentType, inputStream)
     }
 
     def getDocumentsForSite(id) {
@@ -59,14 +64,20 @@ class DocumentService {
         def result
         if (!document.documentId) {
             document.remove('url')
-            def file = new File(grailsApplication.config.upload.images.path, document.filename)
-            // Create a new document, supplying the file that was uploaded to the ImageController.
-            result = createDocument(document, document.contentType, new FileInputStream(file))
-            if (!result.error) {
-                file.delete()
+            File file = new File(grailsApplication.config.upload.images.path, document.filename)
+            if (file.exists()) {
+                // Create a new document, supplying the file that was uploaded to the ImageController.
+                result = createDocument(document, document.contentType, new FileInputStream(file))
+                if (!result.error) {
+                    file.delete()
+                }
+            }
+            else {
+                result = updateDocument(document)
             }
         }
         else {
+
             // Just update the document.
             result = updateDocument(document)
         }
