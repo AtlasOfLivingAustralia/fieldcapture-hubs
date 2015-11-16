@@ -923,7 +923,7 @@ var EditableBlogEntryViewModel = function(blogEntry, options) {
 
     var defaults = {
         validationElementSelector:'.validationEngineContainer',
-        types:['News and events', 'Project Stories'],
+        types:['News and Events', 'Project Stories'],
         returnTo:fcConfig.returnTo,
         blogUpdateUrl:fcConfig.blogUpdateUrl
     };
