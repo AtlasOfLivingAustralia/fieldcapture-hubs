@@ -54,7 +54,7 @@
 
 
     <div>Outputs: <ul data-bind="foreach:outputs">
-        <li data-bind="text:$data"></li>
+        <li><span data-bind="text:$data"></span><span data-bind="visible:$parent.outputConfigByName()[$data].optional()"> (optional)</span></li>
     </ul></div>
     <button data-bind="click:$root.removeActivity" type="button" class="btn btn-mini pull-right">Remove</button>
     <button data-bind="click:edit" type="button" class="btn btn-mini pull-right">Edit</button>
@@ -73,6 +73,13 @@
         <li>
             <span data-bind="text:$data"></span>
             <span class="pull-right"><i data-bind="click:$parent.removeOutput" class="icon-remove"></i></span>
+            <div data-bind="with:$parent.outputConfigByName()[$data]">
+                <label class="checkbox">Optional? <input type="checkbox" class="pull-right" data-bind="checked:optional"></label>
+
+                <label class="checkbox">Collapsed? <input type="checkbox" class="pull-right" data-bind="checked:collapsedByDefault"></label>
+                <label>Question text if optional:</label>
+                <input type="text" class="input-xlarge" data-bind="value:optionalQuestionText, disable:!optional()">
+            </div>
         </li>
     </ul></div>
     <button data-bind="click:done" type="button" class="btn btn-mini pull-right">Done</button>
@@ -148,21 +155,6 @@
 </script>
 
 
-%{--<div class="expandable-debug clearfix">--}%
-    %{--<hr />--}%
-    %{--<h3>Debug</h3>--}%
-    %{--<div>--}%
-        %{--<h4>KO model</h4>--}%
-        %{--<pre data-bind="text:ko.toJSON($root,null,2)"></pre>--}%
-        %{--<h4>Input model</h4>--}%
-        %{--<pre>${activitiesModel}</pre>--}%
-        %{--<h4>Activities</h4>--}%
-        %{--<pre data-bind="text:ko.toJSON(activities,null,2)"></pre>--}%
-        %{--<h4>Outputs</h4>--}%
-        %{--<pre data-bind="text:ko.toJSON(outputs,null,2)"></pre>--}%
-    %{--</div>--}%
-%{--</div>--}%
-
 <r:script>
     $(function(){
 
@@ -171,6 +163,10 @@
             this.name = ko.observable(act.name);
             this.type = ko.observable(act.type);
             this.outputs = ko.observableArray(act.outputs || []);
+            this.outputConfig = ko.observableArray($.map(act.outputConfig || [], function(outputConfig) {
+                return new OutputConfig(outputConfig);
+            }));
+
             this.expanded = ko.observable(false);
             this.category = ko.observable(act.category);
             this.enabled = ko.observable(!act.status || act.status == 'active');
@@ -179,6 +175,26 @@
             this.supportsSites = ko.observable(act.supportsSites);
             this.supportsPhotoPoints = ko.observable(act.supportsPhotoPoints);
 
+            this.outputConfigByName = ko.computed(function() {
+                var outputConfigByName = {};
+                for (var i=0; i<self.outputs().length; i++) {
+                    var outputName = self.outputs()[i];
+                    var found = false;
+                    for (var j=0; j<self.outputConfig().length; j++) {
+                        if (outputName == self.outputConfig()[j].outputName()) {
+
+                            outputConfigByName[outputName] = self.outputConfig()[j];
+                            found = true;
+                            break;
+                        }
+                    }
+                }
+                return outputConfigByName;
+            });
+
+            this.outputs.subscribe(function() {
+                self.initialiseOutputConfig();
+            })
             this.enabled.subscribe(function (enabled) {
                 if (enabled) {
                     self.status('active');
@@ -215,15 +231,48 @@
             };
             this.removeOutput = function (data) {
                 self.outputs.remove(data);
+                self.outputConfig.remove(function(outputConfig) {
+                    return outputConfig.outputName == data;
+                });
+            };
+            this.initialiseOutputConfig = function() {
+                for (var i=0; i<self.outputs().length; i++) {
+                    var outputName = self.outputs()[i];
+                    var found = false;
+                    for (var j=0; j<self.outputConfig().length; j++) {
+                        if (outputName == self.outputConfig()[j].outputName()) {
+                            found = true;
+                        }
+                    }
+                    if (!found) {
+                        self.outputConfig.push(new OutputConfig({outputName:outputName, optional:false, collapsedByDefault:false}));
+                    }
+                }
             };
             this.toJSON = function() {
                 var js = ko.toJS(this);
                 delete js.expanded;
                 delete js.editing;
                 delete js.enabled;
+                delete js.outputConfigByName;
                 return js;
             }
+            self.initialiseOutputConfig();
         };
+
+        var OutputConfig = function(outputConfig) {
+            var self = this;
+            this.outputName = ko.observable(outputConfig.outputName);
+            this.optionalQuestionText = ko.observable(outputConfig.optionalQuestionText);
+            this.optional = ko.observable(outputConfig.optional);
+            this.collapsedByDefault = ko.observable(outputConfig.collapsedByDefault);
+
+            this.optional.subscribe(function(val) {
+                if (!val) {
+                    self.collapsedByDefault(false);
+                }
+            });
+        }
 
         var ScoreModel = function (template, score) {
             var self = this;
@@ -451,6 +500,7 @@
 
         var viewModel = new ViewModel(${activitiesModel});
         ko.applyBindings(viewModel);
+        window.viewModel = viewModel;
     });
 </r:script>
 </body>
