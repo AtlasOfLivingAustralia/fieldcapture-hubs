@@ -49,9 +49,10 @@
 </head>
 <body>
 
+<div class="${containerType}">
     <g:render template="banner" model="${[imageUrl:resource(dir:'/images/filetypes')]}"/>
 
-    <div id="organisationDetails" class="${containerType}" style="display:none;">
+    <div id="organisationDetails" style="display:none;">
 
         <g:render template="/shared/flashScopeMessage"/>
 
@@ -68,6 +69,7 @@
             <r:img width="50px" dir="images" file="loading.gif" alt="loading icon"/>
         </div>
     </div>
+</div>
 
 <g:render template="/shared/declaration"/>
 
