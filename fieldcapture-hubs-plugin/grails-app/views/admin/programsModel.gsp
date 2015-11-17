@@ -35,6 +35,8 @@
                     <div><label for="reportingPeriod">Reporting period (months) <input id="reportingPeriod" class="input-small" type="number" data-bind="enabled:isMeritProgramme, value:reportingPeriod"></label></div>
                     <div><label for="isMeritProgramme">Reporting period is aligned to calendar dates <input id="reportingPeriodAlignedToCalendar" type="checkbox" data-bind="enabled:isMeritProgramme, checked:reportingPeriodAlignedToCalendar"></label></div>
                     <div><label for="projectDatesContracted">Projects must start and end on contract dates <input id="projectDatesContracted" type="checkbox" data-bind="checked:projectDatesContracted"></label></div>
+                    <div><label for="weekDaysToCompleteReport">Number of weekdays to after a stage ends after which the report is due <input id="weekDaysToCompleteReport" type="text" class="input-small" data-bind="value:weekDaysToCompleteReport" data-validation-engine="validate[number]"></label></div>
+
                     <div class="optional-project-content">
                         <label>Optional project content</label>
                         <ul class="unstyled" data-bind="foreach:{data: $root.transients.optionalProjectContent}">
@@ -116,6 +118,7 @@
             this.reportingPeriodAlignedToCalendar = ko.observable(prg.reportingPeriodAlignedToCalendar);
             this.projectDatesContracted = ko.observable(prg.projectDatesContracted);
             this.optionalProjectContent = ko.observableArray(prg.optionalProjectContent || []);
+            this.weekDaysToCompleteReport = ko.observable(prg.weekDaysToCompleteReport);
             this.activities = ko.observableArray(prg.activities?prg.activities:[]);
             this.activities.subscribe(function(e){ console.log(e);});
             this.select = function () {
@@ -127,6 +130,7 @@
             });
             this.toJSON = function() {
                 var js = ko.toJS(this);
+                js.weekDaysToCompleteReport = Number(js.weekDaysToCompleteReport);
                 delete js.isSelected;
                 return js;
             }
