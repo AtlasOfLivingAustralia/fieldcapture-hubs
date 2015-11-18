@@ -24,6 +24,8 @@ class DateUtils {
     private static DateTimeFormatter DISPLAY_DATE_FORMATTER_WITH_TIME = DateTimeFormat.forPattern("dd-MM-yyyy h:mm:ss aa").withZone(DateTimeZone.default)
     private static DateTimeFormatter DISPLAY_DATE_FORMATTER_WITH_TIME_NOSPACE = DateTimeFormat.forPattern("yyyyMMddHHmmss").withZone(DateTimeZone.default)
     private static DateTimeFormatter MONTH_ONLY_FORMATTER = DateTimeFormat.forPattern('MMMMM yyyy')
+    private static DateTimeFormatter LOCAL_DATE_ISO_FORMAT = ISODateTimeFormat.date().withZone(DateTimeZone.default)
+
 
     /**
      * Aligns the supplied DateTime to the start date of the period it falls into.
@@ -103,6 +105,16 @@ class DateUtils {
         return DISPLAY_DATE_FORMATTER_WITH_TIME_NOSPACE.print(parse(isoDate))
     }
 
+    /**
+     * Formats the supplied ISO date string into local time with format of yyyy-MM-dd.  Used by the jquery validation
+     * engine date validation routine.
+     * @param isoDate the date to format.
+     * @return a date String in the format yyyy-MM-dd
+     */
+    static String validatorFormat(String isoDate) {
+        String blah = LOCAL_DATE_ISO_FORMAT.print(parse(isoDate))
+        blah
+    }
 
     static String isoToDisplayFormat(String isoDate) {
         return displayFormat(parse(isoDate))
