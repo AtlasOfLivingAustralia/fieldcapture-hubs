@@ -7,7 +7,6 @@ import org.grails.plugins.google.visualization.GoogleVisualization
  */
 class DashboardTagLib {
     static namespace = "fc"
-
     /**
      * Expects a single attribute with name "score" containing the result from an aggregation.
      */
@@ -125,16 +124,17 @@ class DashboardTagLib {
             <strong>${score.score.label}</strong>
             <div class="progress progress-info active " style="position:relative">
                 <div class="bar" style="width: ${percentComplete}%;"></div>
-                <span class="pull-right progress-label ${percentComplete >= 99 ? 'progress-100':''}" style="position:absolute; top:0; right:0;">${result}/${score.target}</span>
+                <span class="pull-right progress-label ${percentComplete >= 99 ? 'progress-100':''}" style="position:absolute; top:0; right:0;"> ${g.formatNumber(type:'number',number:result, maxFractionDigits: 2, groupingUsed:true)}/${score.target}</span>
             </div>"""
     }
 
     private void renderSingleScore(score) {
         switch (score.score.aggregationType.name) {
 
+            case 'COUNT':
             case 'SUM':
             case 'AVERAGE':
-            case 'COUNT':
+
                 def result = score.results ? score.results[0].result as Double : 0
                 out << "<div><b>${score.score.label}</b>${helpText(score)} : ${g.formatNumber(type:'number',number:result, maxFractionDigits: 2, groupingUsed:true)}</div>"
                 break
