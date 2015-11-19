@@ -982,3 +982,6 @@ input[type="checkbox"] { -webkit-appearance: checkbox; !important }
 #poi .image-attribution {
     height:1em;
 }
+#poi .sp-caption-container {
+    height: 7em;
+}
