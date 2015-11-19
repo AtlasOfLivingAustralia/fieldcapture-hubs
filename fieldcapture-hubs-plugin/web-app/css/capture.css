@@ -978,3 +978,7 @@ input[type="checkbox"] { -webkit-appearance: checkbox; !important }
 .blog-icon {
     padding-right:10px;
 }
+
+#poi .image-attribution {
+    height:1em;
+}
