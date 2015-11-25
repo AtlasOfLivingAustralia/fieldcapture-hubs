@@ -249,7 +249,7 @@
             window[viewModelInstance].dirtyFlag.reset();
 
             // register with the master controller so this model can participate in the save cycle
-            master.register(viewModelInstance, window[viewModelInstance].modelForSaving,
+            master.register(window[viewModelInstance], window[viewModelInstance].modelForSaving,
             window[viewModelInstance].dirtyFlag.isDirty, window[viewModelInstance].dirtyFlag.reset);
         });
 
