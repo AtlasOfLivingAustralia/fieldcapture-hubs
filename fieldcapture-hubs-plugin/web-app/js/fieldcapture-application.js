@@ -923,7 +923,7 @@ var EditableBlogEntryViewModel = function(blogEntry, options) {
 
     var defaults = {
         validationElementSelector:'.validationEngineContainer',
-        types:['News and Events', 'Project Stories'],
+        types:['News and Events', 'Project Stories', 'Photo'],
         returnTo:fcConfig.returnTo,
         blogUpdateUrl:fcConfig.blogUpdateUrl
     };
@@ -938,7 +938,7 @@ var EditableBlogEntryViewModel = function(blogEntry, options) {
     self.stockIcon = ko.observable(blogEntry.stockImageName);
     self.documents = ko.observableArray();
     self.image = ko.observable();
-    self.type = ko.observable();
+    self.type = ko.observable(blogEntry.type);
     self.viewMoreUrl = ko.observable(blogEntry.viewMoreUrl).extend({url:true});
 
     self.imageUrl = ko.computed(function() {
