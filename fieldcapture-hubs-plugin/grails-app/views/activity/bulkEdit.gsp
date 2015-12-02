@@ -20,8 +20,7 @@
     <style type="text/css">
         input.editor-text {box-sizing:border-box; width: 100%;}
         .slick-column-name { white-space: normal; }
-        .slick-header-column.ui-state-default { background: #DAE0B9; height: 100%; font-weight: bold;}
-        .slick-header { background: #DAE0B9; }
+        .slick-header-column.ui-state-default {  height: 100%; font-weight: bold;}
         input[type=checkbox].progress-checkbox { margin-left: 10px; margin-right: 10px;}
         .finish-all-container { position:absolute; font-weight: normal; bottom: 0; padding-top: 5px; padding-bottom: 5px; border-top: 1px solid silver}
         .finish-all-container input[type='checkbox'] { margin-bottom:5px; }

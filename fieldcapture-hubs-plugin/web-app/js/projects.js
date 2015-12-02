@@ -275,7 +275,10 @@ function ProjectViewModel(project, isUserEditor, organisations) {
     self.orgIdSponsor = ko.observable(project.orgIdSponsor);
     self.orgIdSvcProvider = ko.observable(project.orgIdSvcProvider);
 
-    self.serviceProviderName = ko.observable(project.serviceProviderName);
+    self.serviceProviderName = ko.computed(function() {
+        var org = self.orgIdSvcProvider() && organisationsMap[self.orgIdSvcProvider()];
+        return org? org.name: project.serviceProviderName;
+    });
     self.associatedProgram = ko.observable(); // don't initialise yet - we want the change to trigger dependents
     self.associatedSubProgram = ko.observable(project.associatedSubProgram);
     self.newsAndEvents = ko.observable(project.newsAndEvents).extend({markdown:true});
