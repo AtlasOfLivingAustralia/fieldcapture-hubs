@@ -16,7 +16,7 @@
                         output: "copy_html",
                         button_bar: "notes-button-bar",
                         preview: "notes-preview",
-                        helpLink: "${request.contextPath}/static/wmd/markdownhelp.html"
+                        helpLink: "${g.resource(dir:"wmd", file:"markdownhelp.html", plugin:'fieldcapture-plugin')}"
                     });
                 });
         </r:script>
