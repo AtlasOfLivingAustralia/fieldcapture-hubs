@@ -1,8 +1,10 @@
 package au.org.ala.fieldcapture
 
+import grails.converters.JSON
+
 class OrganisationService {
 
-    def grailsApplication, webService, metadataService, projectService, userService
+    def grailsApplication, webService, metadataService, projectService, userService, searchService
 
 
     def get(String id, view = '') {
@@ -107,5 +109,22 @@ class OrganisationService {
             userService.removeUserWithRole(it.projectId, userId, role)
         }
     }
+
+    def search(Integer offset = 0, Integer max = 100, String searchTerm = null, String sort = null) {
+        Map params = [
+                offset:offset,
+                max:max,
+                query:searchTerm,
+                fq:"className:au.org.ala.ecodata.Organisation"
+        ]
+        if (sort) {
+            params.sort = sort
+        }
+        def results = searchService.fulltextSearch(
+                params, false // Don't use the default facet query because organisations won't match it
+        )
+        results
+    }
+
 
 }

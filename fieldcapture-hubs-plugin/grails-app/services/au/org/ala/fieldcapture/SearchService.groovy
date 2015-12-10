@@ -34,7 +34,7 @@ class SearchService {
         }
     }
 
-    def fulltextSearch(originalParams) {
+    def fulltextSearch(originalParams, boolean applyDefaultFacetQuery = true) {
         def params = originalParams.clone()
         addDefaultFacetQuery(params)
         params.offset = params.offset?:0
