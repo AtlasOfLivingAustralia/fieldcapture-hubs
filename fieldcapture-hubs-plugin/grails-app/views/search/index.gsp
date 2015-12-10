@@ -154,6 +154,9 @@
                                     <g:elseif test="${hit.className=~/Activity/}">
                                         <g:link controller="activity" id="${hit.activityId}">${hit.name?:hit.type}</g:link>
                                     </g:elseif>
+                                    <g:elseif test="${hit.className=~/Organisation/}">
+                                        <g:link controller="organisation" id="${hit.organisationId}">${hit.name?:hit.type}</g:link>
+                                    </g:elseif>
                                     <g:else>
                                         ${hit.type}
                                     </g:else>
