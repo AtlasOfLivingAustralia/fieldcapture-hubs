@@ -10,7 +10,6 @@ class OrganisationController {
     static allowedMethods = [ajaxDelete: "POST", delete:"POST", ajaxUpdate: "POST"]
 
     def organisationService, searchService, documentService, userService, roleService, commonService, webService
-    def citizenScienceOrgId = null
 
     def list() {
 
@@ -64,13 +63,22 @@ class OrganisationController {
     }
 
     def edit(String id) {
+
         def organisation = organisationService.get(id)
 
         if (!organisation || organisation.error) {
             organisationNotFound(id, organisation)
         }
         else {
-            [organisation: organisation]
+            if (organisationService.isUserAdminForOrganisation(id)) {
+
+                [organisation: organisation,
+                 isFcAdmin   : userService.userIsAlaOrFcAdmin()]
+            }
+            else {
+                flash.message = 'You do not have permission to perform that action'
+                chain action: 'index', id:id
+            }
         }
     }
 
