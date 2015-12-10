@@ -7,7 +7,7 @@
             <div class="control-group required">
                 <label class="control-label span3" for="name">Name: <fc:iconHelp><g:message code="organisation.name.help"/></fc:iconHelp> </label>
                 <div class="controls span9">
-                    <input type="text" id="name" class="input-xxlarge" data-bind="value:name" data-validation-engine="validate[required]" placeholder="Organisation name">
+                    <input type="text" id="name" class="input-xxlarge" data-bind="value:name" data-validation-engine="validate[required]" placeholder="Organisation name" ${!isFcAdmin?'readonly="readonly"':''}>
                 </div>
             </div>
             %{--Commenting out the type until we can come up with some better options and include them in the collectory--}%
@@ -19,6 +19,12 @@
                             %{--data-validation-engine="validate[required]"></select>--}%
                 %{--</div>--}%
             %{--</div>--}%
+            <div class="control-group">
+                <label class="control-label span3" for="name">Acronym: <fc:iconHelp><g:message code="organisation.acronym.help"/></fc:iconHelp> </label>
+                <div class="controls span9">
+                    <input type="text" id="acronym" class="input-xxlarge" data-bind="value:acronym">
+                </div>
+            </div>
             <div class="control-group required">
                 <label class="control-label span3" for="description">Description: <fc:iconHelp><g:message code="organisation.description.help"/></fc:iconHelp></label>
                 <div class="controls span9">
