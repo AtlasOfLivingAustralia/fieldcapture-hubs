@@ -50,7 +50,8 @@ enum SettingPageType {
     GREEN_ARMY_REPORT_APPROVED_EMAIL_SUBJECT_LINE('greenArmyReportApprovedSubject', 'Subject line for the \'Report has been approved\' email', 'fielddata.greenArmyReportApproved.emailSubject'),
     GREEN_ARMY_REPORT_REJECTED_EMAIL_SUBJECT_LINE('greenArmyReportRejectedSubject', 'Subject line for the \'Report has been rejected\' email', 'fielddata.greenArmyReportRejected.emailSubject'),
     THIRD_PARTY_PHOTO_CONSENT_DECLARATION('thirdPartyPhotoConsent', 'Declaration text for consent from third parties who appear in images', 'fielddata.thirdPartyConsent.text'),
-    HELP_LINKS_TITLE('helpLinksTitle', 'Title for the Helpful Links section of the homepage', 'fielddata.helpLinksTitle.text')
+    HELP_LINKS_TITLE('helpLinksTitle', 'Title for the Helpful Links section of the homepage', 'fielddata.helpLinksTitle.text'),
+    ORGANISATION_LIST_PAGE_HEADER('organisationListHeader', 'Header content for the organisation list page', 'fielddata.organisationListHeader')
     String name
     String title
     String key
