@@ -42,7 +42,9 @@ class DateUtils {
 
         Interval interval = new Interval(periodStart, period)
 
-        while (interval.isBefore(toAlign)) {
+        // We allow periods one day before the period end to support time zone differences in comparisons (e.g. period in UTC, start date in AEST)
+        // Otherwise we get dates like 2015-06-30T14:00 falling into 2015-01-01.
+        while (Days.daysBetween(interval.getEnd(), toAlign).days > -1) {
             interval = new Interval(interval.getEnd(), period)
         }
 
