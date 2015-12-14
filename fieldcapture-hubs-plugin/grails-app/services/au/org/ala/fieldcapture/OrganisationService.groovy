@@ -1,6 +1,5 @@
 package au.org.ala.fieldcapture
 
-import grails.converters.JSON
 
 class OrganisationService {
 
