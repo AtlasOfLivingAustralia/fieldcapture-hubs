@@ -75,7 +75,7 @@ class DateUtilsSpec extends Specification {
         "2014-02-03T00:00:00Z" | 3      | 2014 | 1     | 1
         "2014-04-01T00:00:00Z" | 3      | 2014 | 4     | 1
         "2014-03-01T23:59:00Z" | 3      | 2014 | 1     | 1
-        "2014-02-28T23:59:00Z" | 1      | 2014 | 2     | 1
+        "2014-02-28T23:59:00Z" | 1      | 2014 | 3     | 1  // We allow periods one day before the next period to support time zone differences in comparisons (e.g. period in UTC, start date in AEST)
         "2014-03-01T00:00:00Z" | 1      | 2014 | 3     | 1
     }
 

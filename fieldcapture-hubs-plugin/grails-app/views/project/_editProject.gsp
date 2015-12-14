@@ -166,6 +166,12 @@
     </div>
 </div>
 
+<div class="row-fluid">
+    <div class="span12">
+        <button data-bind="click:regenerateStageReports" class="btn btn-warning">Re-create project stage reports</button>
+    </div>
+</div>
+
 <div class="form-actions">
     <button type="button" data-bind="click: saveSettings" class="btn btn-primary">Save changes</button>
     <button type="button" id="cancel" class="btn">Cancel</button>
