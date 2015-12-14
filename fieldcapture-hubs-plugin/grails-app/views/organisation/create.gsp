@@ -65,6 +65,9 @@
                             url = fcConfig.organisationViewUrl+'/'+orgId;
                         }
                         window.location.href = url;
+                    },
+                    function(data) {
+                        bootbox.alert('<span class="label label-important">Error</span><p>'+data.detail+'</p>');
                     }
                 );
 
