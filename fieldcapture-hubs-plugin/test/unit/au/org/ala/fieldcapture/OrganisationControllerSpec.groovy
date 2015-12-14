@@ -55,6 +55,7 @@ class OrganisationControllerSpec extends Specification {
     def "edit an organisation"() {
         given:
         def testOrg = testOrganisation()
+        setupOrganisationAdmin()
         organisationService.get(_) >> testOrg
 
         when:
