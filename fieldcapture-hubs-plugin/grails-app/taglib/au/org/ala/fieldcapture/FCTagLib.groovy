@@ -573,11 +573,16 @@ class FCTagLib {
                             listItem(org.organisation)
                         }
                     }
-                }?:mkp.yield("[You aren't a member of any organisations]")
+                }
             }
             if (memberOrgs.size() >= maxItems) {
                 maxItemsLink()
                 return // don't show starred projects as we've exceeded limit
+            }
+            if (memberOrgs.size() == 0) {
+                mb.span("[You aren't a member of any organisations]")
+                mb.hr()
+                mb.a(href:g.createLink(controller:'organisation', action:'list'), "Find your organisation here")
             }
 
         } else {
