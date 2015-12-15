@@ -59,7 +59,7 @@ class OrganisationController {
     }
 
     def create() {
-        [organisation:[:]]
+        [organisation:[:], isNameEditable: true]
     }
 
     def edit(String id) {
@@ -73,7 +73,7 @@ class OrganisationController {
             if (organisationService.isUserAdminForOrganisation(id)) {
 
                 [organisation: organisation,
-                 isFcAdmin   : userService.userIsAlaOrFcAdmin()]
+                 isNameEditable   : userService.userIsAlaOrFcAdmin()]
             }
             else {
                 flash.message = 'You do not have permission to perform that action'
