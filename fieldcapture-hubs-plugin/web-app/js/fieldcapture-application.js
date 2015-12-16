@@ -401,6 +401,84 @@ if (typeof Object.create !== 'function') {
     };
 }
 
+/**
+ * Document preview modes to content type 'map'
+ * @type {{convert: string[], pdf: string[], image: string[], audio: string[], video: string[]}}
+ */
+var contentTypes = {
+    convert: [
+        'application/msword',
+        'application/ms-excel',
+        'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+        'application/vnd.openxmlformats-officedocument.wordprocessingml.template',
+        'application/vnd.ms-word.document.macroEnabled.12',
+        'application/vnd.ms-word.template.macroEnabled.12',
+        'application/vnd.ms-excel',
+        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        'application/vnd.openxmlformats-officedocument.spreadsheetml.template',
+        'application/vnd.ms-excel.sheet.macroEnabled.12',
+        'application/vnd.ms-excel.template.macroEnabled.12',
+        'application/vnd.ms-excel.addin.macroEnabled.12',
+        'application/vnd.ms-excel.sheet.binary.macroEnabled.12',
+        'application/vnd.ms-powerpoint',
+        'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+        'application/vnd.openxmlformats-officedocument.presentationml.template',
+        'application/vnd.openxmlformats-officedocument.presentationml.slideshow',
+        'application/vnd.ms-powerpoint.addin.macroEnabled.12',
+        'application/vnd.ms-powerpoint.presentation.macroEnabled.12',
+        'application/vnd.ms-powerpoint.template.macroEnabled.12',
+        'application/vnd.ms-powerpoint.slideshow.macroEnabled.12',
+        'application/vnd.oasis.opendocument.chart',
+        'application/vnd.oasis.opendocument.chart-template',
+        //'application/vnd.oasis.opendocument.database',
+        'application/vnd.oasis.opendocument.formula',
+        'application/vnd.oasis.opendocument.formula-template',
+        'application/vnd.oasis.opendocument.graphics',
+        'application/vnd.oasis.opendocument.graphics-template',
+        'application/vnd.oasis.opendocument.image',
+        'application/vnd.oasis.opendocument.image-template',
+        'application/vnd.oasis.opendocument.presentation',
+        'application/vnd.oasis.opendocument.presentation-template',
+        'application/vnd.oasis.opendocument.spreadsheet',
+        'application/vnd.oasis.opendocument.spreadsheet-template',
+        'application/vnd.oasis.opendocument.text',
+        'application/vnd.oasis.opendocument.text-master',
+        'application/vnd.oasis.opendocument.text-template',
+        'application/vnd.oasis.opendocument.text-web',
+        'text/html',
+        'text/plain'
+    ],
+    pdf: [
+        'application/pdf',
+        'text/pdf'
+    ],
+    image: [
+        'image/jpeg',
+        'image/jpg',
+        'image/png',
+        'image/gif',
+        'image/webp',
+        'image/bmp'
+    ],
+    audio: [
+        'audio/webm',
+        'audio/ogg',
+        'audio/wave',
+        'audio/wav',
+        'audio/x-wav',
+        'audio/x-pn-wav',
+        'audio/mpeg',
+        'audio/mp3',
+        'audio/mp4'
+    ],
+    video: [
+        'video/webm',
+        'video/ogg',
+        'application/ogg',
+        'video/mp4'
+    ]
+};
+
 /** A function that works with documents.  Intended for inheritance by ViewModels */
 var mobileAppRoles = [
     { role: "android", name: "Android" },
@@ -424,6 +502,94 @@ var socialMediaRoles = [
 function Documents() {
     var self = this;
     self.documents = ko.observableArray();
+    self.documentFilter = ko.observable('');
+    self.documentFilterFieldOptions = [{ label: 'Name', fun: 'name'}, { label: 'Attribution', fun: 'attribution' }, { label: 'Type', fun: 'type' }];
+    self.documentFilterField = ko.observable(self.documentFilterFieldOptions[0]);
+
+    self.selectedDocument = ko.observable();
+
+    function listContains(list, value) {
+        return list.indexOf(value) > -1;
+    }
+
+    self.previewTemplate = ko.pureComputed(function() {
+        var selectedDoc = self.selectedDocument();
+
+        var val;
+        if (selectedDoc) {
+            var contentType = (selectedDoc.contentType() || 'application/octet-stream').toLowerCase().trim();
+            var embeddedVideo = selectedDoc.embeddedVideo();
+            if (embeddedVideo) {
+                val = "xssViewer";
+            } else if (listContains(contentTypes.convert.concat(contentTypes.audio, contentTypes.video, contentTypes.image, contentTypes.pdf), contentType)) {
+                val = "iframeViewer";
+            } else {
+                val = "noPreviewViewer";
+            }
+        } else {
+            val = "noViewer";
+        }
+        return val;
+    });
+
+    self.selectedDocumentFrameUrl = ko.computed(function() {
+        var selectedDoc = self.selectedDocument();
+
+        var val;
+        if (selectedDoc) {
+            var contentType = (selectedDoc.contentType() || 'application/octet-stream').toLowerCase().trim();
+            //return (selectedDoc && selectedDoc.url) ? "https://docs.google.com/viewer?url="+encodeURIComponent(selectedDoc.url)+"&embedded=true" : '';
+
+            if (listContains(contentTypes.pdf, contentType)) {
+                val = fcConfig.pdfViewer + '?file=' + encodeURIComponent(selectedDoc.url);
+            } else if (listContains(contentTypes.convert, contentType)) {
+
+              // jq promises are fundamentally broken, so...
+              val = $.Deferred(function(dfd) {
+                $.get(fcConfig.pdfgenUrl, {"file": selectedDoc.url }, $.noop, "json")
+                  .promise()
+                  .done(function(data) {
+                    dfd.resolve(fcConfig.pdfViewer + '?file=' + encodeURIComponent(data.location));
+                  })
+                  .fail(function(jqXHR, textStatus, errorThrown) {
+                    console.warn('get pdf failed', jqXHR, textStatus, errorThrown);
+                    dfd.resolve(fcConfig.errorViewer || '');
+                  })
+              }).promise();
+            } else if (listContains(contentTypes.image, contentType)) {
+                val = fcConfig.imgViewer + '?file=' + encodeURIComponent(selectedDoc.url);
+            } else if (listContains(contentTypes.video, contentType)) {
+                val = fcConfig.videoViewer + '?file=' + encodeURIComponent(selectedDoc.url);
+            } else if (listContains(contentTypes.audio, contentType)) {
+                val = fcConfig.audioViewer + '?file=' + encodeURIComponent(selectedDoc.url);
+            } else {
+                //val = fcConfig.noViewer + '?file='+encodeURIComponent(selectedDoc.url);
+                val = '';
+            }
+        } else {
+            val = '';
+        }
+        return val;
+    }).extend({async: ''});
+
+    self.filteredDocuments = ko.pureComputed(function() {
+        var lcFilter = self.documentFilter().trim().toLowerCase();
+        var field = self.documentFilterField();
+        return ko.utils.arrayFilter(self.documents(), function(doc) {
+            return (doc[field.fun]() || '').toLowerCase().indexOf(lcFilter) !== -1;
+        });
+    });
+
+    self.showListItem = function(element, index, data) {
+        var $elem = $(element);
+        $elem.hide(); // element is visible after render, so hide it to animate it appearing.
+        $elem.show(100);
+    };
+
+    self.hideListItem = function(element, index, data) {
+        $(element).hide(100);
+    };
+
     self.findDocumentByRole = function(documents, roleToFind) {
         for (var i=0; i<documents.length; i++) {
             var role = ko.utils.unwrapObservable(documents[i].role);
@@ -461,7 +627,7 @@ function Documents() {
                     return;
                 }
         });
-    }
+    };
     function pushLinkUrl(urls, links, role) {
         var link = self.findLinkByRole(links, role.role);
         if (link) urls.push({
@@ -475,7 +641,7 @@ function Documents() {
                 return dir + "/" + role.role.toLowerCase() + ".png";
             }
         });
-    };
+    }
 
     self.transients = {};
 
@@ -581,9 +747,11 @@ function Documents() {
         }
     };
 
-    self.ignore = ['documents', 'links', 'logoUrl', 'bannerUrl', 'mainImageUrl', 'primaryImages', 'embeddedVideos', 'ignore', 'transients'];
+    self.ignore = ['documents', 'links', 'logoUrl', 'bannerUrl', 'mainImageUrl', 'primaryImages', 'embeddedVideos',
+      'ignore', 'transients', 'documentFilter', 'documentFilterFieldOptions', 'documentFilterField', 'previewTemplate',
+      'selectedDocumentFrameUrl', 'filteredDocuments'];
 
-};
+}
 
 /**
  * Wraps a list in a fuse search and exposes results and selection as knockout variables.
@@ -690,4 +858,207 @@ function showFloatingMessage(message, alertType) {
 
     }
     messageContainer.slideDown(400);
+};
+
+/**
+ * Format a date given an Unix time number (output of Date.parse)
+ *
+ * @param t
+ * @returns {string}
+ */
+function formatDate(t) {
+    var d = new Date(t);
+    var yyyy = d.getFullYear().toString();
+    var mm = (d.getMonth()+1).toString(); // getMonth() is zero-based
+    var dd  = d.getDate().toString();
+    return yyyy + "-" + (mm[1]?mm:"0"+mm[0]) + "-" + (dd[1]?dd:"0"+dd[0]);
+};
+
+
+
+var BlogViewModel = function(entries, type) {
+    var self = this;
+    self.entries = ko.observableArray();
+
+    for (var i=0; i<entries.length; i++) {
+        if (!type || entries[i].type == type) {
+            self.entries.push(new BlogEntryViewModel(entries[i]));
+        }
+    }
+};
+
+var BlogEntryViewModel = function(blogEntry) {
+    var self = this;
+    var now = convertToSimpleDate(new Date());
+    self.blogEntryId = ko.observable(blogEntry.blogEntryId);
+    self.projectId = ko.observable(blogEntry.projectId);
+    self.title = ko.observable(blogEntry.title || '');
+    self.date = ko.observable(blogEntry.date || now).extend({simpleDate:false});
+    self.content = ko.observable(blogEntry.content).extend({markdown:true});
+    self.stockIcon = ko.observable(blogEntry.stockIcon);
+    self.documents = ko.observableArray(blogEntry.documents || []);
+    self.viewMoreUrl = ko.observable(blogEntry.viewMoreUrl);
+    self.image = ko.computed(function() {
+        return self.documents()[0];
+    });
+    self.type = ko.observable();
+    self.formattedDate = ko.computed(function() {
+        return moment(self.date()).format('Do MMM')
+    });
+    self.shortContent = ko.computed(function() {
+        var content = self.content() || '';
+        if (content.length > 60) {
+            content = content.substring(0, 100)+'...';
+        }
+        return content;
+    });
+    self.imageUrl = ko.computed(function() {
+        if (self.image()) {
+            return self.image().url;
+        }
+    });
+};
+
+var EditableBlogEntryViewModel = function(blogEntry, options) {
+
+    var defaults = {
+        validationElementSelector:'.validationEngineContainer',
+        types:['News and Events', 'Project Stories', 'Photo'],
+        returnTo:fcConfig.returnTo,
+        blogUpdateUrl:fcConfig.blogUpdateUrl
+    };
+    var config = $.extend(defaults, options);
+    var self = this;
+    var now = convertToSimpleDate(new Date());
+    self.blogEntryId = ko.observable(blogEntry.blogEntryId);
+    self.projectId = ko.observable(blogEntry.projectId || undefined);
+    self.title = ko.observable(blogEntry.title || '');
+    self.date = ko.observable(blogEntry.date || now).extend({simpleDate:false});
+    self.content = ko.observable(blogEntry.content);
+    self.stockIcon = ko.observable(blogEntry.stockImageName);
+    self.documents = ko.observableArray();
+    self.image = ko.observable();
+    self.type = ko.observable(blogEntry.type);
+    self.viewMoreUrl = ko.observable(blogEntry.viewMoreUrl).extend({url:true});
+
+    self.imageUrl = ko.computed(function() {
+        if (self.image()) {
+            return self.image().url;
+        }
+    });
+    self.imageId = ko.computed(function() {
+        if (self.image()) {
+           return self.image().documentId;
+        }
+    });
+    self.documents.subscribe(function() {
+        if (self.documents()[0]) {
+           self.image(new DocumentViewModel(self.documents()[0]));
+        }
+        else {
+            self.image(undefined);
+        }
+    });
+    self.removeBlogImage = function() {
+        self.documents([]);
+    };
+
+    self.modelAsJSON = function() {
+        var js = ko.mapping.toJS(self, {ignore:['transients', 'documents', 'image', 'imageUrl']});
+        if (self.image()) {
+            js.image = self.image().modelForSaving();
+        }
+        return JSON.stringify(js);
+    };
+
+    self.editContent = function() {
+        editWithMarkdown('Blog content', self.content);
+    };
+
+    self.save = function() {
+        if ($(config.validationElementSelector).validationEngine('validate')) {
+            self.saveWithErrorDetection(function() {document.location.href = config.returnTo});
+        }
+    };
+
+    self.cancel = function() {
+        document.location.href = config.returnTo;
+    };
+
+    self.transients = {};
+    self.transients.blogEntryTypes = config.types;
+
+    if (blogEntry.documents && blogEntry.documents[0]) {
+        self.documents.push(blogEntry.documents[0]);
+    }
+    $(config.validationElementSelector).validationEngine();
+    autoSaveModel(self, config.blogUpdateUrl, {blockUIOnSave:true});
+};
+
+var BlogSummary = function(blogEntries) {
+    var self = this;
+    self.entries = ko.observableArray();
+
+    self.load = function(entries) {
+        self.entries($.map(entries, function(blogEntry) {
+            return new BlogEntryViewModel(blogEntry);
+        }));
+    };
+
+    self.newBlogEntry = function() {
+        document.location.href = fcConfig.createBlogEntryUrl;
+    };
+    self.deleteBlogEntry = function(entry) {
+        var url = fcConfig.deleteBlogEntryUrl+'&id='+entry.blogEntryId();
+        $.post(url).done(function() {
+            document.location.reload();
+        });
+    };
+    self.editBlogEntry = function(entry) {
+        document.location.href = fcConfig.editBlogEntryUrl+'&id='+entry.blogEntryId();
+    };
+    self.load(blogEntries);
+};
+
+
+/**
+ * Animates the replacement of an element with a new element obtained via an ajax (GET) call.
+ * @param contentSelector identifies the element to replace.
+ * @param url the URL to call to get the replacement content.
+ * @returns a promise that will complete when the content is replaced.
+ */
+function replaceContentSection(contentSelector, url) {
+
+    var $existingContent = $(contentSelector);
+    var $parent = $existingContent.parent();
+
+    var newStats;
+
+    var animation = $.Deferred();
+    $existingContent.slideUp(400, function() {
+        $existingContent.remove();
+        animation.resolve();
+    });
+
+    var ajax = $.get(url).done(function(data) {
+        newStats = $(data);
+    });
+
+    return $.when(animation, ajax).done(function() {
+        newStats.hide().appendTo($parent).slideDown();
+    });
 }
+
+$(function() {
+    $('#logout-btn').click(function() {
+        if (window.localStorage) {
+            window.localStorage.setItem('logout', new Date().getTime());
+        }
+    });
+    $('#logout-warning a').click(function(){ $('#logout-warning').hide(); });
+    window.addEventListener('storage', function(e) {
+        if (e.key == 'logout') {
+            $('#logout-warning').show();
+        }
+    });
+});

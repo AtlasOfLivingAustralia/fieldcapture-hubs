@@ -71,17 +71,17 @@
 
 </div>
 
-<div class="alert alert-block">Be careful if you are considering changing the programme, project dates or regenerating the timeline for a project with approved stages.</div>
+<div class="alert alert-block">You cannot change the start date or programme for a project with submitted or approved reports or MERI plan.</div>
 
 <div class="row-fluid">
     <div class="span4">
         <label class="control-label">Programme name</label>
-        <select data-bind="value:associatedProgram,options:transients.programs,optionsCaption: 'Choose...'"
+        <select data-bind="value:associatedProgram,options:transients.programs,optionsCaption: 'Choose...',enable:${canChangeProjectDates?:'false'}"
                 data-validation-engine="validate[required]"></select>
     </div>
     <div class="span4">
         <label class="control-label">Sub-programme name</label>
-        <select data-bind="value:associatedSubProgram,options:transients.subprogramsToDisplay,optionsCaption: 'Choose...'"></select>
+        <select data-bind="value:associatedSubProgram,options:transients.subprogramsToDisplay,optionsCaption: 'Choose...',,enable:${canChangeProjectDates?:'false'}"></select>
     </div>
 </div>
 
@@ -91,7 +91,12 @@
         <fc:iconHelp title="Start date">Date the project is intended to commence.</fc:iconHelp>
         </label>
         <div class="input-append">
-            <fc:datePicker targetField="plannedStartDate.date" name="startDate" data-validation-engine="validate[required]" printable="${printView}" size="input-large"/>
+            <g:if test="${canChangeProjectDates}">
+                <fc:datePicker targetField="plannedStartDate.date" name="startDate" data-validation-engine="validate[required]" printable="${printView}" size="input-large"/>
+            </g:if>
+            <g:else>
+                <input type="text" data-bind="value:plannedStartDate.formattedDate" disabled="disabled" size="input-large">
+            </g:else>
         </div>
     </div>
     <div class="span4">
@@ -161,13 +166,10 @@
     </div>
 </div>
 
-
 <div class="row-fluid">
-    <span class="span6">
-        <label for="regenerateProjectTimeline">Re-calculate the project stage dates? (This page must be reloaded before the change will be visible)</label>
-        <fc:iconHelp title="Timeline">Selecting the checkbox will result in the project stage start and end dates being adjusted to match the new project dates.</fc:iconHelp>
-        <input id="regenerateProjectTimeline" type="checkbox" data-bind="checked:regenerateProjectTimeline">
-    </span>
+    <div class="span12">
+        <button data-bind="click:regenerateStageReports" class="btn btn-warning">Re-create project stage reports</button>
+    </div>
 </div>
 
 <div class="form-actions">

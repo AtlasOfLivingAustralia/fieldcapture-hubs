@@ -6,7 +6,7 @@ import javax.annotation.PostConstruct
  * Service for ElasticSearch running on ecodata
  */
 class SearchService {
-    def webService, commonService, cacheService, metadataService
+    def webService, commonService, cacheService, metadataService, projectService, documentService
     def grailsApplication
     def elasticBaseUrl
 
@@ -19,15 +19,23 @@ class SearchService {
         def defaultFacetQuery = SettingService.getHubConfig().defaultFacetQuery
         if (defaultFacetQuery) {
             def fq = new HashSet(defaultFacetQuery)
-            if (params.fq) {
-                fq.addAll(params.list('fq'))
+            def paramFq = params.fq
+
+            if (paramFq) {
+                if (paramFq instanceof List) {
+                    fq.addAll(paramFq)
+                }
+                else {
+                    fq.add(paramFq)
+                }
             }
             params.fq = fq.asList()
 
         }
     }
 
-    def fulltextSearch(params) {
+    def fulltextSearch(originalParams, boolean applyDefaultFacetQuery = true) {
+        def params = originalParams.clone()
         addDefaultFacetQuery(params)
         params.offset = params.offset?:0
         params.max = params.max?:10
@@ -149,7 +157,6 @@ class SearchService {
     }
 
     def dashboardReport(params) {
-
         cacheService.get("dashboard-"+params, {
             addDefaultFacetQuery(params)
             params.query = 'docType:project'
@@ -167,5 +174,14 @@ class SearchService {
             def url = grailsApplication.config.ecodata.baseUrl + 'search/report' + commonService.buildUrlParamsFromMap(params)
             webService.getJson(url, 1200000)
         })
+    }
+
+    def reportOnScores(List<String> scoreLabels, List<String> facets) {
+        def reportParams = [scores:scoreLabels]
+        if (facets) {
+            reportParams.fq = facets
+        }
+        def url = grailsApplication.config.ecodata.baseUrl + 'search/scoresByLabel' + commonService.buildUrlParamsFromMap(reportParams)
+        webService.getJson(url, 1200000)
     }
 }

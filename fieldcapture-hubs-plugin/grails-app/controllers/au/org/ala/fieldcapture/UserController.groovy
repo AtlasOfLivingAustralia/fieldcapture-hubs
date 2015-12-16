@@ -20,12 +20,18 @@ class UserController {
             redirect(controller: 'home', model: [error: flash.message])
         } else {
             log.debug('Viewing my dashboard :  ' + user)
-            assembleUserData(user)
+            def userData = assembleUserData(user)
+            if (userData.recentEdits?.error) {
+                flash.message = "User Profile Error: There was an error obtaining ."
+                redirect(controller: 'home', model: [error: flash.message])
+                return
+            }
+            return userData
         }
     }
 
-    private assembleUserData(user) {
-        def recentEdits = userService.getRecentEditsForUserId(user.userId)
+    protected Map assembleUserData(user) {
+        def recentEdits = []//userService.getRecentEditsForUserId(user.userId)
         def memberOrganisations = userService.getOrganisationsForUserId(user.userId)
         def memberProjects = userService.getProjectsForUserId(user.userId)
         def starredProjects = userService.getStarredProjectsForUserId(user.userId)

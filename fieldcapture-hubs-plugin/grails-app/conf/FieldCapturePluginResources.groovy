@@ -9,6 +9,8 @@ modules = {
         resource url: 'js/bootbox.min.js', plugin: 'fieldcapture-plugin'
         resource url: 'js/jquery.columnizer.js', plugin: 'fieldcapture-plugin'
         resource url: 'js/jquery.blockUI.js', plugin: 'fieldcapture-plugin'
+        resource url: 'js/pagination.js', plugin:'fieldcapture-plugin'
+        resource url: 'css/common.css', plugin: 'fieldcapture-plugin'
     }
 
     defaultSkin {
@@ -52,11 +54,12 @@ modules = {
     }
 
     knockout {
-        resource url:'js/knockout-3.3.0.debug.js', plugin: 'fieldcapture-plugin'
+        resource url:'vendor/knockout/3.4.0/knockout-3.4.0.js', plugin: 'fieldcapture-plugin'
         resource url:'js/knockout.mapping-latest.js', plugin: 'fieldcapture-plugin'
         resource url:'js/knockout-custom-bindings.js', plugin: 'fieldcapture-plugin'
         resource url:'js/knockout-dates.js', plugin: 'fieldcapture-plugin'
         resource url:'js/outputs.js', plugin: 'fieldcapture-plugin'
+        resource url:'vendor/knockout-repeat/2.1/knockout-repeat.js', plugin: 'fieldcapture-plugin'
     }
 
     knockout_sortable {
@@ -76,7 +79,7 @@ modules = {
     }
 
     app_bootstrap {
-        dependsOn 'application'
+        dependsOn 'application', 'font-awesome-44'
         resource url: 'bootstrap/js/bootstrap.min.js', plugin: 'fieldcapture-plugin'
         // The less css resources plugin (1.3.3, resources plugin 1.2.14) is unable to resolve less files in a plugin so apps that use this plugin must supply their own bootstrap styles.
         // However, commenting this section
@@ -223,6 +226,8 @@ modules = {
         resource url:'fancybox/fancybox_sprite@2x.png', plugin: 'fieldcapture-plugin'
         resource url:'fancybox/blank.gif', plugin: 'fieldcapture-plugin'
         resource url:'fancybox/fancybox_loading@2x.gif', plugin: 'fieldcapture-plugin'
+        resource url: 'vendor/thumbnail.scroller/2.0.3/jquery.mThumbnailScroller.css', plugin:'fieldcapture-plugin'
+        resource url: 'vendor/thumbnail.scroller/2.0.3/jquery.mThumbnailScroller.js', plugin:'fieldcapture-plugin'
     }
 
     fuelux {
@@ -291,7 +296,14 @@ modules = {
         resource url: 'slider-pro-master/js/jquery.sliderPro.min.js', plugin: 'fieldcapture-plugin'
         resource url: 'slider-pro-master/css/slider-pro.min.css', plugin: 'fieldcapture-plugin'
         resource url: 'slider-pro-master/css/images/blank.gif', plugin: 'fieldcapture-plugin'
-
     }
 
+    leaflet {
+        resource url: 'vendor/leaflet/0.7.3/leaflet.js', plugin: 'fieldcapture-plugin'
+        resource url: 'vendor/leaflet/0.7.3/leaflet.css', plugin: 'fieldcapture-plugin'
+    }
+
+    'font-awesome-44' {
+        resource url: 'vendor/font-awesome/4.4.0/css/font-awesome.min.css', attrs:[media:'all'], plugin: 'fieldcapture-plugin'
+    }
 }

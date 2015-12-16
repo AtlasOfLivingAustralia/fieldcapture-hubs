@@ -142,8 +142,13 @@
     <md:modelStyles model="${model}" edit="true" forceHeaderWrap="true"/>
     <div class="output-block" id="ko${blockId}">
             <h3 data-bind="css:{modified:dirtyFlag.isDirty},attr:{title:'Has been modified'}">${outputName}</h3>
+        <div data-bind="if:transients.optional">
+            <label class="checkbox" ><input type="checkbox" data-bind="checked:outputNotCompleted"> <span data-bind="text:transients.questionText"></span> </label>
+        </div>
+        <div id="${blockId}-content" data-bind="visible:!outputNotCompleted()">
         <!-- add the dynamic components -->
-        <md:modelView model="${model}" site="${site}" edit="true" disableTableUpload="true" output="${outputName}" />
+            <md:modelView model="${model}" site="${site}" edit="true" disableTableUpload="true" output="${outputName}" />
+        </div>
         <r:script>
         $(function(){
 
@@ -153,13 +158,21 @@
             // load dynamic models - usually objects in a list
             <md:jsModelObjects model="${model}" site="${site}" speciesLists="${speciesLists}" edit="true" viewModelInstance="${blockId}ViewModelInstance"/>
 
-            this[viewModelName] = function (output) {
+            this[viewModelName] = function (output, config) {
                 var self = this;
                 self.name = "${outputName}";
                 self.outputId = orBlank(output.outputId);
 
                 self.data = {};
                 self.transients = {};
+                var notCompleted = output.outputNotCompleted;
+
+                if (notCompleted === undefined) {
+                    notCompleted = config.collapsedByDefault;
+                }
+                self.outputNotCompleted = ko.observable(notCompleted);
+                self.transients.optional = config.optional || false;
+                self.transients.questionText = config.optionalQuestionText || 'Not applicable';
                 self.transients.dummy = ko.observable();
 
                 // add declarations for dynamic data
@@ -178,6 +191,9 @@
                 self.modelForSaving = function () {
                     // get model as a plain javascript object
                     var jsData = ko.mapping.toJS(self, {'ignore':['transients']});
+                    if (self.outputNotCompleted()) {
+                        jsData.data = {};
+                    }
                     // get rid of any transient observables
                     return self.removeBeforeSave(jsData);
                 };
@@ -216,7 +232,8 @@
                 });
             }
 
-            window[viewModelInstance] = new this[viewModelName](savedOutput);
+            var config = ${fc.modelAsJavascript(model:metaModel.outputConfig?.find{it.outputName == outputName}, default:'{}')};
+            window[viewModelInstance] = new this[viewModelName](savedOutput, config);
             var output = savedOutput.data ? savedOutput.data : {};
 
             window[viewModelInstance].loadData(output);
@@ -232,7 +249,7 @@
             window[viewModelInstance].dirtyFlag.reset();
 
             // register with the master controller so this model can participate in the save cycle
-            master.register(viewModelInstance, window[viewModelInstance].modelForSaving,
+            master.register(window[viewModelInstance], window[viewModelInstance].modelForSaving,
             window[viewModelInstance].dirtyFlag.isDirty, window[viewModelInstance].dirtyFlag.reset);
         });
 
@@ -268,6 +285,32 @@
             });
             return dirty;
         };
+
+        this.validate = function() {
+            var valid = $('#validation-container').validationEngine('validate');
+            if (valid) {
+                // Check that forms with multiple optional sections have at least one of those sections completed.
+                var optionalCount = 0;
+                var notCompletedCount = 0;
+                $.each(self.subscribers, function(i, obj) {
+                    if (obj.model !== 'activityModel' && obj.model !== 'photoPoints') {
+                        if (obj.model.transients.optional) {
+                            optionalCount++;
+                            if (obj.model.outputNotCompleted()) {
+                                notCompletedCount++;
+                            }
+                        }
+                    }
+                });
+                if (optionalCount > 1 && notCompletedCount == optionalCount) {
+                   valid = false;
+                   bootbox.alert("<p>To 'Save changes', the mandatory fields of at least one section of this form must be completed.</p>"+
+                        "<p>If all sections are 'Not applicable' please contact your grant manager to discuss alternate form options</p>");
+                }
+            }
+
+            return valid;
+        };
         /**
          * Makes an ajax call to save any sections that have been modified. This includes the activity
          * itself and each output.
@@ -291,7 +334,7 @@
 
             var success = true;
             if (validate) {
-                success = $('#validation-container').validationEngine('validate');
+                success = self.validate();
             }
             if (!self.isDirty()) {
                 mobileBindings.onSaveActivity(-1, null);

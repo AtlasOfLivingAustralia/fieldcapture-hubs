@@ -9,8 +9,8 @@
         var fcConfig = {
             serverUrl: "${grailsApplication.config.grails.serverURL}",
             viewProjectUrl: "${createLink(controller:'project', action:'index')}",
-            documentUpdateUrl: '${g.createLink(controller:"proxy", action:"documentUpdate")}',
-            documentDeleteUrl: '${g.createLink(controller:"proxy", action:"deleteDocument")}',
+            documentUpdateUrl: '${g.createLink(controller:"document", action:"documentUpdate")}',
+            documentDeleteUrl: '${g.createLink(controller:"document", action:"deleteDocument")}',
             organisationDeleteUrl: '${g.createLink(action:"ajaxDelete", id:"${organisation.organisationId}")}',
             organisationEditUrl: '${g.createLink(action:"edit", id:"${organisation.organisationId}")}',
             organisationViewUrl: '${g.createLink(action:"index")}',
@@ -27,7 +27,7 @@
 </head>
 <body>
 
-<div class="container-fluid organisation-header organisation-banner image-box" data-bind="style:{'backgroundImage':asBackgroundImage(bannerUrl())}">
+<div class="${containerType} organisation-header organisation-banner image-box" data-bind="style:{'backgroundImage':asBackgroundImage(bannerUrl())}">
 
     <div class="row-fluid">
         <ul class="breadcrumb demphasise">
@@ -77,6 +77,9 @@
                             url = fcConfig.organisationViewUrl+'/'+orgId;
                         }
                         window.location.href = url;
+                    },
+                    function(data) {
+                        bootbox.alert('<span class="label label-important">Error</span><p>'+data.detail+'</p>');
                     }
                 );
 

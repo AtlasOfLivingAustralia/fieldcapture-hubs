@@ -25,13 +25,13 @@
 <body class="${pageProperty(name:'body.class')}" id="${pageProperty(name:'body.id')}" onload="${pageProperty(name:'body.onload')}">
 <div id="body-wrapper">
     <div id="header">
-        <div class="container-fluid">
+        <div class="${containerType}">
             <div class="row-fluid">
             </div>
         </div>
     </div><!-- /#header -->
     <div id="dcNav" class="clearfix">
-        <div class="navbar container-fluid">
+        <div class="navbar ${containerType}">
         </div><!-- /.nav -->
     </div>
 
@@ -42,7 +42,7 @@
     <div id="footer">
         <div id="footer-wrapper">
 
-            <div class="container-fluid">
+            <div class="${containerType}">
             </div>
         </div>
 

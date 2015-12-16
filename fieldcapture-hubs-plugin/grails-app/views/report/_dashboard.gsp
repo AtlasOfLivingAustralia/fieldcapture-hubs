@@ -14,53 +14,10 @@ Data presented in this dashboard has been extracted from grant recipient progres
 
                 </a>
             </div>
-            <div id="${categoryContent}" class="outputData accordian-body collapse">
-            <div class="accordian-inner row-fluid">
-            <g:if test="${scores[category]}">
-                <div class="span6" style="min-width: 460px;">
-
-                    <g:each in="${scores[category][0]}" var="categoryScores">
-
-                        <g:each in="${categoryScores}" var="outputScores">
-
-
-                            <div class="well well-small">
-                                <h3>${outputScores.key}</h3>
-                                <g:each in="${outputScores.value}" var="score">
-                                    <fc:renderScore score="${score}"></fc:renderScore>
-                                </g:each>
-                            </div><!-- /.well -->
-
-                        </g:each>
-
-
-                    </g:each>
+            <div id="${categoryContent}" class="outputData accordian-body collapse" data-category="${category}">
+                <div class="accordian-inner row-fluid">
+                    <r:img width="50" height="50" dir="images" file="loading.gif" alt="saving icon"/> Loading...
                 </div>
-                <div class="span6" style="min-width: 460px;">
-
-                    <g:each in="${scores[category][1]}" var="categoryScores">
-
-                        <g:each in="${categoryScores}" var="outputScores">
-
-
-                                <div class="well well-small">
-                                    <h3>${outputScores.key}</h3>
-                                    <g:each in="${outputScores.value}" var="score">
-                                        <fc:renderScore score="${score}"></fc:renderScore>
-                                    </g:each>
-                                </div><!-- /.well -->
-
-
-                        </g:each>
-
-
-                    </g:each>
-                </div>
-            </g:if>
-            <g:else>
-                There is no data available for this category.<br/>
-            </g:else>
-            </div>
             </div>
 
         </div>
@@ -79,3 +36,28 @@ Data presented in this dashboard has been extracted from grant recipient progres
         Not enough data was returned to display summary data for your facet selection.
     </div>
 </g:else>
+
+<script type="text/javascript">
+
+
+    $(function() {
+        var loadingTemplate = '<div class="accordian-inner row-fluid">'+
+            '<r:img width="50" height="50" dir="images" file="loading.gif" alt="saving icon"/> Loading...'+
+            '</div>';
+        $('#reports .collapse').on('show', function() {
+            var $div = $(this);
+
+            var category = $div.data('category');
+            var url = fcConfig.dashboardCategoryUrl;
+            $.ajax({url:url, data:{report:'dashboard', category:category}}).done(function(data) {
+
+                $div.html(data);
+            });
+        }).on('hidden', function() {
+            var $div = $(this);
+            $div.empty().append(loadingTemplate);
+        });
+    });
+
+</script>
+

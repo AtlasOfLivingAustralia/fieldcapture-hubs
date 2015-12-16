@@ -7,27 +7,12 @@ import grails.converters.JSON
  */
 class OrganisationController {
 
+    static allowedMethods = [ajaxDelete: "POST", delete:"POST", ajaxUpdate: "POST"]
+
     def organisationService, searchService, documentService, userService, roleService, commonService, webService
-    def citizenScienceOrgId = null
 
     def list() {
-        if (params.createCitizenScienceProject as boolean) { // came from CS Hub page
-            if (citizenScienceOrgId == null) {
-                def orgName = grailsApplication.config.citizenScienceOrgName?:"ALA"
-                citizenScienceOrgId = organisationService.getByName(orgName)?.organisationId
-            }
-            // this session attribute indicates user's desire to create a citizen science project
-            // this attribute is cleared on any project indez/edit/create action
-            session.setAttribute('citizenScienceOrgId', citizenScienceOrgId)
-        }
-        def organisations = organisationService.list()
-        def user = userService.getUser()
-        def userOrgIds = user? userService.getOrganisationIdsForUserId(user.userId): []
-        [organisations:organisations.list?:[],
-         user:user,
-         userOrgIds: userOrgIds,
-         citizenScienceOrgId: session.getAttribute('citizenScienceOrgId')?:''
-        ]
+
     }
 
     def index(String id) {
@@ -74,30 +59,49 @@ class OrganisationController {
     }
 
     def create() {
-        [organisation:[:]]
+        [organisation:[:], isNameEditable: true]
     }
 
     def edit(String id) {
+
         def organisation = organisationService.get(id)
 
         if (!organisation || organisation.error) {
             organisationNotFound(id, organisation)
         }
         else {
-            [organisation: organisation]
+            if (organisationService.isUserAdminForOrganisation(id)) {
+
+                [organisation: organisation,
+                 isNameEditable   : userService.userIsAlaOrFcAdmin()]
+            }
+            else {
+                flash.message = 'You do not have permission to perform that action'
+                chain action: 'index', id:id
+            }
         }
     }
 
     def delete(String id) {
-        organisationService.update(id, [status:'deleted'])
-
+        if (organisationService.isUserAdminForOrganisation(id)) {
+            organisationService.update(id, [status: 'deleted'])
+        }
+        else {
+            flash.message = 'You do not have permission to perform that action'
+        }
         redirect action: 'list'
     }
 
     def ajaxDelete(String id) {
-        def result = organisationService.update(id, [status:'deleted'])
 
-        respond result
+        if (organisationService.isUserAdminForOrganisation(id)) {
+            def result = organisationService.update(id, [status: 'deleted'])
+
+            respond result
+        }
+        else {
+            render status:403, text:'You do not have permission to perform that action'
+        }
     }
 
     def ajaxUpdate() {
@@ -222,5 +226,10 @@ class OrganisationController {
             flash.message += "<br/>${response.error}"
         }
         redirect(controller: 'home', model: [error: flash.message])
+    }
+
+    def search(Integer offset, Integer max, String searchTerm, String sort) {
+
+        render organisationService.search(offset, max, searchTerm, sort) as JSON
     }
 }

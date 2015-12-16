@@ -7,7 +7,6 @@ import org.grails.plugins.google.visualization.GoogleVisualization
  */
 class DashboardTagLib {
     static namespace = "fc"
-
     /**
      * Expects a single attribute with name "score" containing the result from an aggregation.
      */
@@ -118,25 +117,31 @@ class DashboardTagLib {
     private void renderTarget(score, double target) {
         def result = score.results ? score.results[0].result as Double : 0
         def percentComplete = result / target * 100
-
+        percentComplete = Math.min(100, percentComplete)
+        percentComplete = Math.max(0, percentComplete)
 
         out << """
-            <strong>${score.score.label}</strong><span class="pull-right progress-label ${percentComplete >= 99 ? 'progress-100':''}">${result}/${score.target}</span>
-                <div class="progress progress-info active ">
+            <strong>${score.score.label}</strong>
+            <div class="progress progress-info active " style="position:relative">
                 <div class="bar" style="width: ${percentComplete}%;"></div>
+                <span class="pull-right progress-label ${percentComplete >= 99 ? 'progress-100':''}" style="position:absolute; top:0; right:0;"> ${g.formatNumber(type:'number',number:result, maxFractionDigits: 2, groupingUsed:true)}/${score.target}</span>
             </div>"""
     }
 
     private void renderSingleScore(score) {
         switch (score.score.aggregationType.name) {
 
+            case 'COUNT':
             case 'SUM':
             case 'AVERAGE':
-            case 'COUNT':
+
                 def result = score.results ? score.results[0].result as Double : 0
                 out << "<div><b>${score.score.label}</b>${helpText(score)} : ${g.formatNumber(type:'number',number:result, maxFractionDigits: 2, groupingUsed:true)}</div>"
                 break
             case 'HISTOGRAM':
+                if (score.results.size() == 1 && score.results[0].count == 1) {
+                    return
+                }
                 def chartData = toArray(score.results[0].result)
                 def chartType = score.score.displayType?:'piechart'
                 drawChart(chartType, score.score.label, score.score.label, helpText(score), [['string', score.score.label], ['number', 'Count']], chartData)
@@ -163,6 +168,9 @@ class DashboardTagLib {
     }
 
     private void renderGroupedScore(score) {
+        if (score.results.size() == 1 && score.results[0].count == 1) {
+            return
+        }
         switch (score.score.aggregationType.name) {
             case 'SUM':
             case 'AVERAGE':
@@ -202,7 +210,7 @@ class DashboardTagLib {
 
             case 'piechart':
                 out << "<div id=\"${chartId}\"></div>"
-                out << gvisualization.pieCoreChart([elementId: chartId,  chartArea:new Expando(left:20, top:5, right:20, width:'430', height:'300'), dynamicLoading: true, title: title, columns: columns, data: data, width:'450', height:'300', backgroundColor: '#ebe6dc'])
+                out << gvisualization.pieCoreChart([elementId: chartId,  chartArea:new Expando(left:20, top:5, right:20, width:'430', height:'300'), dynamicLoading: true, title: title, columns: columns, data: data, width:'450', height:'300', backgroundColor: 'transparent'])
                 break;
             case 'barchart':
 
@@ -216,7 +224,7 @@ class DashboardTagLib {
                 else {
                     out << "<div id=\"${chartId}\"></div>"
                 }
-                out << gvisualization.barCoreChart([elementId: chartId, legendTextStyle:chartFont(), fontSize:11, tooltipTextStyle:chartFont(), legend:"none", dynamicLoading: true, title: title, columns: columns, data: data, chartArea:new Expando(left:140, top:topMargin, bottom:bottomMargin, width:'290', height:height-topMargin-bottomMargin), width:'450', height:height, backgroundColor: '#ebe6dc'])
+                out << gvisualization.barCoreChart([elementId: chartId, legendTextStyle:chartFont(), fontSize:11, tooltipTextStyle:chartFont(), legend:"none", dynamicLoading: true, title: title, columns: columns, data: data, chartArea:new Expando(left:140, top:topMargin, bottom:bottomMargin, width:'290', height:height-topMargin-bottomMargin), width:'450', height:height, backgroundColor: 'transparent'])
                 break;
         }
     }

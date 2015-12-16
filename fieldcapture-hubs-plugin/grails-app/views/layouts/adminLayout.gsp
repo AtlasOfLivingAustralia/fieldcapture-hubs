@@ -36,7 +36,7 @@
     </head>
 
     <body>
-    <div class="container-fluid">
+    <div class="${containerType}">
 
         <ul class="breadcrumb">
             <li>
@@ -55,6 +55,8 @@
                     <fc:breadcrumbItem href="${createLink(controller: 'admin', action: 'audit')}" title="Audit" />
                     <g:if test="${fc.userInRole(role: grailsApplication.config.security.cas.adminRole) || fc.userInRole(role: grailsApplication.config.security.cas.alaAdminRole)}">
                         <fc:breadcrumbItem href="${createLink(controller: 'admin', action: 'staticPages')}" title="Static pages" />
+                        <fc:breadcrumbItem href="${createLink(controller: 'admin', action: 'editHelpLinks')}" title="Help Resources"/>
+                        <fc:breadcrumbItem href="${createLink(controller: 'admin', action: 'editSiteBlog')}" title="Site Blog"/>
                     </g:if>
                     <g:if test="${fc.userInRole(role: grailsApplication.config.security.cas.alaAdminRole)}">
                         <fc:breadcrumbItem href="${createLink(controller: 'admin', action: 'tools')}" title="Tools" />
@@ -74,7 +76,7 @@
 
             <div class="span9">
                 <g:if test="${flash.errorMessage}">
-                    <div class="container-fluid">
+                    <div class="${containerType}">
                         <div class="alert alert-error">
                             ${flash.errorMessage}
                         </div>
@@ -82,7 +84,7 @@
                 </g:if>
 
                 <g:if test="${flash.message}">
-                    <div class="container-fluid">
+                    <div class="${containerType}">
                         <div class="alert alert-info">
                             ${flash.message}
                         </div>

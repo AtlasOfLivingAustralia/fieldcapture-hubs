@@ -10,7 +10,7 @@
             serverUrl: "${grailsApplication.config.grails.serverURL}",
             organisationSaveUrl: "${createLink(action:'ajaxUpdate')}",
             organisationViewUrl: "${createLink(action:'index')}",
-            documentUpdateUrl: "${createLink(controller:"proxy", action:"documentUpdate")}",
+            documentUpdateUrl: "${createLink(controller:"document", action:"documentUpdate")}",
             returnTo: "${params.returnTo}"
             };
     </r:script>
@@ -18,7 +18,7 @@
 
 </head>
 <body>
-<div class="container-fluid">
+<div class="${containerType}">
     <ul class="breadcrumb">
         <li>
             <g:link controller="home">Home</g:link> <span class="divider">/</span>
@@ -65,6 +65,9 @@
                             url = fcConfig.organisationViewUrl+'/'+orgId;
                         }
                         window.location.href = url;
+                    },
+                    function(data) {
+                        bootbox.alert('<span class="label label-important">Error</span><p>'+data.detail+'</p>');
                     }
                 );
 

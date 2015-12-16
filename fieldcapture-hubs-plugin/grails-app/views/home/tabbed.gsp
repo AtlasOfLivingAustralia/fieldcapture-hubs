@@ -18,7 +18,7 @@
     <r:require modules="knockout,mapWithFeatures,jquery_bootstrap_datatable,js_iso8601"/>
 </head>
 <body>
-<div id="wrapper" class="container-fluid">
+<div id="wrapper" class="${containerType}">
     <div class="row-fluid large-space-after hide">
         <div class="span12" id="heading">
             <h1 class="pull-left">Field Capture</h1>

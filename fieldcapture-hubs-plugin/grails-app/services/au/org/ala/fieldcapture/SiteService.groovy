@@ -105,11 +105,6 @@ class SiteService {
     def getRaw(id) {
         def site = get(id, [raw:'true'])
         if (!site || site.error) return [:]
-
-        if (site.shapePid && !(site.shapePid instanceof JSONArray)) {
-            log.debug "converting to array"
-            site.shapePid = [site.shapePid] as JSONArray
-        }
         def documents = documentService.getDocumentsForSite(site.siteId).resp?.documents?:[]
         [site: site, documents:documents as JSON, meta: metaModel()]
     }

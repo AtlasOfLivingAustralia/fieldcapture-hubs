@@ -39,7 +39,7 @@
             output: "editorOutput",
             button_bar: "editor-button-bar",
             preview: "",
-            helpLink: "${request.contextPath}/static/wmd/markdownhelp.html"
+            helpLink: "${g.resource(dir:"wmd", file:"markdownhelp.html", plugin:'fieldcapture-plugin')}"
         });
 
         self.title = ko.observable();

@@ -23,7 +23,7 @@
   <r:require modules="knockout,mapWithFeatures,amplify"/>
 </head>
 <body>
-    <div class="container-fluid">
+    <div class="${containerType}">
         <h1>Add sites to <a href="${params.returnTo}">${project.name}</a></h1>
 
         <div class="row-fluid">
@@ -98,7 +98,7 @@
         </div>
 
         <g:if env="development">
-        <div class="container-fluid">
+        <div class="${containerType}">
             <div class="expandable-debug">
                 <hr />
                 <h3>Debug</h3>

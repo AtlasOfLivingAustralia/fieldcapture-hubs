@@ -345,11 +345,14 @@ class WebService {
 
             response.success = {resp, message ->
                 result.status = resp.status
+                result.statusCode = resp.status
                 result.content = message
+                result.resp = message
             }
 
             response.failure = {resp ->
                 result.status = resp.status
+                result.statusCode = resp.status
                 result.error = "Error POSTing to ${url}"
             }
         }

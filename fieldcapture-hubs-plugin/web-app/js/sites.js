@@ -881,6 +881,9 @@ var SitesViewModel =  function(sites, map, mapFeatures, isUserEditor) {
     this.uploadShapefile = function () {
         document.location.href = fcConfig.siteUploadUrl;
     };
+    this.downloadShapefile = function() {
+        window.open(fcConfig.shapefileDownloadUrl, '_blank');
+    };
     self.triggerGeocoding = function () {
         ko.utils.arrayForEach(self.sites, function (site) {
             map.getAddressById(site.name(), site.setAddress);

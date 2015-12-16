@@ -49,7 +49,7 @@
   <r:require modules="knockout, jqueryValidationEngine, amplify, drawmap, projects"/>
 </head>
 <body>
-    <div class="container-fluid validationEngineContainer" id="validation-container">
+    <div class="${containerType} validationEngineContainer" id="validation-container">
         <ul class="breadcrumb">
             <li><g:link controller="home">Home</g:link> <span class="divider">/</span></li>
             <li>Sites<span class="divider">/</span></li>
@@ -78,7 +78,7 @@
         </bs:form>
     </div>
     <g:if env="development">
-    <div class="container-fluid">
+    <div class="${containerType}">
         <div class="expandable-debug">
             <hr />
             <h3>Debug</h3>

@@ -63,66 +63,6 @@ class ProxyController {
     }
 
     /**
-     * Proxies to the ecodata document controller.
-     * @param id the id of the document to update (if not supplied, a create operation will be assumed).
-     * @return the result of the update.
-     */
-    def documentUpdate(String id) {
-
-        def url = grailsApplication.config.ecodata.baseUrl + "document" + (id ? "/" + id : '')
-        if (request.respondsTo('getFile')) {
-            def f = request.getFile('files')
-            def originalFilename = f.getOriginalFilename()
-            if(originalFilename){
-                def extension = FilenameUtils.getExtension(originalFilename)?.toLowerCase()
-                if (extension && !grailsApplication.config.upload.extensions.blacklist.contains(extension)){
-                    def result =  webService.postMultipart(url, [document:params.document], f).content as JSON
-
-                    // This is returned to the browswer as a text response due to workaround the warning
-                    // displayed by IE8/9 when JSON is returned from an iframe submit.
-                    response.setContentType('text/plain;charset=UTF8')
-                    render result.toString();
-                } else {
-                    response.setStatus(400)
-                    //flag error for extension
-                    def error = [error: "Files with the extension '.${extension}' are not permitted.",
-                    statusCode: "400",
-                    detail: "Files with the extension ${extension} are not permitted."] as JSON
-                    response.setContentType('text/plain;charset=UTF8')
-                    render error.toString()
-                }
-            } else {
-                //flag error for extension
-                response.setStatus(400)
-                def error = [error: "Unable to retrieve the file name.",
-                statusCode: "400",
-                detail: "Unable to retrieve the file name."] as JSON
-                response.setContentType('text/plain;charset=UTF8')
-                render error.toString()
-            }
-        } else {
-            // This is returned to the browswer as a text response due to workaround the warning
-            // displayed by IE8/9 when JSON is returned from an iframe submit.
-            def result = webService.doPost(url, JSON.parse(params.document)) as JSON;
-            response.setContentType('text/plain;charset=UTF8')
-
-            render result.toString()
-        }
-    }
-
-    /**
-     * Proxies to the eco data document controller to delete the document with the supplied id.
-     * @param id the id of the document to delete.
-     * @return the result of the deletion.
-     */
-    def deleteDocument(String id) {
-        println 'deleting doc with id:'+id
-        def url = grailsApplication.config.ecodata.baseUrl + "document/" + id
-        def responseCode = webService.doDelete(url)
-        render status: responseCode
-    }
-
-    /**
      * Returns an excel template that can be used to populate a table of data in an output form.
      */
     def excelOutputTemplate() {

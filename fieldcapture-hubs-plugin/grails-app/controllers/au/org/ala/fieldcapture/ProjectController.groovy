@@ -37,6 +37,7 @@ class ProjectController {
             }
             def programs = projectService.programsModel()
             def activities = activityService.activitiesForProject(id)
+            project.activities = activities
             def content = projectContent(project, user, programs)
 
             def model = [project: project,
@@ -84,7 +85,7 @@ class ProjectController {
 
         [about:[label:'About', template:'aboutCitizenScienceProject', visible: true, default: true, type:'tab', projectSite:project.projectSite],
          news:[label:'News', visible: true, type:'tab'],
-         documents:[label:'Documents', template:'/shared/listDocuments', useExistingModel: true, editable:user?.isEditor,  visible: !project.isExternal, imageUrl:resource(dir:'/images/filetypes'), containerId:'overviewDocumentList', type:'tab'],
+         documents:[label:'Resources', template:'/shared/listDocuments', useExistingModel: true, editable:false, filterBy: 'all', visible: !project.isExternal, imageUrl:resource(dir:'/images'), containerId:'overviewDocumentList', type:'tab'],
          activities:[label:'Surveys', visible:!project.isExternal, template:'/projectActivity/list', showSites:true, site:project.sites, wordForActivity:'Survey', type:'tab'],
          data:[label:'Data', visible:!project.isExternal, template:'/projectActivity/data', showSites:true, site:project.sites, wordForActivity:'Data', type:'tab'],
          site:[label:'Location', visible: !project.isExternal, stopBinding:true, wordForSite:'Location', template:'/site/sitesList', editable:user?.isEditor == true, type:'tab'],
@@ -93,6 +94,7 @@ class ProjectController {
 
 
     protected Map worksProjectContent(project, user) {
+
         [overview:[label:'Overview', visible: true, default: true, type:'tab', projectSite:project.projectSite],
          documents:[label:'Documents', visible: !project.isExternal, type:'tab'],
          activities:[label:'Activities', visible:!project.isExternal, disabled:!user?.hasViewAccess, wordForActivity:"Activity",type:'tab'],

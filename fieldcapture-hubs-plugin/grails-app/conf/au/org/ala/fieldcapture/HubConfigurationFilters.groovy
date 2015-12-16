@@ -2,11 +2,18 @@ package au.org.ala.fieldcapture
 
 class HubConfigurationFilters {
 
-    def settingService
+    SettingService settingService
+    UserService userService
 
     def filters = {
         all(controller: '*', action: '*') {
             before = {
+                if (userService.getCurrentUserId()) {
+                    request.containerType = 'container-fluid'
+                }
+                else {
+                    request.containerType = 'container' // Default to fixed width for most pages.
+                }
                 settingService.loadHubConfig(params.hub)
             }
             after = { Map model ->

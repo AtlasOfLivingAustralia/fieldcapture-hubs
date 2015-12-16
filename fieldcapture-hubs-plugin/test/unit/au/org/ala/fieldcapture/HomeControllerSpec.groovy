@@ -30,9 +30,10 @@ class HomeControllerSpec extends Specification {
         SettingService.setHubConfig(settings)
 
         when:
-        def model = controller.index()
+        controller.index()
 
         then:
+        view == '/home/index'
         model.containsKey('mapFacets')
         model.containsKey('results')
         model.containsKey('geographicFacets')

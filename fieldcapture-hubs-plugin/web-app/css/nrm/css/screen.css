@@ -196,14 +196,14 @@ ul.horizontal li {
 }
 
 @media (max-width: 980px) {
-    #body-wrapper {
-        margin-left: -20px;
-        margin-right: -20px;
-    }
-    #body-wrapper > #header > div {
-        /*margin-left: 20px;*/
-        /*margin-right: 20px;*/
-    }
+    /*#body-wrapper {*/
+        /*margin-left: -20px;*/
+        /*margin-right: -20px;*/
+    /*}*/
+    /*#body-wrapper > #header > div {*/
+        /*/!*margin-left: 20px;*!/*/
+        /*/!*margin-right: 20px;*!/*/
+    /*}*/
 
     #header, #content, #footer-wrapper, #dcNav > div {
         margin-left: 20px;

@@ -8,7 +8,7 @@
 </head>
 
 <body>
-<div class="container-fluid">
+<div class="${containerType}">
 <div class="row-fluid">
     <h1>Page not found</h1>
 </div>

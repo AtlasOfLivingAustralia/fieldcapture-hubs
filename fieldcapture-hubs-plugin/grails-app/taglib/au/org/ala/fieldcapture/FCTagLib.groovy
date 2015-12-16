@@ -204,29 +204,35 @@ class FCTagLib {
 
         def navbarConfig = [
                 home:[
-                        icon:"icon-home",
+                        //icon:"icon-home",
                         link:createLink(controller: 'home'),
                         cssClass:'visible-desktop',
                         label:'Home'
                 ],
+                projectExplorer:[
+                        //icon:"icon-search",
+                        link:createLink(controller: 'home', action:'projectExplorer'),
+                        cssClass:'visible-desktop',
+                        label:'Project Explorer'
+                ],
                 about:[
-                        icon:"icon-info-sign",
+                        //icon:"icon-info-sign",
                         link:createLink(controller: 'home', action: 'about'),
                         label:'About'
                 ],
                 help:[
-                        icon:"icon-question-sign",
+                        //icon:"icon-question-sign",
                         link:createLink(controller: 'home', action: "help"),
                         label:'Help'
                 ],
                 contacts:[
-                        icon:"icon-envelope",
+                        //icon:"icon-envelope",
                         link:createLink(controller: 'home', action: 'contacts'),
                         label:'Contacts'
                 ]
         ]
 
-        def navDefaults = ['home', 'about', 'help', 'contacts']
+        def navDefaults = ['home', 'projectExplorer', 'about', 'help', 'contacts']
         def navItems = attrs.items ?: navDefaults
 
         def mb = new MarkupBuilder(out)
@@ -429,10 +435,10 @@ class FCTagLib {
             output = "<a id='logout-btn' href='${logoutUrl}" +
                     "?casUrl=${casLogoutUrl}" +
                     "&appUrl=${logoutReturnToUrl}' " +
-                    "class='${cssClass}'><i class='icon-off ${(cssClass.contains("btn-login")) ? "icon-white" : ""}'></i> Logout</a>"
+                    "class='${cssClass}'><i class=\"fa fa-sign-in\"></i> Logout</a>"
         } else {
             // currently logged out
-            output =  "<a href='${casLoginUrl}?service=${loginReturnToUrl}' class='${cssClass}'><span><i class='icon-off ${(cssClass.contains("btn-login")) ? "icon-white" : ""}'></i> Log in</span></a>"
+            output =  "<a href='${casLoginUrl}?service=${loginReturnToUrl}' class='${cssClass}'><span><i class=\"fa fa-sign-in\"></i> Log in</span></a>"
         }
         out << output
     }
@@ -532,6 +538,53 @@ class FCTagLib {
             if (memberProjects.size() + starredProjects.size() > maxItems) {
                 maxItemsLink()
             }
+        } else {
+            mb.div { mkp.yield("Error: User not found") }
+        }
+    }
+
+    /**
+     * Build HTML for drop down menu "My Organisations"
+     */
+    def userOrganisationList = { attrs ->
+        def user = userService.user
+        def maxItems = 10 // total for both list combined
+        def mb = new MarkupBuilder(out)
+        // common code as closures
+        def maxItemsLink = {
+            mb.p {
+                a(href: g.createLink(controller: "user"), "[showing top ${maxItems} - see full list]")
+            }
+        }
+        def listItem = { org ->
+            mb.li {
+                span {
+                    a(href: g.createLink(controller: 'organisation', id: org.organisationId), org.name)
+                }
+            }
+        }
+
+        if (user) {
+            List memberOrgs = userService.getOrganisationsForUserId(user.userId)
+            mb.ul {
+                memberOrgs.eachWithIndex { org, i ->
+                    if (i < maxItems) {
+                        if (org && org.organisation){
+                            listItem(org.organisation)
+                        }
+                    }
+                }
+            }
+            if (memberOrgs.size() >= maxItems) {
+                maxItemsLink()
+                return // don't show starred projects as we've exceeded limit
+            }
+            if (memberOrgs.size() == 0) {
+                mb.span("[You aren't a member of any organisations]")
+                mb.hr()
+                mb.a(href:g.createLink(controller:'organisation', action:'list'), "Find your organisation here")
+            }
+
         } else {
             mb.div { mkp.yield("Error: User not found") }
         }
@@ -649,6 +702,19 @@ class FCTagLib {
         }
     }
 
+    def truncate = { attrs ->
+        String value = attrs.value
+        int maxLength = Integer.parseInt(attrs.maxLength)
+
+        String result = value
+
+        if (value?.length() > maxLength) {
+            result = value.substring(0, maxLength-3) + "..."
+        }
+
+        out << result
+    }
+
     private void renderObject(Object object, MarkupBuilder mb) {
 
         if (object instanceof JSONObject) {
@@ -677,6 +743,13 @@ class FCTagLib {
                 }
             }
 
+        }
+    }
+
+    def attributeSafeValue = { attrs ->
+        String value = attrs.value
+        if (value) {
+            out << value.replaceAll(/[^A-Za-z0-9]/, "")
         }
     }
 

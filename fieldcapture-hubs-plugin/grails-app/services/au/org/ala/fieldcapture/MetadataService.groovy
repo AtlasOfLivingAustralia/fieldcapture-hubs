@@ -51,6 +51,26 @@ class MetadataService {
 
     }
 
+    Map getProgramConfiguration(String programName, String subProgramName = null) {
+        def program = programModel(programName)
+        if (!program) {
+            throw new IllegalArgumentException("No program exists with name ${programName}")
+        }
+        def config = new HashMap(program)
+        config.remove('subprograms')
+
+        if (subProgramName) {
+            def subProgram = program.subprograms?.find{it.name == subProgramName}
+            if (!subProgram) {
+                throw new IllegalArgumentException("No subprogram exists for program ${programName} with name ${subProgramName}")
+            }
+
+            config.putAll(subProgram)
+        }
+
+        config
+    }
+
     def programModel(program) {
         return programsModel().programs.find {it.name == program}
     }

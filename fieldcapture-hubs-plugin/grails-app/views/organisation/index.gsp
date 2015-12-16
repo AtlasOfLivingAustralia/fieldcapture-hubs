@@ -13,8 +13,8 @@
             serverUrl: "${grailsApplication.config.grails.serverURL}",
             viewProjectUrl: "${createLink(controller:'project', action:'index')}",
             updateProjectUrl: "${createLink(controller: 'project', action:'ajaxUpdate')}",
-            documentUpdateUrl: '${g.createLink(controller:"proxy", action:"documentUpdate")}',
-            documentDeleteUrl: '${g.createLink(controller:"proxy", action:"deleteDocument")}',
+            documentUpdateUrl: '${g.createLink(controller:"document", action:"documentUpdate")}',
+            documentDeleteUrl: '${g.createLink(controller:"document", action:"deleteDocument")}',
             organisationDeleteUrl: '${g.createLink(action:"ajaxDelete", id:"${organisation.organisationId}")}',
             organisationEditUrl: '${g.createLink(action:"edit", id:"${organisation.organisationId}")}',
             organisationListUrl: '${g.createLink(action:"list")}',
@@ -31,6 +31,7 @@
             approveReportUrl: '${g.createLink( action:'ajaxApproveReport', id:"${organisation.organisationId}")}',
             rejectReportUrl: '${g.createLink( action:'ajaxRejectReport', id:"${organisation.organisationId}")}',
             returnTo: '${g.createLink(action:'index', id:"${organisation.organisationId}")}',
+            dashboardCategoryUrl: "${g.createLink(controller: 'report', action: 'activityOutputs', params: params)}",
             projects : <fc:modelAsJavascript model="${organisation.projects}"/>
             };
     </r:script>
@@ -49,9 +50,10 @@
 </head>
 <body>
 
+<div class="${containerType}">
     <g:render template="banner" model="${[imageUrl:resource(dir:'/images/filetypes')]}"/>
 
-    <div id="organisationDetails" class="container-fluid" style="display:none;">
+    <div id="organisationDetails" style="display:none;">
 
         <g:render template="/shared/flashScopeMessage"/>
 
@@ -68,6 +70,7 @@
             <r:img width="50px" dir="images" file="loading.gif" alt="loading icon"/>
         </div>
     </div>
+</div>
 
 <g:render template="/shared/declaration"/>
 

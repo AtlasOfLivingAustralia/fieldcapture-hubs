@@ -2,7 +2,7 @@ package au.org.ala.fieldcapture
 import grails.converters.JSON
 
 class SearchController {
-    def searchService, webService, speciesService, grailsApplication, commonService
+    def searchService, webService, speciesService, grailsApplication, commonService, documentService, reportService
 
     /**
      * Main search page that takes its input from the search bar in the header
@@ -90,6 +90,21 @@ class SearchController {
         if (resp.status != 200) {
             render view:'/error', model:[error:resp.error]
         }
+    }
+
+    Map findPotentialHomePageImages() {
+        Integer max = params.max as Integer
+        Integer offset = params.offset as Integer
+
+        render reportService.findPotentialHomePageImages(max, offset) as JSON
+    }
+
+    def findHomePageNominatedProjects() {
+        Integer max = params.max as Integer
+        Integer offset = params.offset as Integer
+        def projects = reportService.findHomePageNominatedProjects(max, offset)
+
+        projects
     }
 
 }

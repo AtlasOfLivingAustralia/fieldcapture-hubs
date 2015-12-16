@@ -185,9 +185,9 @@
                return program.name;
             });
             self.transients = {
-                availableFacets:['status','organisationFacet','associatedProgramFacet','associatedSubProgramFacet','mainThemeFacet','stateFacet','nrmFacet','lgaFacet','mvgFacet','ibraFacet','imcra4_pbFacet','otherFacet', 'gerSubRegionFacet','electFacet','cmzFacet','meriPlanAssetFacet', 'partnerOrganisationTypeFacet'],
+                availableFacets:['status','organisationFacet','associatedProgramFacet','associatedSubProgramFacet','mainThemeFacet','stateFacet','nrmFacet','lgaFacet','mvgFacet','ibraFacet','imcra4_pbFacet','otherFacet', 'gerSubRegionFacet','electFacet','cmzFacet','meriPlanAssetFacet', 'partnerOrganisationTypeFacet', 'promoteOnHomepage', 'custom.details.caseStudy'],
                 availableMapFacets:['status', 'organisationFacet','associatedProgramFacet','associatedSubProgramFacet','stateFacet','nrmFacet','lgaFacet','mvgFacet','ibraFacet','imcra4_pbFacet','electFacet', 'cmzFacet'],
-                adminFacets:['electFacet', 'cmzFacet','meriPlanAssetFacet', 'partnerOrganisationTypeFacet'],
+                adminFacets:['electFacet', 'cmzFacet','meriPlanAssetFacet', 'partnerOrganisationTypeFacet', 'promoteOnHomepage', 'custom.details.caseStudy'],
                 programNames:programNames,
                 message:ko.observable(),
                 selectedHub:ko.observable(),
@@ -219,22 +219,22 @@
             }
 
             self.loadSettings = function(settings) {
-               self.id(settings.id);
-               self.skin(settings.skin);
-               self.title(settings.title);
-               self.supportedPrograms(self.orEmptyArray(settings.supportedPrograms));
-               self.availableFacets(self.orEmptyArray(settings.availableFacets));
-               self.adminFacets(self.orEmptyArray(settings.adminFacets));
-               self.availableMapFacets(self.orEmptyArray(settings.availableMapFacets));
-               self.bannerUrl(self.orBlank(settings.bannerUrl));
-               self.logoUrl(self.orBlank(settings.logoUrl));
-               self.homePathPath(self.orBlank(settings.homePagePath));
-
-               if (settings.defaultFacetQuery && settings.defaultFacetQuery instanceof Array) {
-                   $.each(settings.defaultFacetQuery, function(i, obj) {
+                self.id(settings.id);
+                self.skin(settings.skin);
+                self.title(settings.title);
+                self.supportedPrograms(self.orEmptyArray(settings.supportedPrograms));
+                self.availableFacets(self.orEmptyArray(settings.availableFacets));
+                self.adminFacets(self.orEmptyArray(settings.adminFacets));
+                self.availableMapFacets(self.orEmptyArray(settings.availableMapFacets));
+                self.bannerUrl(self.orBlank(settings.bannerUrl));
+                self.logoUrl(self.orBlank(settings.logoUrl));
+                self.homePagePath(self.orBlank(settings.homePagePath));
+                self.defaultFacetQuery([]);
+                if (settings.defaultFacetQuery && settings.defaultFacetQuery instanceof Array) {
+                    $.each(settings.defaultFacetQuery, function(i, obj) {
                        self.defaultFacetQuery.push({query: ko.observable(obj)});
-                   });
-               }
+                    });
+                }
             };
 
             self.transients.selectedHub.subscribe(function(newValue) {

@@ -92,12 +92,34 @@ class ActivityController {
             }
             def model = activityModel(activity, activity.projectId)
 
+            model.putAll(determineValidationDates(model.project))
             model.activityTypes = metadataService.activityTypesList()
             model.hasPhotopointData = activity.documents?.find {it.poiId}
             model
         } else {
             forward(action: 'list', model: [error: 'no such id'])
         }
+    }
+
+    private Map determineValidationDates(Map project) {
+        def model = [:]
+        def lastSubmittedOrApprovedReportEndDate = null
+        project.reports?.each { report ->
+            if (report.publicationStatus == 'published' || report.publicationStatus == 'pendingApproval') {
+                if (report.toDate > lastSubmittedOrApprovedReportEndDate) {
+                    lastSubmittedOrApprovedReportEndDate = report.toDate
+                }
+            }
+        }
+        if (lastSubmittedOrApprovedReportEndDate) {
+            model.earliestEndDate = DateUtils.displayFormat(DateUtils.parse(lastSubmittedOrApprovedReportEndDate).plusDays(1))
+        } else {
+            model.earliestEndDate = DateUtils.isoToDisplayFormat(project.plannedStartDate)
+        }
+        model.lastSubmittedOrApprovedReportEndDate = lastSubmittedOrApprovedReportEndDate
+        model.earliestStartDate = DateUtils.isoToDisplayFormat(project.plannedStartDate)
+        model.latestEndDate = DateUtils.isoToDisplayFormat(project.plannedEndDate)
+        model
     }
 
     /**
@@ -211,6 +233,8 @@ class ActivityController {
             model.sites = siteService.list().collect({[name:it.name,siteId:it.siteId]})
             model.projects = projectService.list().collect({[name:it.name,projectId:it.projectId]})
         }
+        model.putAll(determineValidationDates(model.project))
+
         model
     }
 

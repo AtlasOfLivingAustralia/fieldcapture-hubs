@@ -41,6 +41,7 @@ OrganisationViewModel = function (props) {
         return orgTypesMap[self.orgType()] || "Unspecified";
     });
     self.name = ko.observable(props.name);
+    self.acronym = ko.observable(props.acronym);
     self.description = ko.observable(props.description).extend({markdown:true});
     self.url = ko.observable(props.url);
     self.newsAndEvents = ko.observable(props.newsAndEvents).extend({markdown:true});;
@@ -225,6 +226,46 @@ OrganisationSelectionViewModel = function(organisations, userOrganisations, init
     }
 
 };
+
+var ServerSideOrganisationsViewModel = function() {
+    var self = this;
+    self.pagination = new PaginationViewModel({}, self);
+    self.organisations = ko.observableArray([]);
+    self.searchTerm = ko.observable('').extend({throttle:500});
+    self.searchTerm.subscribe(function(term) {
+       self.refreshPage(0);
+    });
+    self.refreshPage = function(offset) {
+        var url = fcConfig.organisationSearchUrl;
+        var params = {offset:offset, max:self.pagination.resultsPerPage()};
+        if (self.searchTerm()) {
+            params.searchTerm = self.searchTerm();
+        }
+        else {
+            params.sort = "nameSort"; // Sort by name unless there is a search term, in which case we sort by relevence.
+        }
+        $.get(url, params, function(data) {
+            if (data.hits) {
+                var orgs = data.hits.hits || [];
+                self.organisations($.map(orgs, function(hit) {
+                    if (hit._source.logoUrl) {
+                        hit._source.documents = [{
+                            role:'logo',
+                            url: hit._source.logoUrl
+                        }]
+                    }
+                    return new OrganisationViewModel(hit._source);
+                }));
+            }
+            if (offset == 0) {
+                self.pagination.loadPagination(0, data.hits.total);
+            }
+
+        });
+    };
+    self.refreshPage(0);
+};
+
 
 var OrganisationsViewModel = function(organisations, userOrgIds) {
     var self = this;

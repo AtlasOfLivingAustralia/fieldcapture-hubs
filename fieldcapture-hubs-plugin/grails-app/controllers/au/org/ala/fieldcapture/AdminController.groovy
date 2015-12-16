@@ -179,6 +179,17 @@ class AdminController {
     }
 
     @PreAuthorise(accessLevel = 'siteAdmin', redirectController = "admin")
+    def editHelpLinks() {
+        def helpLinks = documentService.findAllHelpResources()?:[]
+
+        // The current design supports exactly 5 help documents.
+        while (helpLinks.size() < 5) {
+            helpLinks << [:]
+        }
+        [helpLinks:helpLinks]
+    }
+
+    @PreAuthorise(accessLevel = 'siteAdmin', redirectController = "admin")
     def editSettingText(String id) {
         def content
         def layout = params.layout?:"adminLayout"

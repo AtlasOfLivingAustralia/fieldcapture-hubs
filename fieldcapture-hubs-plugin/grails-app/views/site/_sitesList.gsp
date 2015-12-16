@@ -1,4 +1,3 @@
-<script type="text/javascript" src="${grailsApplication.config.google.maps.url}"></script>
 <g:set var="wordForSite" value="${wordForSite?:'site'}"/>
 <div id="sitesList">
     <div data-bind="visible: sites.length == 0">
@@ -14,7 +13,8 @@
 
     <div class="row-fluid"  data-bind="visible: sites.length > 0">
         <div class="span5 well list-box">
-            <div class="span9">
+            <div class="row-fluid">
+                <div class="span7">
                 <div class="control-group">
                     <div class="input-append">
                         <input type="text" class="filterinput input-medium"
@@ -63,29 +63,22 @@
                 </div>
 
             </div>
-        %{--<div class="span5" id="sites-scroller">
-           <ul class="unstyled inline" data-bind="foreach: sites">
-               <li class="siteInstance" data-bind="event: {mouseover: $root.highlight, mouseout: $root.unhighlight}">
-                   <a data-bind="text: name, click: $root.openSite"></a>
-                   <button data-bind="click: $root.removeSite" type="button" class="close" title="delete">&times;</button>
-               </li>
-           </ul>
-       </div>--}%
 
-            <g:if test="${editable}">
+                <g:if test="${editable}">
 
-                <div class="row-fluid">
-                    <div class="span3">
-                        <div class="btn-group btn-group-vertical pull-right">
-                            <a data-bind="click: $root.addSite" type="button" class="btn ">Add new ${wordForSite}</a>
-                            <a data-bind="click: $root.addExistingSite" type="button" class="btn">Add existing ${wordForSite}</a>
-                            <a data-bind="click: $root.uploadShapefile" type="button" class="btn">Upload ${wordForSite}s from shapefile</a>
-                            <a href="${g.createLink(action:'downloadShapefile', id:project.projectId)}" target="_blank" type="button" class="btn">Download ${wordForSite}s as shapefile</a>
-                            <a data-bind="click: $root.removeAllSites" type="button" class="btn">Delete all ${wordForSite}s</a>
-                        </div>
+                    <div class="span5">
+
+                            <div class="btn-group btn-group-vertical">
+                                <a data-bind="click: $root.addSite" type="button" class="btn ">Add new ${wordForSite}</a>
+                                <a data-bind="click: $root.addExistingSite" type="button" class="btn">Add existing ${wordForSite}</a>
+                                <a data-bind="click: $root.uploadShapefile" type="button" class="btn">Upload ${wordForSite}s from shapefile</a>
+                                <a data-bind="click: $root.downloadShapefile" type="button" class="btn">Download ${wordForSite}s as shapefile</a>
+                                <a data-bind="click: $root.removeAllSites" type="button" class="btn">Delete all ${wordForSite}s</a>
+                            </div>
+
                     </div>
-                </div>
-            </g:if>
+                </g:if>
+            </div>
         </div>
         <div class="span7">
             <div id="map" style="width:100%"></div>

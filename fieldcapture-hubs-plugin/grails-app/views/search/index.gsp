@@ -13,7 +13,7 @@
     <title>Search Results | Field Capture</title>
 </head>
 <body>
-<div id="wrapper" class="container-fluid">
+<div id="wrapper" class="${containerType}">
     <div class="row-fluid">
         <div class="span12" id="header">
             <h1 class="pull-left">Search Results</h1>
@@ -153,6 +153,9 @@
                                     </g:if>
                                     <g:elseif test="${hit.className=~/Activity/}">
                                         <g:link controller="activity" id="${hit.activityId}">${hit.name?:hit.type}</g:link>
+                                    </g:elseif>
+                                    <g:elseif test="${hit.className=~/Organisation/}">
+                                        <g:link controller="organisation" id="${hit.organisationId}">${hit.name?:hit.type}</g:link>
                                     </g:elseif>
                                     <g:else>
                                         ${hit.type}
