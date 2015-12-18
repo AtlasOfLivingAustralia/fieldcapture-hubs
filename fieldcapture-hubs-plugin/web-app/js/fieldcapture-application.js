@@ -512,6 +512,11 @@ function Documents() {
         return list.indexOf(value) > -1;
     }
 
+    self.selectDocument = function(data) {
+        self.selectedDocument(data);
+        return true;
+    };
+
     self.previewTemplate = ko.pureComputed(function() {
         var selectedDoc = self.selectedDocument();
 
@@ -544,18 +549,18 @@ function Documents() {
                 val = fcConfig.pdfViewer + '?file=' + encodeURIComponent(selectedDoc.url);
             } else if (listContains(contentTypes.convert, contentType)) {
 
-              // jq promises are fundamentally broken, so...
-              val = $.Deferred(function(dfd) {
-                $.get(fcConfig.pdfgenUrl, {"file": selectedDoc.url }, $.noop, "json")
-                  .promise()
-                  .done(function(data) {
-                    dfd.resolve(fcConfig.pdfViewer + '?file=' + encodeURIComponent(data.location));
-                  })
-                  .fail(function(jqXHR, textStatus, errorThrown) {
-                    console.warn('get pdf failed', jqXHR, textStatus, errorThrown);
-                    dfd.resolve(fcConfig.errorViewer || '');
-                  })
-              }).promise();
+                // jq promises are fundamentally broken, so...
+                val = $.Deferred(function(dfd) {
+                    $.get(fcConfig.pdfgenUrl, {"file": selectedDoc.url }, $.noop, "json")
+                        .promise()
+                        .done(function(data) {
+                            dfd.resolve(fcConfig.pdfViewer + '?file=' + encodeURIComponent(data.location));
+                        })
+                        .fail(function(jqXHR, textStatus, errorThrown) {
+                            console.warn('get pdf failed', jqXHR, textStatus, errorThrown);
+                            dfd.resolve(fcConfig.errorViewer || '');
+                        })
+                }).promise();
             } else if (listContains(contentTypes.image, contentType)) {
                 val = fcConfig.imgViewer + '?file=' + encodeURIComponent(selectedDoc.url);
             } else if (listContains(contentTypes.video, contentType)) {
@@ -578,6 +583,14 @@ function Documents() {
         return ko.utils.arrayFilter(self.documents(), function(doc) {
             return (doc[field.fun]() || '').toLowerCase().indexOf(lcFilter) !== -1;
         });
+    });
+
+    self.docViewerClass = ko.pureComputed(function() {
+        return self.selectedDocument() ? 'span6': 'hidden';
+    });
+
+    self.docListClass = ko.pureComputed(function() {
+        return self.selectedDocument() ? 'span6': 'span12';
     });
 
     self.showListItem = function(element, index, data) {
@@ -635,7 +648,7 @@ function Documents() {
             name: role.name,
             role: role.role,
             remove: function() {
-              self.links.remove(link);
+                self.links.remove(link);
             },
             logo: function(dir) {
                 return dir + "/" + role.role.toLowerCase() + ".png";
@@ -654,8 +667,8 @@ function Documents() {
     self.transients.mobileAppsUnspecified = ko.pureComputed(function() {
         var apps = [], links = self.links();
         for (var i = 0; i < mobileAppRoles.length; i++)
-        if (!self.findLinkByRole(links, mobileAppRoles[i].role))
-            apps.push(mobileAppRoles[i]);
+            if (!self.findLinkByRole(links, mobileAppRoles[i].role))
+                apps.push(mobileAppRoles[i]);
         return apps;
     });
     self.transients.mobileAppToAdd = ko.observable();
@@ -748,8 +761,8 @@ function Documents() {
     };
 
     self.ignore = ['documents', 'links', 'logoUrl', 'bannerUrl', 'mainImageUrl', 'primaryImages', 'embeddedVideos',
-      'ignore', 'transients', 'documentFilter', 'documentFilterFieldOptions', 'documentFilterField', 'previewTemplate',
-      'selectedDocumentFrameUrl', 'filteredDocuments'];
+        'ignore', 'transients', 'documentFilter', 'documentFilterFieldOptions', 'documentFilterField',
+        'previewTemplate', 'selectedDocumentFrameUrl', 'filteredDocuments','docViewerClass','docListClass'];
 
 }
 

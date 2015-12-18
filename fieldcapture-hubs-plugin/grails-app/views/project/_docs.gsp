@@ -1,9 +1,8 @@
 <div class="well" >
+    <h4>Project documents</h4>
     <div class="row-fluid text-center">
-        <div class="span2 ">
-            <b>Project documents:</b>
-        </div>
-        <div class="span10 text-left">
+
+        <div class="span12 text-left">
             <!-- <div id="documents" data-bind="css: { span3: primaryImages() != null, span7: primaryImages() == null }"> -->
             <div id="documents">
                 <div data-bind="visible:documents().length == 0">
