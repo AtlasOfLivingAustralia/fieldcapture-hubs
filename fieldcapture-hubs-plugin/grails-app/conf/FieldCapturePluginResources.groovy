@@ -306,4 +306,8 @@ modules = {
     'font-awesome-44' {
         resource url: 'vendor/font-awesome/4.4.0/css/font-awesome.min.css', attrs:[media:'all'], plugin: 'fieldcapture-plugin'
     }
+
+    admin {
+        resource url: 'js/activityModel.js', plugin: 'fieldcapture-plugin'
+    }
 }
