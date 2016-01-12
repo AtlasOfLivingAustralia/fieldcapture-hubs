@@ -363,6 +363,12 @@
                     }
                 });
 
+                // reset the progress to planned if the activity type is changed.
+                if (self.transients.typeWarning()) {
+                    jsData.progress = 'planned';
+                }
+
+
                 return jsData;
             };
             self.modelAsJSON = function () {
