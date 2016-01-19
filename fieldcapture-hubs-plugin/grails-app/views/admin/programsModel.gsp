@@ -72,6 +72,12 @@
                 </div>
                 <div>Start Date <fc:datePicker class="input-small" targetField="startDate.date" name="startDate"/></div>
                 <div>End Date <fc:datePicker class="input-small" targetField="endDate.date" name="endDate"/></div>
+                <div class="optional-project-content">
+                    <label>Optional project content</label>
+                    <ul class="unstyled" data-bind="foreach:{data: $root.transients.optionalProjectContent}">
+                        <li class="text-left"><input type="checkbox" name="optionalProjectContent" data-bind="value:$data, checked:$parent.optionalProjectContent"> <span data-bind="text:$data"></span></li>
+                    </ul>
+                </div>
                 <div><label data-bind="click:toggleActivities">Activities <span data-bind="text:'(' + activities().length + ' selected)'"></span></label></div>
                 <div class="program-activities" data-bind="visible:transients.showActivities">
                     <div data-bind="foreach:{data: $root.transients.activityTypes}">
