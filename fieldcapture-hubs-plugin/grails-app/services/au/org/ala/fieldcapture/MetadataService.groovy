@@ -148,6 +148,33 @@ class MetadataService {
         })
     }
 
+    boolean isOptionalContent(String contentName, String program, String subProgram = '') {
+        Map config = mergeProgramConfig(program, subProgram)
+        return contentName in (config.optionalProjectContent?:[])
+    }
+
+    /**
+     * Returns a Map containing config information from a program and sub-program.  If the same configuration
+     * is specified in both the program and sub-program, the sub-program value will override it.
+     * @param program the program name
+     * @param subProgram the sub-program name
+     * @return a single Map containing data from the program and sub-program
+     */
+    private Map mergeProgramConfig(String program, String subProgram = '') {
+        Map programModel = programModel(program)
+        Map config = new HashMap(programModel)
+        if (subProgram) {
+            Map subProgramModel = programModel.subprograms?.find{it.name == subProgram}
+            subProgramModel?.each { k, v ->
+                if (v) {
+                    config[k] = v
+                }
+            }
+        }
+        config.remove('name')
+        config
+    }
+
     /**
      * Returns a Map with key: activityName and value: <list of score definitions for the outputs that make up the activity>
      * Used to support the nomination of project output targets for various activity types.

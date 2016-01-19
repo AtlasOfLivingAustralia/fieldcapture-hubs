@@ -33,7 +33,7 @@ var SubprogramModel = function (subProgram, model) {
     self.name = ko.observable(subProgram.name);
     self.startDate = ko.observable(subProgram.startDate).extend({simpleDate:false});
     self.endDate = ko.observable(subProgram.endDate).extend({simpleDate:false});
-
+    self.optionalProjectContent = ko.observableArray(subProgram.optionalProjectContent || []);
     self.themes = ko.observableArray($.map(subProgram.themes, function (obj) {
         return new ThemeModel(obj, model);
     }));
