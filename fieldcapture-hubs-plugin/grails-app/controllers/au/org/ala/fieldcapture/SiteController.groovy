@@ -12,7 +12,7 @@ class SiteController {
 
     def search = {
         params.fq = "docType:site"
-        def results = searchService.fulltextSearch(params)
+        def results = searchService.fulltextSearch(params, false)
         render results as JSON
     }
 
