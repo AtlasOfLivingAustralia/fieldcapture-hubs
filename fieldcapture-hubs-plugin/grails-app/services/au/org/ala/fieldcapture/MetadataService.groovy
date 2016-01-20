@@ -132,16 +132,47 @@ class MetadataService {
         return activitiesModel().activities.find({it.name == type})?.template
     }
 
-    def activityTypesList(program = '') {
-        cacheService.get('activitiesSelectList'+program, {
+    def activityTypesList(program = '', subprogram='') {
+        cacheService.get('activitiesSelectList'+program+'-'+subprogram, {
             String url = grailsApplication.config.ecodata.baseUrl + 'metadata/activitiesList'
             if (program) {
-                url += 'program='+program.encodeAsURL()
+                url += '?program='+program.encodeAsURL()
+                if (subprogram) {
+                    url += '&subprogram='+subprogram.encodeAsURL()
+                }
             }
+
             def activityTypes = webService.getJson(url)
             activityTypes.collect {key, value -> [name:key, list:value]}.sort{it.name}
 
         })
+    }
+
+    boolean isOptionalContent(String contentName, String program, String subProgram = '') {
+        Map config = mergeProgramConfig(program, subProgram)
+        return contentName in (config.optionalProjectContent?:[])
+    }
+
+    /**
+     * Returns a Map containing config information from a program and sub-program.  If the same configuration
+     * is specified in both the program and sub-program, the sub-program value will override it.
+     * @param program the program name
+     * @param subProgram the sub-program name
+     * @return a single Map containing data from the program and sub-program
+     */
+    private Map mergeProgramConfig(String program, String subProgram = '') {
+        Map programModel = programModel(program)
+        Map config = new HashMap(programModel)
+        if (subProgram) {
+            Map subProgramModel = programModel.subprograms?.find{it.name == subProgram}
+            subProgramModel?.each { k, v ->
+                if (v) {
+                    config[k] = v
+                }
+            }
+        }
+        config.remove('name')
+        config
     }
 
     /**

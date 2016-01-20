@@ -631,8 +631,8 @@ class ModelTagLib {
         out << INDENT*4 << "<script id=\"${templateName}\" type=\"text/html\"><tr>\n"
         model.columns.eachWithIndex { col, i ->
             col.type = col.type ?: getType(attrs, col.source, model.source)
-            //log.debug "col = ${col}"
-            out << INDENT*5 << "<td>" << dataTag(attrs, col, '', edit) << "</td>" << "\n"
+            def colEdit = edit && !col.readOnly
+            out << INDENT*5 << "<td>" << dataTag(attrs, col, '', colEdit) << "</td>" << "\n"
         }
         if (model.editableRows) {
                 out << INDENT*5 << "<td>\n"
