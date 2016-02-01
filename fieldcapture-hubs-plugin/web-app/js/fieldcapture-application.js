@@ -366,7 +366,10 @@ function autoSaveModel(viewModel, saveUrl, options) {
                 if (config.blockUIOnSave) {
                     $.unblockUI();
                 }
-                bootbox.alert($(config.timeoutMessageSelector).html());
+                var message = $(config.timeoutMessageSelector).html();
+                if (message) {
+                    bootbox.alert(message);
+                }
                 if (typeof errorCallback === 'function') {
                     errorCallback(data);
                 }
@@ -990,7 +993,10 @@ var EditableBlogEntryViewModel = function(blogEntry, options) {
 
     self.save = function() {
         if ($(config.validationElementSelector).validationEngine('validate')) {
-            self.saveWithErrorDetection(function() {document.location.href = config.returnTo});
+            self.saveWithErrorDetection(
+                function() {document.location.href = config.returnTo},
+                function(data) {bootbox.alert("Error: "+data.responseText);}
+            );
         }
     };
 
