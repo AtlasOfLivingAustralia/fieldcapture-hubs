@@ -173,8 +173,16 @@ class FCTagLib {
      */
     def iconHelp = { attrs, body ->
         if (!attrs.printable) {
-            def mb = new MarkupBuilder(out)
-            def anchorAttrs = [href:'#', class:'helphover', 'data-original-title':attrs.title, 'data-placement':'top', 'data-content':body()]
+            MarkupBuilder mb = new MarkupBuilder(out)
+            String title = message(code:attrs.titleCode, default: attrs.title)
+            String helpText
+            if (attrs.helpTextCode) {
+                helpText = message(code:attrs.helpTextCode)
+            }
+            else {
+                helpText = body()
+            }
+            Map anchorAttrs = [href:'#', class:'helphover', 'data-original-title':title, 'data-placement':'top', 'data-content':helpText]
             if (attrs.container) {
                 anchorAttrs << ['data-container':attrs.container]
             }
