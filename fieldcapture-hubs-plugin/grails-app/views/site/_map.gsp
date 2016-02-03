@@ -176,8 +176,8 @@
             <fc:textField data-bind="value:geometry().decimalLongitude" data-validation-engine="validate[required,custom[number],min[-180],max[180]]" data-prompt-position="topRight:-150" outerClass="span6" label="Longitude"/>
         </div>
         <div class="row-fluid controls-row">
-            <fc:textField data-bind="value:geometry().uncertainty, enable: hasCoordinate()" outerClass="span4" label="Uncertainty"/>
-            <fc:textField data-bind="value:geometry().precision, enable: hasCoordinate()" outerClass="span4" label="Precision"/>
+            <fc:textField data-bind="value:geometry().uncertainty, enable: hasCoordinate()" outerClass="span4" label="Uncertainty (metres)" data-validation-engine="validate[min[0],custom[integer]]"/>
+            <fc:textField data-bind="value:geometry().precision, enable: hasCoordinate()" outerClass="span4" label="Precision" data-validation-engine="validate[min[0],custom[number]]"/>
             %{-- CG - only supporting WGS84 at the moment --}%
             <fc:textField data-bind="value:geometry().datum, enable: hasCoordinate()" outerClass="span4" label="Datum" placeholder="WGS84" readonly="readonly"/>
         </div>
