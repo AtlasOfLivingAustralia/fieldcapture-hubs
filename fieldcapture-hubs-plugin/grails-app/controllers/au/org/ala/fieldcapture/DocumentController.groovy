@@ -79,8 +79,8 @@ class DocumentController {
             // displayed by IE8/9 when JSON is returned from an iframe submit.
             def result = documentService.updateDocument(JSON.parse(params.document))
             response.setContentType('text/plain;charset=UTF8')
-
-            render (result as JSON).toString()
+            def resultAsText = (result as JSON).toString()
+            render resultAsText
         }
     }
 

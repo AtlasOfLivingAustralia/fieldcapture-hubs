@@ -930,7 +930,7 @@ function CurrencyEditor(args) {
         var width = $(args.container).width();
         var $container = $('<div class="input-append input-prepend" style="width:100%;"></div>');
         $container.append('<span class="add-on">$</span>');
-        var $input = $('<input style="width:100%;" type="text">');
+        var $input = $('<input style="width:100%; font-size:initial;" type="text">');
         $container.append($input);
         $container.append('<span class="add-on">.00</span>');
         $container.appendTo(args.container);

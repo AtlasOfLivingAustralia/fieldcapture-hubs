@@ -36,7 +36,9 @@ class SearchService {
 
     def fulltextSearch(originalParams, boolean applyDefaultFacetQuery = true) {
         def params = originalParams.clone()
-        addDefaultFacetQuery(params)
+        if (applyDefaultFacetQuery) {
+            addDefaultFacetQuery(params)
+        }
         params.offset = params.offset?:0
         params.max = params.max?:10
         params.query = params.query?:"*:*"
