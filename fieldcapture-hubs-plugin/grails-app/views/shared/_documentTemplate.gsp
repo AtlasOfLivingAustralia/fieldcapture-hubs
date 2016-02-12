@@ -7,10 +7,10 @@
         <i class="fa fa-download"></i>
     </a>
     <span>
-        <small class="media-heading" data-bind="text:name"></small>
+        <small class="media-heading" data-bind="text:name() || filename()"></small>
     </span>
     <span class="muted" data-bind="if:$data.attribution">
-        <small data-bind="text:attribution"></small>
+        <br/><small data-bind="text:attribution"></small>
     </span>
 </div>
 </script>
@@ -24,10 +24,10 @@
         <i class="fa fa-download"></i>
     </a>
     <span>
-        <small class="media-heading" data-bind="text:name"></small>
+        <small class="media-heading" data-bind="text:name() || filename()"></small>
     </span>
     <span class="muted" data-bind="if:$data.attribution">
-        <small data-bind="text:attribution"></small>
+        <br/><small data-bind="text:attribution"></small>
     </span>
 </div>
 </script>
@@ -60,10 +60,10 @@
         <i class="fa fa-download"></i>
     </a>
     <a data-bind="attr:{href:url}">
-        <small class="media-heading" data-bind="text:name"></small>
+        <small class="media-heading" data-bind="text:name() || filename()"></small>
     </a>
     <span class="muted" data-bind="if:$data.attribution">
-        <small data-bind="text:attribution"></small>
+        <br/><small data-bind="text:attribution"></small>
     </span>
 </div>
 </script>
@@ -74,10 +74,10 @@
         <i class="fa fa-download"></i>
     </a>
     <a data-bind="attr:{href:url}" target="_blank">
-        <small class="media-heading" data-bind="text:name"></small>
+        <small class="media-heading" data-bind="text:name() || filename()"></small>
     </a>
     <span class="muted" data-bind="if:$data.attribution">
-        <small data-bind="text:attribution"></small>
+        <br/><small data-bind="text:attribution"></small>
     </span>
 </div>
 </script>
