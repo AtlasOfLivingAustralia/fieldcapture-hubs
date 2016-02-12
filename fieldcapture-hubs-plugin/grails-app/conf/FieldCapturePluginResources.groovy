@@ -310,5 +310,6 @@ modules = {
     admin {
         resource url: 'js/activityModel.js', plugin: 'fieldcapture-plugin'
         resource url: 'js/programModel.js', plugin: 'fieldcapture-plugin'
+        resource url: 'js/hubs.js', plugin: 'fieldcapture-plugin'
     }
 }
