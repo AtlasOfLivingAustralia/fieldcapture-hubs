@@ -5,6 +5,15 @@ package au.org.ala.fieldcapture.hub
  */
 class HubSettings extends HashMap {
 
+    public HubSettings() {
+        super()
+    }
+
+    public HubSettings(Map settings) {
+        super()
+        putAll(settings)
+    }
+
     public boolean overridesHomePage() {
         return get('homePagePath') as boolean
     }
