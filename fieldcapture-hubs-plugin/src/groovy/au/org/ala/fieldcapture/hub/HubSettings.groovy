@@ -1,9 +1,11 @@
 package au.org.ala.fieldcapture.hub
 
+import org.codehaus.groovy.grails.web.json.JSONObject
+
 /**
  * The configuration for a hub.
  */
-class HubSettings extends HashMap {
+class HubSettings extends JSONObject {
 
     public HubSettings() {
         super()
