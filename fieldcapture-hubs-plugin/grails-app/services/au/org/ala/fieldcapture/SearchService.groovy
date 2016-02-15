@@ -1,5 +1,8 @@
 package au.org.ala.fieldcapture
+
+import au.org.ala.fieldcapture.hub.HubSettings
 import groovy.json.JsonSlurper
+import org.apache.commons.lang.StringUtils
 
 import javax.annotation.PostConstruct
 /**
@@ -118,7 +121,8 @@ class SearchService {
         params.fsort = "term"
         //params.offset = 0
         params.query = "docType:project"
-        params.facets = params.facets ?: SettingService.getHubConfig().availableFacets.join(',')
+        HubSettings settings = SettingService.getHubConfig()
+        params.facets = params.facets ?: StringUtils.join(settings.availableFacets, ',')
 
         addDefaultFacetQuery(params)
 
