@@ -10,9 +10,11 @@ import org.springframework.web.context.request.RequestAttributes
 class SettingService {
 
     private static def ThreadLocal localHubConfig = new ThreadLocal()
-    private static final String HUB_CONFIG_KEY_SUFFIX = '.hub.configuration'
+    private static final String HUB_LIST_CACHE_KEY = 'hubList'
+    private static final String HUB_CACHE_KEY_SUFFIX = '_hub'
     public static final String HUB_CONFIG_ATTRIBUTE_NAME = 'hubConfig'
     public static final String LAST_ACCESSED_HUB = 'recentHub'
+
 
     public static void setHubConfig(HubSettings hubSettings) {
         localHubConfig.set(hubSettings)
@@ -33,9 +35,9 @@ class SettingService {
     /**
      * Checks if there is a configuration defined for the specified hub.
      */
-    boolean isValidHub(hub) {
-        def result = (getHubSettings(hub) != null)
-        result
+    boolean isValidHub(String hubUrlPath) {
+        List hubs = listHubs()
+        hubs.find{it.urlPath == hubUrlPath}
     }
 
     def loadHubConfig(hub) {
@@ -88,7 +90,7 @@ class SettingService {
         return res?.settingText?:""
     }
 
-    def getJson(key) {
+    private def getJson(key) {
         cacheService.get(key, {
             def settings = get(key)
             return settings ? JSON.parse(settings) : [:]
@@ -127,24 +129,35 @@ class SettingService {
         set(key, (settings as JSON).toString())
     }
 
+    private String hubCacheKey(String prefix) {
+        return prefix+HUB_CACHE_KEY_SUFFIX
+    }
+
     HubSettings getHubSettings(String urlPath) {
 
-        String url = grailsApplication.config.ecodata.baseUrl+'hub/findByUrlPath/'+urlPath
-        Map json = webService.getJson(url)
+        cacheService.get(hubCacheKey(urlPath), {
+            String url = grailsApplication.config.ecodata.baseUrl+'hub/findByUrlPath/'+urlPath
+            Map json = webService.getJson(url)
 
-        json.hubId ? new HubSettings(new HashMap(json)) : null
+            json.hubId ? new HubSettings(new HashMap(json)) : null
+        })
     }
 
     void updateHubSettings(HubSettings settings) {
+        cacheService.clear(HUB_LIST_CACHE_KEY)
+        cacheService.clear(hubCacheKey(settings.urlPath))
 
         String url = grailsApplication.config.ecodata.baseUrl+'hub/'+(settings.hubId?:'')
         webService.doPost(url, settings)
     }
 
     List listHubs() {
-        String url = grailsApplication.config.ecodata.baseUrl+'hub/'
-        Map resp = webService.getJson(url)
-        resp.list
+        cacheService.get(HUB_LIST_CACHE_KEY, {
+            String url = grailsApplication.config.ecodata.baseUrl + 'hub/'
+            Map resp = webService.getJson(url)
+            resp.list ?: []
+        })
     }
+
 
 }
