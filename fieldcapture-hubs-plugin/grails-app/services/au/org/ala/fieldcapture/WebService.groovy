@@ -68,8 +68,9 @@ class WebService {
         def readTimeout = timeout?:defaultTimeout()
         conn.setConnectTimeout(grailsApplication.config.webservice.connectTimeout as int)
         conn.setReadTimeout(readTimeout)
+        conn.setRequestProperty("Authorization", grailsApplication.config.api_key);
         def user = getUserService().getUser()
-        if (includeUserId && user) {
+        if (user) {
             conn.setRequestProperty(grailsApplication.config.app.http.header.userId, user.userId)
         }
         conn
