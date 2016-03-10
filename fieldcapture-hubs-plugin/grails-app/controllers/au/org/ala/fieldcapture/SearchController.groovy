@@ -41,6 +41,7 @@ class SearchController {
         facets.addAll(params.getList("fq"))
         facets << "className:au.org.ala.ecodata.Project"
         params.put("fq", facets)
+        searchService.addDefaultFacetQuery(params)
         def url = grailsApplication.config.ecodata.baseUrl + path +  commonService.buildUrlParamsFromMap(params)
         webService.proxyGetRequest(response, url, true, true)
     }
@@ -61,9 +62,14 @@ class SearchController {
         facets.addAll(params.getList("fq"))
         facets << "className:au.org.ala.ecodata.Project"
         params.put("fq", facets)
-
+        params.put("downloadUrl", g.createLink(controller:'document', action:'downloadProjectDataFile', absolute: true)+'/')
+        params.put("systemEmail", grailsApplication.config.merit.support.email)
+        params.put("senderEmail", grailsApplication.config.merit.support.email)
+        searchService.addDefaultFacetQuery(params)
         def url = grailsApplication.config.ecodata.baseUrl + path +  commonService.buildUrlParamsFromMap(params)
-        webService.proxyGetRequest(response, url, true, true,960000)
+        def response = webService.doPostWithParams(url, [:]) // POST because the URL can get long.
+
+        render response as JSON
     }
 
     @PreAuthorise(accessLevel = 'siteAdmin', redirectController ='home', redirectAction = 'index')
@@ -77,6 +83,7 @@ class SearchController {
             path += ".json"
         }
 
+        searchService.addDefaultFacetQuery(params)
         def url = grailsApplication.config.ecodata.baseUrl + path + commonService.buildUrlParamsFromMap(params)
         webService.proxyGetRequest(response, url, true, true,960000)
     }
@@ -86,6 +93,7 @@ class SearchController {
         params.query = "docType:project"
         def path = "search/downloadShapefile"
 
+        searchService.addDefaultFacetQuery(params)
         def url = grailsApplication.config.ecodata.baseUrl + path + commonService.buildUrlParamsFromMap(params)
         def resp = webService.proxyGetRequest(response, url, true, true,960000)
         if (resp.status != 200) {
