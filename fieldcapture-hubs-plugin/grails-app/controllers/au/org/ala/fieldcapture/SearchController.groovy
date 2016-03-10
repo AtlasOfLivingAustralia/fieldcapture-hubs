@@ -64,9 +64,10 @@ class SearchController {
         params.put("fq", facets)
         params.put("downloadUrl", g.createLink(controller:'document', action:'downloadProjectDataFile', absolute: true)+'/')
         params.put("systemEmail", grailsApplication.config.merit.support.email)
+        params.put("senderEmail", grailsApplication.config.merit.support.email)
         searchService.addDefaultFacetQuery(params)
-        def url = grailsApplication.config.ecodata.baseUrl + path +  commonService.buildUrlParamsFromMap(params)
-        def response = webService.getJson(url)
+        def url = grailsApplication.config.ecodata.baseUrl + path
+        def response = webService.doPostWithParams(url, params)
 
         render response as JSON
     }
