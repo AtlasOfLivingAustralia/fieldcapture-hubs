@@ -63,6 +63,7 @@ class SearchController {
         facets << "className:au.org.ala.ecodata.Project"
         params.put("fq", facets)
         params.put("downloadUrl", g.createLink(controller:'document', action:'downloadProjectDataFile', absolute: true)+'/')
+        params.put("systemEmail", grailsApplication.config.merit.support.email)
         searchService.addDefaultFacetQuery(params)
         def url = grailsApplication.config.ecodata.baseUrl + path +  commonService.buildUrlParamsFromMap(params)
         def response = webService.getJson(url)
