@@ -62,9 +62,12 @@ class SearchController {
         facets.addAll(params.getList("fq"))
         facets << "className:au.org.ala.ecodata.Project"
         params.put("fq", facets)
+        params.put("downloadUrl", g.createLink(controller:'document', action:'downloadProjectDataFile', absolute: true)+'/')
         searchService.addDefaultFacetQuery(params)
         def url = grailsApplication.config.ecodata.baseUrl + path +  commonService.buildUrlParamsFromMap(params)
-        webService.proxyGetRequest(response, url, true, true,960000)
+        def response = webService.getJson(url)
+
+        render response as JSON
     }
 
     @PreAuthorise(accessLevel = 'siteAdmin', redirectController ='home', redirectAction = 'index')
