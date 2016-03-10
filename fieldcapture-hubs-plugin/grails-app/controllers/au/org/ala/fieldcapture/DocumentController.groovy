@@ -94,4 +94,14 @@ class DocumentController {
         def responseCode = webService.doDelete(url)
         render status: responseCode
     }
+
+    @PreAuthorise(accessLevel = "siteAdmin")
+    def downloadProjectDataFile() {
+        if (!params.id) {
+            response.setStatus(400)
+            render "A download ID is required"
+        } else {
+            webService.proxyGetRequest(response, "${grailsApplication.config.ecodata.baseUrl}search/downloadProjectDataFile/${params.id}?fileExtension=xlsx", true, true)
+        }
+    }
 }
