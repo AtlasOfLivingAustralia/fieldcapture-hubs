@@ -66,8 +66,8 @@ class SearchController {
         params.put("systemEmail", grailsApplication.config.merit.support.email)
         params.put("senderEmail", grailsApplication.config.merit.support.email)
         searchService.addDefaultFacetQuery(params)
-        def url = grailsApplication.config.ecodata.baseUrl + path
-        def response = webService.doPostWithParams(url, params)
+        def url = grailsApplication.config.ecodata.baseUrl + path +  commonService.buildUrlParamsFromMap(params)
+        def response = webService.doPostWithParams(url, [:]) // POST because the URL can get long.
 
         render response as JSON
     }
