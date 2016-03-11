@@ -63,8 +63,8 @@ class SearchController {
         facets << "className:au.org.ala.ecodata.Project"
         params.put("fq", facets)
         params.put("downloadUrl", g.createLink(controller:'document', action:'downloadProjectDataFile', absolute: true)+'/')
-        params.put("systemEmail", grailsApplication.config.merit.support.email)
-        params.put("senderEmail", grailsApplication.config.merit.support.email)
+        params.put("systemEmail", grailsApplication.config.fieldcapture.system.email.address)
+        params.put("senderEmail", grailsApplication.config.fieldcapture.system.email.address)
         searchService.addDefaultFacetQuery(params)
         def url = grailsApplication.config.ecodata.baseUrl + path +  commonService.buildUrlParamsFromMap(params)
         def response = webService.doPostWithParams(url, [:]) // POST because the URL can get long.
