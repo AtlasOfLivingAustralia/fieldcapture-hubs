@@ -73,7 +73,7 @@ class SearchService {
 
         params.query = "docType:project"
         if (searchTerm) {
-            params.query += " AND " + searchTerm
+            params.query += " AND (" + searchTerm + ")"
         }
 
         params.facets = "statesFacet,lgasFacet,nrmsFacet,organisationFacet,mvgsFacet"
