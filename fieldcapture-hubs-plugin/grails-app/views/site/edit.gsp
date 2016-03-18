@@ -27,7 +27,7 @@
         featureService: "${createLink(controller: 'proxy', action: 'feature')}",
         spatialWms: "${grailsApplication.config.spatial.geoserverUrl}",
         geocodeUrl: "${grailsApplication.config.google.geocode.url}",
-        siteMetaDataUrl: "${createLink(controller:'site', action:'locationMetadataForPoint')}",
+        siteMetaDataUrl: "${createLink(controller:'site', action:'lookupLocationMetadataForSite')}",
         <g:if test="${project}">
             pageUrl : "${grailsApplication.config.grails.serverName}${createLink(controller:'site', action:'createForProject', params:[projectId:project.projectId,checkForState:true])}",
             projectUrl : "${grailsApplication.config.grails.serverName}${createLink(controller:'project', action:'index', id:project.projectId)}",

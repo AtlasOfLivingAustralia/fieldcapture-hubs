@@ -142,8 +142,10 @@ var SiteViewModel = function (site, feature) {
         }
 
         $.ajax({
-            url: fcConfig.siteMetaDataUrl + "?lat=" + lat + "&lon=" + lng,
-            dataType: "json"
+            url: fcConfig.siteMetaDataUrl,
+            method:"POST",
+            contentType: 'application/json',
+            data:self.modelAsJSON()
         })
             .done(function (data) {
                 var geom = self.extent().geometry();
@@ -156,8 +158,7 @@ var SiteViewModel = function (site, feature) {
 
         //do the google geocode lookup
         $.ajax({
-            url: fcConfig.geocodeUrl + lat + "," + lng,
-            async: false
+            url: fcConfig.geocodeUrl + lat + "," + lng
         }).done(function (data) {
             if (data.results.length > 0) {
                 self.extent().geometry().locality(data.results[0].formatted_address);
