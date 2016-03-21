@@ -45,11 +45,7 @@
                               from="['choose site context','Pastoral','Industrial','Urban','Coastal', 'Reserve', 'Private land']"
                               keys="['none','Pastoral','Industrial','Urban','Coastal','Reserve', 'Private land']"/>
                 </div>
-                <div class="span3">
-                    <label for="siteArea">Area (decimal hectares)
-                        <fc:iconHelp title="Area of site">The area in decimal hectares (4dp) enclosed within the boundary of the shape file.</fc:iconHelp></label>
-                    <input data-bind="value: area" id="siteArea" type="text" class="span12"/>
-                </div>
+
             </div>
 
             <div class="row-fluid">
@@ -183,13 +179,13 @@
         </div>
     </div>
     <div class="row-fluid controls-row gazProperties">
-        <span class="label label-success">State/territory</span> <span data-bind="text:geometry().state"></span>
+        <span class="label label-success">State/territory</span> <span data-bind="expandable:geometry().state"></span>
     </div>
     <div class="row-fluid controls-row gazProperties">
-        <span class="label label-success">Local Gov. Area</span> <span data-bind="text:geometry().lga"></span>
+        <span class="label label-success">Local Gov. Area</span> <span data-bind="expandable:geometry().lga"></span>
     </div>
     <div class="row-fluid controls-row gazProperties">
-        <span class="label label-success">NRM</span> <span data-bind="text:geometry().nrm"></span>
+        <span class="label label-success">NRM</span> <span data-bind="expandable:geometry().nrm"></span>
     </div>
     <div class="row-fluid controls-row gazProperties">
         <span class="label label-success">Locality</span> <span data-bind="text:geometry().locality"></span>
@@ -285,15 +281,15 @@
             </div>
 
             <div class="row-fluid controls-row gazProperties" data-bind="visible: geometry!=null && geometry().state!=null && geometry().state!=''">
-                <span class="label label-success">State/territory</span> <span data-bind="text:geometry().state"></span>
+                <span class="label label-success">State/territory</span> <span data-bind="expandable:geometry().state"></span>
             </div>
 
             <div class="row-fluid controls-row gazProperties" data-bind="visible: geometry!=null && geometry().lga!=null && geometry().lga!=''">
-                <span class="label label-success">Local Gov. Area</span> <span data-bind="text:geometry().lga"></span>
+                <span class="label label-success">Local Gov. Area</span> <span data-bind="expandable:geometry().lga"></span>
             </div>
 
             <div class="row-fluid controls-row gazProperties">
-                <span class="label label-success">NRM</span> <span data-bind="text:geometry().nrm"></span>
+                <span class="label label-success">NRM</span> <span data-bind="expandable:geometry().nrm"></span>
             </div>
 
             <div class="row-fluid controls-row gazProperties">
