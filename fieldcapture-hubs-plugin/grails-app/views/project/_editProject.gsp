@@ -20,8 +20,13 @@
 </div>
 <div class="row-fluid">
     <div class="control-group span5">
+        <label class="control-label">Service provider organisation</label>
+        <select class="input-xlarge" id="serviceProviderOrganisation"
+                data-bind="options:transients.organisations, optionsText:'name', optionsValue:'organisationId', value:orgIdSvcProvider, optionsCaption: 'Choose...'"></select>
+    </div>
+    <div class="control-group span6">
         <label class="control-label">Service provider organisation name</label>
-        <input class="input-xlarge" data-bind="value:serviceProviderName" id="serviceProviderName"/>
+        <input class="input-xlarge" readonly="readonly" data-bind="value:serviceProviderName" id="serviceProviderName"/>
     </div>
 </div>
 <div class="row-fluid">

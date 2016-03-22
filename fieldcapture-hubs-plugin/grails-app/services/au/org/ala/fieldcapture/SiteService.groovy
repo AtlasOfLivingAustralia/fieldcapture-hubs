@@ -312,6 +312,14 @@ class SiteService {
         asJSON
     }
 
+    def lookupLocationMetadataForSite(Map site) {
+        Map resp = webService.doPost(grailsApplication.config.ecodata.baseUrl + 'site/lookupLocationMetadataForSite', site)
+        if (resp.resp) {
+            return resp.resp
+        }
+        resp
+    }
+
     static metaModel() {
         return [domain: 'site',
                 model: [

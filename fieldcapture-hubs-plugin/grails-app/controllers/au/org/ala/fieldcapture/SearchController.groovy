@@ -105,7 +105,9 @@ class SearchController {
         Integer max = params.max as Integer
         Integer offset = params.offset as Integer
 
-        render reportService.findPotentialHomePageImages(max, offset) as JSON
+        Map result = reportService.findPotentialHomePageImages(max, offset)
+        result.documents = result.documents?.collect{it + [ref:g.createLink(controller: 'project', action:'index', id:it.projectId)]}
+        render result as JSON
     }
 
     def findHomePageNominatedProjects() {

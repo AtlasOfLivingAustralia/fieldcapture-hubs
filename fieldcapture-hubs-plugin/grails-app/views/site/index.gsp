@@ -68,19 +68,23 @@
 
             <g:if test="${site.extent?.geometry}">
             <p>
-                <span class="label label-success">State/territory:</span> ${site.extent.geometry.state?:'Not specified'}
-                <span class="label label-success">Local government area:</span> ${site.extent.geometry.lga?:'Not specified'}
-                <span class="label label-success">NRM:</span> ${site.extent.geometry.nrm?:'Not specified'}
+                <fc:siteFacet site="${site}" facet="state" label="State/territory:"/>
+            </p>
+            <p>
+                <fc:siteFacet site="${site}" facet="lga" label="Local government area:"/>
+            </p>
+            <p>
+                <fc:siteFacet site="${site}" facet="nrm" label="NRM:"/>
             </p>
 
             <p>
-                <span class="label label-success">Locality:</span> ${site.extent.geometry.locality?:'Not specified'}
+                <fc:siteFacet site="${site}" facet="locality" label="Locality:"/>
             </p>
             <p>
-                <span class="label label-success">NVIS major vegetation group:</span> ${site.extent.geometry.mvg?:'Not specified'}
+                <fc:siteFacet site="${site}" facet="mvg" label="NVIS major vegetation group:"/>
             </p>
             <p>
-                <span class="label label-success">NVIS major vegetation subgroup:</span> ${site.extent.geometry.mvs?:'Not specified'}
+                <fc:siteFacet site="${site}" facet="mvs" label="NVIS major vegetation subgroup:"/>
             </p>
             </g:if>
 

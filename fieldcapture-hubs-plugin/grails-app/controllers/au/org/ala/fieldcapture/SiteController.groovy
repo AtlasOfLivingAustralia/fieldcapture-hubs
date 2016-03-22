@@ -398,6 +398,23 @@ class SiteController {
         render metadataService.getLocationMetadataForPoint(lat, lon) as JSON
     }
 
+    /**
+     * Looks up the site metadata  based on the supplied
+     * site geometry / pid and returns it as JSON.
+     */
+    def lookupLocationMetadataForSite() {
+
+        def site = request.JSON
+
+        if (!site?.extent?.geometry) {
+            response.status = 400
+            def result = [error:'site geometry is required']
+            render result as JSON
+        }
+
+        render siteService.lookupLocationMetadataForSite(site) as JSON
+    }
+
     def projectsForSite(String id) {
         def projects = siteService.projectsForSite(id) ?: []
         //log.debug projects
