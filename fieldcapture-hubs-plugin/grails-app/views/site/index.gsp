@@ -57,8 +57,9 @@
                 <span class="label label-info">External Id:</span> ${site.externalId?:'Not specified'}
                 <span class="label label-info">Type:</span> ${site.type?:'Not specified'}
                 <span class="label label-info">Area:</span>
-                <g:if test="${site?.extent?.geometry?.area}">
-                    ${site.extent.geometry.area} square km
+                <g:set var="areaHa" value="${site?.extent?.geometry?.area ? site?.extent?.geometry?.area * 100 : (site?.extent?.geometry?.aream2) ? site?.extent?.geometry?.aream2 / 10000 : null}"/>
+                <g:if test="${areaHa}">
+                    <g:formatNumber number="${areaHa}" format="#.0"/> Ha
                 </g:if>
                 <g:else>
                     Not specified
@@ -76,9 +77,14 @@
             <p>
                 <fc:siteFacet site="${site}" facet="nrm" label="NRM:"/>
             </p>
-
+            <p>
+                <fc:siteFacet site="${site}" facet="elect" label="Electorate:"/>
+            </p>
             <p>
                 <fc:siteFacet site="${site}" facet="locality" label="Locality:"/>
+            </p>
+            <p>
+                <fc:siteFacet site="${site}" facet="cmz" label="Conservation management zone:"/>
             </p>
             <p>
                 <fc:siteFacet site="${site}" facet="mvg" label="NVIS major vegetation group:"/>
