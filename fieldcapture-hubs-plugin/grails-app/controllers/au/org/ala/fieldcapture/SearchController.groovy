@@ -63,8 +63,8 @@ class SearchController {
         facets << "className:au.org.ala.ecodata.Project"
         params.put("fq", facets)
         params.put("downloadUrl", g.createLink(controller:'document', action:'downloadProjectDataFile', absolute: true)+'/')
-        params.put("systemEmail", grailsApplication.config.merit.support.email)
-        params.put("senderEmail", grailsApplication.config.merit.support.email)
+        params.put("systemEmail", grailsApplication.config.fieldcapture.system.email.address)
+        params.put("senderEmail", grailsApplication.config.fieldcapture.system.email.address)
         searchService.addDefaultFacetQuery(params)
         def url = grailsApplication.config.ecodata.baseUrl + path +  commonService.buildUrlParamsFromMap(params)
         def response = webService.doPostWithParams(url, [:]) // POST because the URL can get long.
@@ -105,7 +105,9 @@ class SearchController {
         Integer max = params.max as Integer
         Integer offset = params.offset as Integer
 
-        render reportService.findPotentialHomePageImages(max, offset) as JSON
+        Map result = reportService.findPotentialHomePageImages(max, offset)
+        result.documents = result.documents?.collect{it + [ref:g.createLink(controller: 'project', action:'index', id:it.projectId)]}
+        render result as JSON
     }
 
     def findHomePageNominatedProjects() {

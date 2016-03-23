@@ -45,11 +45,7 @@
                               from="['choose site context','Pastoral','Industrial','Urban','Coastal', 'Reserve', 'Private land']"
                               keys="['none','Pastoral','Industrial','Urban','Coastal','Reserve', 'Private land']"/>
                 </div>
-                <div class="span3">
-                    <label for="siteArea">Area (decimal hectares)
-                        <fc:iconHelp title="Area of site">The area in decimal hectares (4dp) enclosed within the boundary of the shape file.</fc:iconHelp></label>
-                    <input data-bind="value: area" id="siteArea" type="text" class="span12"/>
-                </div>
+
             </div>
 
             <div class="row-fluid">
@@ -183,13 +179,13 @@
         </div>
     </div>
     <div class="row-fluid controls-row gazProperties">
-        <span class="label label-success">State/territory</span> <span data-bind="text:geometry().state"></span>
+        <span class="label label-success">State/territory</span> <span data-bind="expandable:geometry().state"></span>
     </div>
     <div class="row-fluid controls-row gazProperties">
-        <span class="label label-success">Local Gov. Area</span> <span data-bind="text:geometry().lga"></span>
+        <span class="label label-success">Local Gov. Area</span> <span data-bind="expandable:geometry().lga"></span>
     </div>
     <div class="row-fluid controls-row gazProperties">
-        <span class="label label-success">NRM</span> <span data-bind="text:geometry().nrm"></span>
+        <span class="label label-success">NRM</span> <span data-bind="expandable:geometry().nrm"></span>
     </div>
     <div class="row-fluid controls-row gazProperties">
         <span class="label label-success">Locality</span> <span data-bind="text:geometry().locality"></span>
@@ -263,7 +259,7 @@
                 <span class="label label-success">Layer</span> <span data-bind="text:geometry().layerName"></span>
             </div>
             <div class="row-fluid controls-row">
-                <span class="label label-success">Area (km&sup2;)</span> <span data-bind="text:geometry().area"></span>
+                <span class="label label-success">Area (Ha)</span> <span data-bind="text:geometry().area() ? geometry().area() * 100 : ''"></span>
             </div>
         </div>
     </div>
@@ -281,19 +277,19 @@
                 <span class="label label-success">Type</span> <span data-bind="text:geometry().type"></span>
             </div>
             <div class="row-fluid controls-row" data-bind="visible: geometry!=null && geometry().areaKmSq!=null && geometry().areaKmSq != '' ">
-                <span class="label label-success">Area (km&sup2;)</span> <span data-bind="text:geometry().areaKmSq"></span>
+                <span class="label label-success">Area (Ha)</span> <span data-bind="text:geometry().areaKmSq() ? geometry().areaKmSq()*100: '' "></span>
             </div>
 
             <div class="row-fluid controls-row gazProperties" data-bind="visible: geometry!=null && geometry().state!=null && geometry().state!=''">
-                <span class="label label-success">State/territory</span> <span data-bind="text:geometry().state"></span>
+                <span class="label label-success">State/territory</span> <span data-bind="expandable:geometry().state"></span>
             </div>
 
             <div class="row-fluid controls-row gazProperties" data-bind="visible: geometry!=null && geometry().lga!=null && geometry().lga!=''">
-                <span class="label label-success">Local Gov. Area</span> <span data-bind="text:geometry().lga"></span>
+                <span class="label label-success">Local Gov. Area</span> <span data-bind="expandable:geometry().lga"></span>
             </div>
 
             <div class="row-fluid controls-row gazProperties">
-                <span class="label label-success">NRM</span> <span data-bind="text:geometry().nrm"></span>
+                <span class="label label-success">NRM</span> <span data-bind="expandable:geometry().nrm"></span>
             </div>
 
             <div class="row-fluid controls-row gazProperties">

@@ -94,28 +94,28 @@
                                 var latLng = new google.maps.LatLng(lat,lon);
                                 if (!isNaN(lat) && !isNaN(lon)) {
                                     if (lat >= -90 && lat <=90 && lon >= -180 && lon <= 180) {
-                                        if (!useHeatMap) {
-                                            var point = {
-                                                type: "dot",
-                                                id: projectId,
-                                                name: projectName,
-                                                popup: generatePopup(projectLinkPrefix,projectId,projectName,project.org,siteLinkPrefix,el.siteId, el.siteName),
-                                                latitude:lat,
-                                                longitude:lon,
-                                                color: "-1"
-                                            }
 
-                                            if(el.index !== undefined && el.index != null){
-                                                point.color = legends[el.index].color;
-                                                point.legendName = el.legendName;
-                                            }
-                                            features.push(point);
-
-                                            if (projectId) {
-                                                projectIdMap[projectId] = true;
-                                            }
+                                        var point = {
+                                            type: "dot",
+                                            id: projectId,
+                                            name: projectName,
+                                            popup: generatePopup(projectLinkPrefix,projectId,projectName,project.org,siteLinkPrefix,el.siteId, el.siteName),
+                                            latitude:lat,
+                                            longitude:lon,
+                                            color: "-1"
                                         }
-                                        else {
+
+                                        if(el.index !== undefined && el.index != null){
+                                            point.color = legends[el.index].color;
+                                            point.legendName = el.legendName;
+                                        }
+                                        features.push(point);
+
+                                        if (projectId) {
+                                            projectIdMap[projectId] = true;
+                                        }
+
+                                        if (useHeatMap) {
                                             heatMapPoints.push(latLng);
                                         }
                                         bounds.extend(latLng);
@@ -144,13 +144,54 @@
             $("#map-colorby-status").hide();
 
             initialiseMap(features, bounds, mapOptions);
-            if (heatMapPoints) {
+            if (heatMapPoints.length > 0) {
 
                 var heatMap = new google.maps.visualization.HeatmapLayer({
                     data: heatMapPoints,
-                    map: alaMap.map
+                    map: alaMap.map,
+                    maxIntensity:100,
+                    disapating:true
                     });
 
+                var toggleMarkers = function(features, value) {
+                    for (var f in features) {
+                        if (features.hasOwnProperty(f)) {
+                            var feature = features[f];
+                            for (var i=0; i<feature.length; i++) {
+                                if (typeof feature[i].setMap == 'function') {
+                                    feature[i].setMap(value);
+                                }
+                            }
+
+                        }
+
+                    }
+                };
+                var ZOOM_THRESHOLD = 4;
+
+                alaMap.hideMarkers = function() {
+                    toggleMarkers(alaMap.featureIndex, null);
+                };
+                alaMap.showMarkers = function() {
+                    toggleMarkers(alaMap.featureIndex, alaMap.map);
+                };
+
+                alaMap.map.addListener('zoom_changed', function() {
+                    var oldZoom = alaMap.zoom;
+                    var newZoom = alaMap.map.getZoom();
+                    alaMap.zoom = newZoom;
+
+                    if ((!oldZoom || oldZoom > ZOOM_THRESHOLD) && newZoom <= ZOOM_THRESHOLD) {
+                        alaMap.hideMarkers();
+                    }
+                    else if ((!oldZoom || oldZoom <= ZOOM_THRESHOLD) && newZoom > ZOOM_THRESHOLD) {
+                        alaMap.showMarkers();
+                    }
+                });
+
+                if (alaMap.map.getZoom() <= ZOOM_THRESHOLD) {
+                    alaMap.hideMarkers();
+                }
             }
             mapBounds = bounds;
             features.length > 0 ? showLegends(legends) : "";
@@ -208,6 +249,7 @@
         } else {
             alaMap.map.setZoom(4);
         }
+
 
         // Create the DIV to hold the control and
         // call the HomeControl() constructor passing

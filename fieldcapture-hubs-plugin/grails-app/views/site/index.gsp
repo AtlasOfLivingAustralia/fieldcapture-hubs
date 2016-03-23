@@ -57,8 +57,9 @@
                 <span class="label label-info">External Id:</span> ${site.externalId?:'Not specified'}
                 <span class="label label-info">Type:</span> ${site.type?:'Not specified'}
                 <span class="label label-info">Area:</span>
-                <g:if test="${site?.extent?.geometry?.area}">
-                    ${site.extent.geometry.area} square km
+                <g:set var="areaHa" value="${site?.extent?.geometry?.area ? site?.extent?.geometry?.area * 100 : (site?.extent?.geometry?.aream2) ? site?.extent?.geometry?.aream2 / 10000 : null}"/>
+                <g:if test="${areaHa}">
+                    <g:formatNumber number="${areaHa}" format="#.0"/> Ha
                 </g:if>
                 <g:else>
                     Not specified
@@ -68,19 +69,28 @@
 
             <g:if test="${site.extent?.geometry}">
             <p>
-                <span class="label label-success">State/territory:</span> ${site.extent.geometry.state?:'Not specified'}
-                <span class="label label-success">Local government area:</span> ${site.extent.geometry.lga?:'Not specified'}
-                <span class="label label-success">NRM:</span> ${site.extent.geometry.nrm?:'Not specified'}
-            </p>
-
-            <p>
-                <span class="label label-success">Locality:</span> ${site.extent.geometry.locality?:'Not specified'}
+                <fc:siteFacet site="${site}" facet="state" label="State/territory:"/>
             </p>
             <p>
-                <span class="label label-success">NVIS major vegetation group:</span> ${site.extent.geometry.mvg?:'Not specified'}
+                <fc:siteFacet site="${site}" facet="lga" label="Local government area:"/>
             </p>
             <p>
-                <span class="label label-success">NVIS major vegetation subgroup:</span> ${site.extent.geometry.mvs?:'Not specified'}
+                <fc:siteFacet site="${site}" facet="nrm" label="NRM:"/>
+            </p>
+            <p>
+                <fc:siteFacet site="${site}" facet="elect" label="Electorate:"/>
+            </p>
+            <p>
+                <fc:siteFacet site="${site}" facet="locality" label="Locality:"/>
+            </p>
+            <p>
+                <fc:siteFacet site="${site}" facet="cmz" label="Conservation management zone:"/>
+            </p>
+            <p>
+                <fc:siteFacet site="${site}" facet="mvg" label="NVIS major vegetation group:"/>
+            </p>
+            <p>
+                <fc:siteFacet site="${site}" facet="mvs" label="NVIS major vegetation subgroup:"/>
             </p>
             </g:if>
 
