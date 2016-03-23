@@ -259,7 +259,7 @@
                 <span class="label label-success">Layer</span> <span data-bind="text:geometry().layerName"></span>
             </div>
             <div class="row-fluid controls-row">
-                <span class="label label-success">Area (km&sup2;)</span> <span data-bind="text:geometry().area"></span>
+                <span class="label label-success">Area (Ha)</span> <span data-bind="text:geometry().area() ? geometry().area() * 100 : ''"></span>
             </div>
         </div>
     </div>
@@ -277,7 +277,7 @@
                 <span class="label label-success">Type</span> <span data-bind="text:geometry().type"></span>
             </div>
             <div class="row-fluid controls-row" data-bind="visible: geometry!=null && geometry().areaKmSq!=null && geometry().areaKmSq != '' ">
-                <span class="label label-success">Area (km&sup2;)</span> <span data-bind="text:geometry().areaKmSq"></span>
+                <span class="label label-success">Area (Ha)</span> <span data-bind="text:geometry().areaKmSq() ? geometry().areaKmSq()*100: '' "></span>
             </div>
 
             <div class="row-fluid controls-row gazProperties" data-bind="visible: geometry!=null && geometry().state!=null && geometry().state!=''">
