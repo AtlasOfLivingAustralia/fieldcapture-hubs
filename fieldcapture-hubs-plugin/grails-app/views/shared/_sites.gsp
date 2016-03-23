@@ -144,7 +144,7 @@
             $("#map-colorby-status").hide();
 
             initialiseMap(features, bounds, mapOptions);
-            if (heatMapPoints) {
+            if (heatMapPoints.length > 0) {
 
                 var heatMap = new google.maps.visualization.HeatmapLayer({
                     data: heatMapPoints,
@@ -153,6 +153,45 @@
                     disapating:true
                     });
 
+                var toggleMarkers = function(features, value) {
+                    for (var f in features) {
+                        if (features.hasOwnProperty(f)) {
+                            var feature = features[f];
+                            for (var i=0; i<feature.length; i++) {
+                                if (typeof feature[i].setMap == 'function') {
+                                    feature[i].setMap(value);
+                                }
+                            }
+
+                        }
+
+                    }
+                };
+                var ZOOM_THRESHOLD = 4;
+
+                alaMap.hideMarkers = function() {
+                    toggleMarkers(alaMap.featureIndex, null);
+                };
+                alaMap.showMarkers = function() {
+                    toggleMarkers(alaMap.featureIndex, alaMap.map);
+                };
+
+                alaMap.map.addListener('zoom_changed', function() {
+                    var oldZoom = alaMap.zoom;
+                    var newZoom = alaMap.map.getZoom();
+                    alaMap.zoom = newZoom;
+
+                    if ((!oldZoom || oldZoom > ZOOM_THRESHOLD) && newZoom <= ZOOM_THRESHOLD) {
+                        alaMap.hideMarkers();
+                    }
+                    else if ((!oldZoom || oldZoom <= ZOOM_THRESHOLD) && newZoom > ZOOM_THRESHOLD) {
+                        alaMap.showMarkers();
+                    }
+                });
+
+                if (alaMap.map.getZoom() <= ZOOM_THRESHOLD) {
+                    alaMap.hideMarkers();
+                }
             }
             mapBounds = bounds;
             features.length > 0 ? showLegends(legends) : "";
@@ -210,33 +249,6 @@
         } else {
             alaMap.map.setZoom(4);
         }
-
-        var toggleMarkers = function(features, value) {
-            for (var f in features) {
-                if (features.hasOwnProperty(f)) {
-                    var feature = features[f];
-                    for (var i=0; i<feature.length; i++) {
-                        feature[i].setMap(value);
-                    }
-
-                }
-
-            }
-        }
-        alaMap.hideMarkers = function() {
-            toggleMarkers(alaMap.featureIndex, null);
-        };
-        alaMap.showMarkers = function() {
-            toggleMarkers(alaMap.featureIndex, alaMap.map);
-        };
-        alaMap.map.addListener('zoom_changed', function() {
-            if (alaMap.map.getZoom() <= 4) {
-                alaMap.hideMarkers();
-            }
-            else {
-                alaMap.showMarkers();
-            }
-        });
 
 
         // Create the DIV to hold the control and
