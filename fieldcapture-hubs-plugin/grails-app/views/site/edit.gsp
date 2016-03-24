@@ -106,6 +106,15 @@
         $('.helphover').popover({animation: true, trigger:'hover'});
 
         var siteViewModel = initSiteViewModel();
+        var options = {
+            storageKey : 'SITE'+siteViewModel.siteId,
+            blockUIOnSave: true,
+            blockUISaveMessage: "Saving site...",
+            preventNavigationIfDirty: true
+        };
+
+        autoSaveModel(siteViewModel, fcConfig.ajaxUpdateUrl, options);
+
         $('#cancel').click(function () {
             if(siteViewModel.saved()){
                 document.location.href = fcConfig.sitePageUrl;
@@ -116,13 +125,8 @@
 
         $('#save').click(function () {
             if ($('#validation-container').validationEngine('validate')) {
-                var json = siteViewModel.modelAsJSON();
-                $.ajax({
-                    url: fcConfig.ajaxUpdateUrl,
-                    type: 'POST',
-                    data: json,
-                    contentType: 'application/json',
-                    success: function (data) {
+                siteViewModel.saveWithErrorDetection(
+                    function (data) {
                         if(data.status == 'created'){
                         <g:if test="${project}">
                             document.location.href = fcConfig.projectUrl;
@@ -134,10 +138,10 @@
                             document.location.href = fcConfig.sitePageUrl;
                         }
                     },
-                    error: function (data) {
+                    function (data) {
                         alert('There was a problem saving this site');
                     }
-                });
+                );
             }
         });
     });
