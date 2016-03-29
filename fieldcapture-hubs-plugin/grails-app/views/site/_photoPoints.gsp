@@ -8,6 +8,7 @@
        <p>There are no photo points defined for the selected site.  To create a photo point, use the "New Photo Point" button below.</p>
     </div>
 
+    All points of interest associated with the site will display here. Only attach photos to the photo points relevant to this activity.
     <table id="photoPointTable" class="table table-bordered photoPoints imageList">
         <thead>
             <tr>

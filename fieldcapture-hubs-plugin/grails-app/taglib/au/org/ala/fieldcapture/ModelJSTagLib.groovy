@@ -464,7 +464,7 @@ class ModelJSTagLib {
     }
 
     def numberViewModel(model, out) {
-        out << "\n" << INDENT*3 << "self.data.${model.name} = ko.observable();\n"
+        out << "\n" << INDENT*3 << "self.data.${model.name} = ko.observable().extend({numericString:2});\n"
         modelConstraints(model, out)
     }
 
