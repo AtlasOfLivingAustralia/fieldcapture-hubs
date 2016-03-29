@@ -38,7 +38,7 @@
                     <hr/>
                     <div><label for="isMeritProgramme">Reports via MERIT <input id="isMeritProgramme" type="checkbox" data-bind="checked:isMeritProgramme"></label></div>
                     <div><label for="reportingPeriod">Reporting period (months) <input id="reportingPeriod" class="input-small" type="number" data-bind="enabled:isMeritProgramme, value:reportingPeriod"></label></div>
-                    <div><label for="isMeritProgramme">Reporting period is aligned to calendar dates <input id="reportingPeriodAlignedToCalendar" type="checkbox" data-bind="enabled:isMeritProgramme, checked:reportingPeriodAlignedToCalendar"></label></div>
+                    <div><label for="reportingPeriodAlignedToCalendar">Reporting period is aligned to calendar dates <input id="reportingPeriodAlignedToCalendar" type="checkbox" data-bind="enabled:isMeritProgramme, checked:reportingPeriodAlignedToCalendar"></label></div>
                     <div><label for="projectDatesContracted">Projects must start and end on contract dates <input id="projectDatesContracted" type="checkbox" data-bind="checked:projectDatesContracted"></label></div>
                     <div><label for="weekDaysToCompleteReport">Number of weekdays to after a stage ends after which the report is due <input id="weekDaysToCompleteReport" type="text" class="input-small" data-bind="value:weekDaysToCompleteReport" data-validation-engine="validate[number]"></label></div>
 
@@ -72,19 +72,28 @@
                 </div>
                 <div>Start Date <fc:datePicker class="input-small" targetField="startDate.date" name="startDate"/></div>
                 <div>End Date <fc:datePicker class="input-small" targetField="endDate.date" name="endDate"/></div>
-                <div class="optional-project-content">
-                    <label>Optional project content</label>
-                    <ul class="unstyled" data-bind="foreach:{data: $root.transients.optionalProjectContent}">
-                        <li class="text-left"><input type="checkbox" name="optionalProjectContent" data-bind="value:$data, checked:$parent.optionalProjectContent"> <span data-bind="text:$data"></span></li>
-                    </ul>
-                </div>
-                <div><label data-bind="click:toggleActivities">Activities <span data-bind="text:'(' + activities().length + ' selected)'"></span></label></div>
-                <div class="program-activities" data-bind="visible:transients.showActivities">
-                    <div data-bind="foreach:{data: $root.transients.activityTypes}">
-                        <strong><span data-bind="text:name"></span></strong>
-                        <ul class="unstyled" data-bind="foreach:list">
-                            <li><input type="checkbox" name="activity" data-bind="value:name,attr:{id:'activity'+$index()},checked:$parents[1].activities" data-validation-engine="validate[minCheckbox[1]]"> <span data-bind="text:name"></span></li>
+                <div><label for="overridesProgramData">Override program configuration <input id="overridesProgramData" type="checkbox" data-bind="checked:overridesProgramData"></label></div>
+
+                <div data-bind="visible:overridesProgramData">
+                    <div><label for="subProgrammeReportingPeriod">Reporting period (months) <input id="subProgrammeReportingPeriod" class="input-small" type="number" data-bind="enabled:isMeritProgramme, value:reportingPeriod"></label></div>
+                    <div><label for="subProgrammeReportingPeriodAlignedToCalendar">Reporting period is aligned to calendar dates <input id="subProgrammeReportingPeriodAlignedToCalendar" type="checkbox" data-bind="enabled:isMeritProgramme, checked:reportingPeriodAlignedToCalendar"></label></div>
+                    <div><label for="subProgrammeProjectDatesContracted">Projects must start and end on contract dates <input id="subProgrammeProjectDatesContracted" type="checkbox" data-bind="checked:projectDatesContracted"></label></div>
+                    <div><label for="weekDaysToCompleteReport">Number of weekdays to after a stage ends after which the report is due <input id="weekDaysToCompleteReport" type="text" class="input-small" data-bind="value:weekDaysToCompleteReport" data-validation-engine="validate[number]"></label></div>
+
+                    <div class="optional-project-content">
+                        <label>Optional project content</label>
+                        <ul class="unstyled" data-bind="foreach:{data: $root.transients.optionalProjectContent}">
+                            <li class="text-left"><input type="checkbox" name="optionalProjectContent" data-bind="value:$data, checked:$parent.optionalProjectContent"> <span data-bind="text:$data"></span></li>
                         </ul>
+                    </div>
+                    <div><label data-bind="click:toggleActivities">Activities <span data-bind="text:'(' + activities().length + ' selected)'"></span></label></div>
+                    <div class="program-activities" data-bind="visible:transients.showActivities">
+                        <div data-bind="foreach:{data: $root.transients.activityTypes}">
+                            <strong><span data-bind="text:name"></span></strong>
+                            <ul class="unstyled" data-bind="foreach:list">
+                                <li><input type="checkbox" name="activity" data-bind="value:name,attr:{id:'activity'+$index()},checked:$parents[1].activities" data-validation-engine="validate[minCheckbox[1]]"> <span data-bind="text:name"></span></li>
+                            </ul>
+                        </div>
                     </div>
                 </div>
             </li>

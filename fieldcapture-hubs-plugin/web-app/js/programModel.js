@@ -2,8 +2,8 @@ var ProgramModel = function (prg, model) {
     var self = this;
     self.name = ko.observable(prg.name);
 
-    self.subprograms = ko.observableArray($.map(prg.subprograms, function (obj) {
-        return new SubprogramModel(obj, model);
+    self.subprograms = ko.observableArray($.map(prg.subprograms, function (subprogram) {
+        return new SubprogramModel(subprogram, prg, model);
     }));
 
     self.isMeritProgramme = ko.observable(prg.isMeritProgramme);
@@ -28,15 +28,22 @@ var ProgramModel = function (prg, model) {
     }
 };
 
-var SubprogramModel = function (subProgram, model) {
+var SubprogramModel = function (subProgram, program, model) {
     var self = this;
     self.name = ko.observable(subProgram.name);
     self.startDate = ko.observable(subProgram.startDate).extend({simpleDate:false});
     self.endDate = ko.observable(subProgram.endDate).extend({simpleDate:false});
     self.optionalProjectContent = ko.observableArray(subProgram.optionalProjectContent || []);
+    self.weekDaysToCompleteReport = ko.observable(subProgram.weekDaysToCompleteReport);
+
     self.themes = ko.observableArray($.map(subProgram.themes, function (obj) {
         return new ThemeModel(obj, model);
     }));
+    self.overridesProgramData = ko.observable(subProgram.overridesProgramData);
+    self.reportingPeriod = ko.observable(subProgram.reportingPeriod);
+    self.reportingPeriodAlignedToCalendar = ko.observable(subProgram.reportingPeriodAlignedToCalendar);
+    self.projectDatesContracted = ko.observable(subProgram.projectDatesContracted);
+
     self.activities = ko.observableArray(subProgram.activities || []);
 
     self.select = function () {
@@ -45,11 +52,30 @@ var SubprogramModel = function (subProgram, model) {
     self.isSelected = ko.computed(function () {
         return self === model.transients.selectedSubprogram();
     });
+
     self.transients = {};
     self.transients.showActivities = ko.observable(false);
     self.toggleActivities = function() {
         self.transients.showActivities(!self.transients.showActivities());
     };
+    self.overridesProgramData.subscribe(function(newValue) {
+        if (!newValue) {
+            self.optionalProjectContent([]);
+            self.weekDaysToCompleteReport(undefined);
+            self.reportingPeriod(undefined);
+            self.reportingPeriodAlignedToCalendar(undefined);
+            self.projectDatesContracted(undefined);
+            self.activities([]);
+        }
+        else {
+            self.optionalProjectContent(program.optionalProjectContent || []);
+            self.weekDaysToCompleteReport(program.weekDaysToCompleteReport);
+            self.reportingPeriod(program.reportingPeriod);
+            self.reportingPeriodAlignedToCalendar(program.reportingPeriodAlignedToCalendar);
+            self.projectDatesContracted(program.projectDatesContracted);
+            self.activities(program.activites || []);
+        }
+    });
     self.toJSON = function() {
         var js = ko.toJS(this);
         delete js.isSelected;
