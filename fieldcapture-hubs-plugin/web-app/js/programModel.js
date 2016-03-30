@@ -3,7 +3,7 @@ var ProgramModel = function (prg, model) {
     self.name = ko.observable(prg.name);
 
     self.subprograms = ko.observableArray($.map(prg.subprograms, function (subprogram) {
-        return new SubprogramModel(subprogram, prg, model);
+        return new SubprogramModel(subprogram, self, model);
     }));
 
     self.isMeritProgramme = ko.observable(prg.isMeritProgramme);
@@ -28,7 +28,7 @@ var ProgramModel = function (prg, model) {
     }
 };
 
-var SubprogramModel = function (subProgram, program, model) {
+var SubprogramModel = function (subProgram, programModel, model) {
     var self = this;
     self.name = ko.observable(subProgram.name);
     self.startDate = ko.observable(subProgram.startDate).extend({simpleDate:false});
@@ -68,16 +68,19 @@ var SubprogramModel = function (subProgram, program, model) {
             self.activities([]);
         }
         else {
-            self.optionalProjectContent(program.optionalProjectContent || []);
-            self.weekDaysToCompleteReport(program.weekDaysToCompleteReport);
-            self.reportingPeriod(program.reportingPeriod);
-            self.reportingPeriodAlignedToCalendar(program.reportingPeriodAlignedToCalendar);
-            self.projectDatesContracted(program.projectDatesContracted);
-            self.activities(program.activites || []);
+            self.optionalProjectContent(programModel.optionalProjectContent() || []);
+            self.weekDaysToCompleteReport(programModel.weekDaysToCompleteReport());
+            self.reportingPeriod(programModel.reportingPeriod());
+            self.reportingPeriodAlignedToCalendar(programModel.reportingPeriodAlignedToCalendar());
+            self.projectDatesContracted(programModel.projectDatesContracted());
+            self.activities(programModel.activities() || []);
         }
     });
     self.toJSON = function() {
         var js = ko.toJS(this);
+        if (js.weekDaysToCompleteReport) {
+            js.weekDaysToCompleteReport = Number(js.weekDaysToCompleteReport);
+        }
         delete js.isSelected;
         delete js.transients;
         return js;
@@ -135,7 +138,7 @@ var ProgramModelViewModel = function (model, activityTypes, options) {
         act.name.editing(true);
     };
     self.addSubprogram = function (item, event) {
-        var newSub = new SubprogramModel({name:"", themes:[]}, self);
+        var newSub = new SubprogramModel({name:"", themes:[]}, self.transients.selectedProgram(), self);
         self.transients.selectedProgram().subprograms.push(newSub);
         newSub.name.editing(true);
     };
