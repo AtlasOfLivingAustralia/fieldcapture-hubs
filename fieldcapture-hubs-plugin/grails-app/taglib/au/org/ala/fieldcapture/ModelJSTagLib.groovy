@@ -409,7 +409,7 @@ class ModelJSTagLib {
                         out << INDENT*3 << "this.${col.name} = ko.${observable}(orBlank(data['${col.name}']));\n"
                         break;
                     case 'number':
-                        out << INDENT*3 << "this.${col.name} = ko.${observable}(orZero(data['${col.name}']));\n"
+                        out << INDENT*3 << "this.${col.name} = ko.${observable}(orZero(data['${col.name}'])).extend({numericString:2});\n"
                         break;
                     case 'boolean':
                         out << INDENT*3 << "this.${col.name} = ko.${observable}(orFalse(data['${col.name}']));\n"
