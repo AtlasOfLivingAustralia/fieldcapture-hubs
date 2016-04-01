@@ -66,7 +66,6 @@
             if (geoPoints.total) {
                 var projectLinkPrefix = "${createLink(controller:'project')}/";
                 var siteLinkPrefix = "${createLink(controller:'site')}/";
-                $("#numberOfSites").html(geoPoints.total + " sites");
 
                 if (geoPoints.total > 0) {
                     var staticColors =
@@ -143,7 +142,18 @@
             $("#legend-table").fadeIn();
             $("#map-colorby-status").hide();
 
+
+            var numSitesHtml = "";
+            var siteCount = features.length || heatMapPoints.length;
+            if(siteCount > 0){
+                numSitesHtml = siteCount + " sites";
+            } else {
+                numSitesHtml = "0 sites <span class=\"label label-important\">No georeferenced points for the selected projects</span>";
+            }
+            $("#numberOfSites").html(numSitesHtml);
+
             initialiseMap(features, bounds, mapOptions);
+
             if (heatMapPoints.length > 0) {
 
                 var heatMap = new google.maps.visualization.HeatmapLayer({
@@ -195,16 +205,6 @@
             }
             mapBounds = bounds;
             features.length > 0 ? showLegends(legends) : "";
-
-            var numSitesHtml = "";
-            var siteCount = features.length || heatMapPoints.length;
-            if(siteCount > 0){
-                numSitesHtml = siteCount + " sites";
-            } else {
-                numSitesHtml = "0 sites <span class=\"label label-important\">No georeferenced points for the selected projects</span>";
-            }
-
-            $("#numberOfSites").html(numSitesHtml);
 
             }).error(function (request, status, error) {
                 console.error("AJAX error", status, error);
