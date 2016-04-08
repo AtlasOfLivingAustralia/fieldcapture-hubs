@@ -363,12 +363,19 @@ function autoSaveModel(viewModel, saveUrl, options) {
                 }
             })
             .fail(function (data) {
+                if (config.preventNavigationIfDirty) {
+                    window.onbeforeunload = null;
+                }
                 if (config.blockUIOnSave) {
                     $.unblockUI();
                 }
                 var message = $(config.timeoutMessageSelector).html();
                 if (message) {
-                    bootbox.alert(message);
+                    bootbox.alert(message, function() {
+                        if (config.preventNavigationIfDirty) {
+                            window.onbeforeunload = onunloadHandler;
+                        }
+                    });
                 }
                 if (typeof errorCallback === 'function') {
                     errorCallback(data);
