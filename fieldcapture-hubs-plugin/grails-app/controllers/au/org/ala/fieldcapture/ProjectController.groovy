@@ -50,7 +50,7 @@ class ProjectController {
                 activityTypes: projectService.activityTypesList(),
                 metrics: projectService.summary(id),
                 outputTargetMetadata: metadataService.getOutputTargetsByOutputByActivity(),
-                organisations: metadataService.organisationList().list,
+                organisations: organisationList(project),
                 programs: programs,
                 today:DateUtils.format(new DateTime()),
                 themes:metadataService.getThemesForProject(project),
@@ -65,6 +65,20 @@ class ProjectController {
 
             render view:content.view, model:model
         }
+    }
+
+    protected List organisationList(Map project) {
+        List organisations
+        if (userService.userIsAlaOrFcAdmin()) {
+            organisations = metadataService.organisationList().list
+        }
+        else {
+            organisations = [[name:project.organisationName, organisationId:project.organisationId]]
+            if (project.serviceProviderName) {
+                organisations << [name:project.serviceProviderName, organisationId:project.orgIdSvcProvider]
+            }
+        }
+        organisations
     }
 
     protected Map projectContent(project, user, programs) {
