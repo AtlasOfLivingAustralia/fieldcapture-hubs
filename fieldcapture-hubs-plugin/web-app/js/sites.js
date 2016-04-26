@@ -359,7 +359,8 @@ var PidLocation = function (l) {
 
     // These layers are treated specially.
     var USER_UPLOAD_FID = 'c11083';
-    var OLD_NRM_LAYER_FID = 'cl916';
+    var OLD_NRM_LAYER_FIDS = ['cl916', 'cl2111'];
+
 
     var self = this;
     self.source = ko.observable('pid');
@@ -400,7 +401,7 @@ var PidLocation = function (l) {
                 }
             }
         }
-    }
+    };
     //TODO load this from config
     self.layers = ko.observable([
         {id:'cl2120', name:'NRM'},
@@ -414,8 +415,8 @@ var PidLocation = function (l) {
     if (l.fid == USER_UPLOAD_FID) {
         self.layers().push({id:USER_UPLOAD_FID, name:'User Uploaded'});
     }
-    else if (l.fid == OLD_NRM_LAYER_FID) {
-        self.layers().push({id:OLD_NRM_LAYER_FID, name:'NRM Regions - pre 2014'});
+    else if ($.inArray(l.fid,OLD_NRM_LAYER_FIDS)) {
+        self.layers().push({id: l.fid, name:'NRM Regions - pre 2015'});
     }
     self.chosenLayer = ko.observable(exists(l,'fid'));
     self.layerObjects = ko.observable([]);
