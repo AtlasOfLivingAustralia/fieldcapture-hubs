@@ -585,13 +585,12 @@ class FCTagLib {
             }
             if (memberOrgs.size() >= maxItems) {
                 maxItemsLink()
-                return // don't show starred projects as we've exceeded limit
             }
             if (memberOrgs.size() == 0) {
                 mb.span("[You aren't a member of any organisations]")
-                mb.hr()
-                mb.a(href:g.createLink(controller:'organisation', action:'list'), "Find your organisation here")
             }
+            mb.hr()
+            mb.a(href:g.createLink(controller:'organisation', action:'list'), "Find an organisation here")
 
         } else {
             mb.div { mkp.yield("Error: User not found") }

@@ -65,7 +65,9 @@ class MetadataService {
                 throw new IllegalArgumentException("No subprogram exists for program ${programName} with name ${subProgramName}")
             }
 
-            config.putAll(subProgram)
+            if (subProgram.overridesProgramData) {
+                config.putAll(subProgram)
+            }
         }
 
         config
@@ -149,30 +151,8 @@ class MetadataService {
     }
 
     boolean isOptionalContent(String contentName, String program, String subProgram = '') {
-        Map config = mergeProgramConfig(program, subProgram)
+        Map config = getProgramConfiguration(program, subProgram)
         return contentName in (config.optionalProjectContent?:[])
-    }
-
-    /**
-     * Returns a Map containing config information from a program and sub-program.  If the same configuration
-     * is specified in both the program and sub-program, the sub-program value will override it.
-     * @param program the program name
-     * @param subProgram the sub-program name
-     * @return a single Map containing data from the program and sub-program
-     */
-    private Map mergeProgramConfig(String program, String subProgram = '') {
-        Map programModel = programModel(program)
-        Map config = new HashMap(programModel)
-        if (subProgram) {
-            Map subProgramModel = programModel.subprograms?.find{it.name == subProgram}
-            subProgramModel?.each { k, v ->
-                if (v) {
-                    config[k] = v
-                }
-            }
-        }
-        config.remove('name')
-        config
     }
 
     /**
@@ -256,7 +236,10 @@ class MetadataService {
 
     def organisationList() {
         return cacheService.get('organisations',{
-            webService.getJson(grailsApplication.config.ecodata.baseUrl + "organisation")
+            Map result = webService.getJson(grailsApplication.config.ecodata.baseUrl + "organisation")
+
+            List reducedList = result?.list?.collect {[name:it.name, organisationId:it.organisationId]}
+            [list:reducedList?:[]]
         })
     }
 

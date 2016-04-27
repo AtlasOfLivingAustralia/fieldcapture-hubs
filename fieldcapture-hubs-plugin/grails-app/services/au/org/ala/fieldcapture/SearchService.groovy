@@ -55,7 +55,7 @@ class SearchService {
         addDefaultFacetQuery(params)
         params.max = 9999
         params.flimit = 999
-        params.fsort = "term"
+        params.fsort = "count"
         params.offset = 0
         params.query = "geo.loc.lat:*"
         params.facets = "stateFacet,nrmFacet,lgaFacet,mvgFacet"
@@ -68,7 +68,7 @@ class SearchService {
         addDefaultFacetQuery(params)
         //params.max = 9999
         params.flimit = 999
-        params.fsort = "term"
+        params.fsort = "count"
         //params.offset = 0
 
         params.query = "docType:project"
@@ -87,7 +87,7 @@ class SearchService {
         addDefaultFacetQuery(params)
         //params.max = 9999
         params.flimit = 999
-        params.fsort = "term"
+        params.fsort = "count"
         //params.offset = 0
 
         params.query = "docType:project"
@@ -104,7 +104,7 @@ class SearchService {
         addDefaultFacetQuery(params)
         //params.max = 9999
         params.flimit = 999
-        params.fsort = "term"
+        params.fsort = "count"
         //params.offset = 0
 //        params.query = "docType:site"
         params.fq = "docType:site"
@@ -118,7 +118,7 @@ class SearchService {
 
         def params = originalParams.clone()
         params.flimit = 999
-        params.fsort = "term"
+        params.fsort = "count"
         //params.offset = 0
         params.query = "docType:project"
         HubSettings settings = SettingService.getHubConfig()

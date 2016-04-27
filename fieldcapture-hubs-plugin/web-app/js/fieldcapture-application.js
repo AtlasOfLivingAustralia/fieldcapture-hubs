@@ -363,12 +363,19 @@ function autoSaveModel(viewModel, saveUrl, options) {
                 }
             })
             .fail(function (data) {
+                if (config.preventNavigationIfDirty) {
+                    window.onbeforeunload = null;
+                }
                 if (config.blockUIOnSave) {
                     $.unblockUI();
                 }
                 var message = $(config.timeoutMessageSelector).html();
                 if (message) {
-                    bootbox.alert(message);
+                    bootbox.alert(message, function() {
+                        if (config.preventNavigationIfDirty) {
+                            window.onbeforeunload = onunloadHandler;
+                        }
+                    });
                 }
                 if (typeof errorCallback === 'function') {
                     errorCallback(data);
@@ -910,6 +917,7 @@ var BlogEntryViewModel = function(blogEntry) {
     self.projectId = ko.observable(blogEntry.projectId);
     self.title = ko.observable(blogEntry.title || '');
     self.date = ko.observable(blogEntry.date || now).extend({simpleDate:false});
+    self.keepOnTop = ko.observable(blogEntry.keepOnTop || false);
     self.content = ko.observable(blogEntry.content).extend({markdown:true});
     self.stockIcon = ko.observable(blogEntry.stockIcon);
     self.documents = ko.observableArray(blogEntry.documents || []);
@@ -950,6 +958,7 @@ var EditableBlogEntryViewModel = function(blogEntry, options) {
     self.projectId = ko.observable(blogEntry.projectId || undefined);
     self.title = ko.observable(blogEntry.title || '');
     self.date = ko.observable(blogEntry.date || now).extend({simpleDate:false});
+    self.keepOnTop = ko.observable(blogEntry.keepOnTop || false);
     self.content = ko.observable(blogEntry.content);
     self.stockIcon = ko.observable(blogEntry.stockImageName);
     self.documents = ko.observableArray();

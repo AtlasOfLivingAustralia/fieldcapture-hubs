@@ -31,7 +31,7 @@
             approveReportUrl: '${g.createLink( action:'ajaxApproveReport', id:"${organisation.organisationId}")}',
             rejectReportUrl: '${g.createLink( action:'ajaxRejectReport', id:"${organisation.organisationId}")}',
             returnTo: '${g.createLink(action:'index', id:"${organisation.organisationId}")}',
-            dashboardCategoryUrl: "${g.createLink(controller: 'report', action: 'activityOutputs', params: params)}",
+            dashboardCategoryUrl: "${g.createLink(controller: 'report', action: 'activityOutputs', params: [fq:'organisationFacet:'+organisation.name])}",
             projects : <fc:modelAsJavascript model="${organisation.projects}"/>
             };
     </r:script>

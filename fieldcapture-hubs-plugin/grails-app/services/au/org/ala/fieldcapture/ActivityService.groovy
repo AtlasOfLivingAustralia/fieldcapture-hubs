@@ -8,7 +8,8 @@ class ActivityService {
 
     def webService, grailsApplication, metadataService
 
-    private static def PROGRESS = ['planned', 'started', 'finished', 'cancelled', 'deferred']
+    public static final String PROGRESS_PLANNED = 'planned'
+    private static def PROGRESS = [PROGRESS_PLANNED, 'started', 'finished', 'cancelled', 'deferred']
 
     public static Comparator<String> PROGRESS_COMPARATOR = {a,b -> PROGRESS.indexOf(a) <=> PROGRESS.indexOf(b)}
 
