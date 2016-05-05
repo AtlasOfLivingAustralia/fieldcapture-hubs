@@ -91,7 +91,7 @@ class ProjectService {
         if (scores && scores instanceof List) {  // If there was an error, it would be returning a map containing the error.
             // There are some targets that have been saved as Strings instead of numbers.
             scoresWithTargetsByOutput = scores.grep{ it.target && it.target != "0" }.groupBy { it.score.outputName }
-            scoresWithoutTargetsByOutputs = scores.grep{ it.results && (!it.target || it.target == "0") }.groupBy { it.score.outputName }
+            scoresWithoutTargetsByOutputs = scores.grep{ (it.result || it.groups) && (!it.target || it.target == "0") }.groupBy { it.score.outputName }
         }
         [targets:scoresWithTargetsByOutput, other:scoresWithoutTargetsByOutputs]
     }
