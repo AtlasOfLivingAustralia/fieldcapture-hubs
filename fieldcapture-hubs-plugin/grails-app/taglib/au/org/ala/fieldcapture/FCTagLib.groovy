@@ -796,4 +796,22 @@ class FCTagLib {
             out << " "+value.toString()
         }
     }
+
+    def documentType = {attrs ->
+        Map document = attrs.document
+        if (document.type == 'image') {
+            out << 'image'
+        }
+        else {
+            if (document.filename) {
+                int i = document.filename.lastIndexOf('.')
+                if (i >= 0 && i<document.filename.length() -1) {
+                    out << document.filename.substring(i, document.filename.length())
+                }
+                else {
+                    out << document.type
+                }
+            }
+        }
+    }
 }
