@@ -1,4 +1,4 @@
-<g:set var="blockId" value="${activity.activityId+fc.toSingleWord([name: outputName])}"/>
+<g:set var="blockId" value="${divId?:(activity.activityId+fc.toSingleWord([name: outputName]))}"/>
 <g:set var="output" value="${activity.outputs.find {it.name == outputName}}"/>
 <g:if test="${!output}">
     <g:set var="output" value="[name: outputName]"/>
