@@ -133,7 +133,7 @@ class ActivityService {
     }
 
     boolean isFinished(activity) {
-        return activity?.progress == FINISHED
+        return activity?.progress == PROGRESS_FINISHED
     }
 
     /**
