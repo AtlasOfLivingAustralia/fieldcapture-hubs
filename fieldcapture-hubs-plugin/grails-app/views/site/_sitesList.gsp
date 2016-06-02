@@ -105,7 +105,7 @@
             },
             mapOptions
         );
-        var mapFeatures = $.parseJSON('${mapFeatures?:[].encodeAsJavaScript()}');
+        var mapFeatures = <fc:modelAsJavascript model="${mapFeatures?:[]}"/>;
         var sitesViewModel = new SitesViewModel(sites, map, mapFeatures, ${editable ?: false});
         ko.applyBindings(sitesViewModel, document.getElementById('sitesList'));
 
