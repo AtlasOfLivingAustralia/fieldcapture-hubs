@@ -599,7 +599,7 @@ class FCTagLib {
 
     def modelAsJavascript = { attrs ->
         def model = attrs.model
-        if (!(model instanceof JSONObject) && !(model instanceof JSONArray)) {
+        if (!(model instanceof JSONObject) && !(model instanceof JSONArray) && !(model instanceof grails.converters.JSON)) {
             model = model as JSON
 
         }
