@@ -814,4 +814,17 @@ class FCTagLib {
             }
         }
     }
+
+    def comparisonClass = { attrs ->
+
+        if (attrs.current != null && attrs.previous != null) {
+            if (attrs.current > attrs.previous) {
+                out << "up"
+            }
+            else if (attrs.current < attrs.previous) {
+                out << "down"
+            }
+        }
+
+    }
 }
