@@ -3,6 +3,7 @@
 <g:if test="${!output}">
     <g:set var="output" value="[name: outputName]"/>
 </g:if>
+<md:modelStyles model="${outputModel}" edit="true"/>
 <div class="output-block" id="ko${blockId}">
     <h3>${outputName}</h3>
     <div data-bind="if:outputNotCompleted">

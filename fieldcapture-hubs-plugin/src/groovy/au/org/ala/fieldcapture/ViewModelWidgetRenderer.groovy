@@ -7,7 +7,10 @@ class ViewModelWidgetRenderer implements ModelWidgetRenderer {
 
     @Override
     void renderLiteral(WidgetRenderContext context) {
-        context.writer << "<span ${context.attributes.toString()}>${context.model.source}</span>" // don't include context in literals
+        if (!context.model.mode || context.model.mode != 'edit') { // Allow form instructions to be only viewable in edit mode
+            context.writer << "<span ${context.attributes.toString()}>${context.model.source}</span>"
+        }
+
     }
 
     @Override
@@ -31,6 +34,7 @@ class ViewModelWidgetRenderer implements ModelWidgetRenderer {
     @Override
     void renderTextArea(WidgetRenderContext context) {
         context.databindAttrs.add 'text', context.source
+        context.attributes.addClass('model-text-value')
         context.writer << "<span ${context.attributes.toString()} data-bind='${context.databindAttrs.toString()}'></span>"
     }
 
