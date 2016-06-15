@@ -20,4 +20,33 @@ class AuditService {
         return webService.getJson(url)
     }
 
+    Map compareProjectEntity(String projectId, String baselineDate, String beforeDate, String entityPath) {
+
+        Map auditResult = getAuditMessagesForProject(projectId)
+        Map baselineEdit = null
+        Map comparisonEdit = null
+
+        boolean finished = false
+        int i = 0
+        while (i < auditResult.messages.size() && !finished) {
+            Map message = auditResult.messages[i]
+            if (message.entityType == "au.org.ala.ecodata.Project") {
+
+                if (!baselineEdit && (message.date < baselineDate) && message.entity[entityPath]) {
+                    baselineEdit = message
+                }
+                else if (!comparisonEdit && (message.date < beforeDate)) {
+                    if (message.entity[entityPath] != baselineEdit.entity[entityPath]) {
+                        comparisonEdit = message
+                    }
+                }
+            }
+            if (baselineEdit != null && comparisonEdit != null) {
+                finished = true
+            }
+            i++
+        }
+        [baseline: baselineEdit, comparison:comparisonEdit]
+    }
+
 }
