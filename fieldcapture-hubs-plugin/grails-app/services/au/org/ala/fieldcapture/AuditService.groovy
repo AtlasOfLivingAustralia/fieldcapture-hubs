@@ -35,7 +35,7 @@ class AuditService {
                 if (!baselineEdit && (message.date < baselineDate) && message.entity[entityPath]) {
                     baselineEdit = message
                 }
-                else if (!comparisonEdit && (message.date < beforeDate)) {
+                else if (baselineEdit && !comparisonEdit && (message.date < beforeDate)) {
                     if (message.entity[entityPath] != baselineEdit.entity[entityPath]) {
                         comparisonEdit = message
                     }
