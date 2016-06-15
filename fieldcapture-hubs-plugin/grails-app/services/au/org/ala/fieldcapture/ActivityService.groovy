@@ -10,7 +10,8 @@ class ActivityService {
 
     public static final String PROGRESS_PLANNED = 'planned'
     public static final String PROGRESS_FINISHED = 'finished'
-    private static def PROGRESS = [PROGRESS_PLANNED, 'started', PROGRESS_FINISHED, 'cancelled', 'deferred']
+    public static final String PROGRESS_STARTED = 'started'
+    private static def PROGRESS = [PROGRESS_PLANNED, PROGRESS_STARTED, PROGRESS_FINISHED, 'cancelled', 'deferred']
 
     public static Comparator<String> PROGRESS_COMPARATOR = {a,b -> PROGRESS.indexOf(a) <=> PROGRESS.indexOf(b)}
 
@@ -134,6 +135,14 @@ class ActivityService {
 
     boolean isFinished(activity) {
         return activity?.progress == PROGRESS_FINISHED
+    }
+
+    boolean isStarted(activity) {
+        return activity?.progress == PROGRESS_STARTED
+    }
+
+    boolean isStartedOrFinished(activity) {
+        return isFinished(activity) || isStarted(activity)
     }
 
     /**
