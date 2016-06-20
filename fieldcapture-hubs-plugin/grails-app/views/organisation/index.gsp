@@ -20,6 +20,7 @@
             organisationListUrl: '${g.createLink(action:"list")}',
             organisationViewUrl: '${g.createLink(action:"index", id:"${organisation.organisationId}")}',
             organisationReportUrl: "${g.createLink(action:'editOrganisationReport')}",
+            organisationReportPDFUrl: "${g.createLink(action:'performanceReportPDF')}",
             organisationMembersUrl: "${loadPermissionsUrl}",
             imageLocation:"${resource(dir:'/images')}",
             logoLocation:"${resource(dir:'/images/filetypes')}",
