@@ -142,10 +142,16 @@
             }
         });
 
-        var storedTab = amplify.store(organisationTabStorageKey);
+        var storedTab = window.location.hash;
+        if (!storedTab) {
+            storedTab = amplify.store(organisationTabStorageKey);
+        }
 
         if (storedTab) {
-            $(storedTab + '-tab').tab('show');
+            var $tab = $(storedTab + '-tab');
+            if ($tab[0]) {
+                $tab.tab('show');
+            }
         }
 
         <g:if test="${content.admin.visible}">
