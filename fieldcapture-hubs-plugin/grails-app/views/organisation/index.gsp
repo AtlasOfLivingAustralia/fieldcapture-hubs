@@ -1,4 +1,4 @@
-<%@ page contentType="text/html;charset=UTF-8" %>
+<%@ page import="au.org.ala.fieldcapture.SettingPageType" contentType="text/html;charset=UTF-8" %>
 <!DOCTYPE html>
 <html>
 <head>
@@ -76,7 +76,7 @@
     </div>
 </div>
 
-<g:render template="/shared/declaration"/>
+<g:render template="/shared/declaration" model="${[declarationType:au.org.ala.fieldcapture.SettingPageType.ORGANISATION_DECLARATION]}"/>
 
 <r:script>
 
