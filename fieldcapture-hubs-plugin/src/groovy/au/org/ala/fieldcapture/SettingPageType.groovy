@@ -31,6 +31,7 @@ enum SettingPageType {
     CONTACTS ("contacts","Contacts","fielddata.contacts.text"),
     INTRO ("intro","User Introduction","fielddata.introduction.text"),
     DECLARATION ('declaration', "Legal Declaration", "fielddata.declaration.text"),
+    ORGANISATION_DECLARATION ('organisation-declaration', "Legal Declaration", "fielddata.organisation.declarationText"),
     REPORT_SUBMITTED_EMAIL('reportSubmitted', 'Report has been submitted email body text', 'fielddata.reportSubmitted.emailText'),
     REPORT_APPROVED_EMAIL('reportApproved', 'Report has been approved email body text', 'fielddata.reportApproved.emailText'),
     REPORT_REJECTED_EMAIL('reportRejected', 'Report has been rejected email body text', 'fielddata.reportRejected.emailText'),
