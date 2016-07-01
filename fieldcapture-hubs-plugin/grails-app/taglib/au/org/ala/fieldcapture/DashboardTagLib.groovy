@@ -17,7 +17,7 @@ class DashboardTagLib {
 
             def target = score.target ? score.target as Double : 0
             // A zero target essentially means not a target.
-            if (target > 0 && score.score.isOutputTarget && !score.displayType) {
+            if (target > 0 && score.score.isOutputTarget) {
                 renderTarget(score, target)
             }
             else if (!score.score.displayType) {
@@ -115,7 +115,7 @@ class DashboardTagLib {
      * @param target the target value for the score
      */
     private void renderTarget(score, double target) {
-        def result = score.results ? score.results[0].result as Double : 0
+        def result = score.result ?: 0
         def percentComplete = result / target * 100
         percentComplete = Math.min(100, percentComplete)
         percentComplete = Math.max(0, percentComplete)
@@ -135,19 +135,19 @@ class DashboardTagLib {
             case 'SUM':
             case 'AVERAGE':
 
-                def result = score.results ? score.results[0].result as Double : 0
+                def result = score.result as Double ?: 0
                 out << "<div><b>${score.score.label}</b>${helpText(score)} : ${g.formatNumber(type:'number',number:result, maxFractionDigits: 2, groupingUsed:true)}</div>"
                 break
             case 'HISTOGRAM':
-                if (score.results.size() == 1 && score.results[0].count == 1) {
+                if (score.result.size() <= 1) {
                     return
                 }
-                def chartData = toArray(score.results[0].result)
+                def chartData = toArray(score.result)
                 def chartType = score.score.displayType?:'piechart'
                 drawChart(chartType, score.score.label, score.score.label, helpText(score), [['string', score.score.label], ['number', 'Count']], chartData)
                 break
             case 'SET':
-                out << "<div><b>${score.score.label}</b> :${score.results[0].result.join(',')}</div>"
+                out << "<div><b>${score.score.label}</b> :${score.result.join(',')}</div>"
                 break
         }
     }
@@ -168,20 +168,20 @@ class DashboardTagLib {
     }
 
     private void renderGroupedScore(score) {
-        if (score.results.size() == 1 && score.results[0].count == 1) {
+        if (score.result && score.result.size() == 1) {
             return
         }
         switch (score.score.aggregationType.name) {
             case 'SUM':
             case 'AVERAGE':
             case 'COUNT':
-                def chartData = score.results.findAll{it.result}.collect{[it.group, it.result]}.sort{a,b -> a[0].compareTo(b[0])}
+                def chartData = score.groups.collect{[it.group, it.results[0].result]}.findAll{it[1]}.sort{a,b -> a[0].compareTo(b[0])}
                 def chartType = score.score.displayType?:'piechart'
-                drawChart(chartType, score.score.label, score.groupTitle, helpText(score), [['string', score.groupTitle], ['number', score.score.label]], chartData)
+                drawChart(chartType, score.score.label, score.label?:'', helpText(score), [['string', score.label?:''], ['number', score.score.label]], chartData)
 
                 break
             case 'HISTOGRAM':
-                def chartData = toArray(score.results[0].result)
+                def chartData = toArray(score.result)
                 def chartType = score.score.displayType?:'piechart'
                 drawChart(chartType, score.score.label, score.score.label, helpText(score), [['string', score.score.label], ['number', 'Count']], chartData)
                 break

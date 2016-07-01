@@ -599,7 +599,7 @@ class FCTagLib {
 
     def modelAsJavascript = { attrs ->
         def model = attrs.model
-        if (!(model instanceof JSONObject) && !(model instanceof JSONArray)) {
+        if (!(model instanceof JSONObject) && !(model instanceof JSONArray) && !(model instanceof grails.converters.JSON)) {
             model = model as JSON
 
         }
@@ -795,5 +795,56 @@ class FCTagLib {
             }
             out << " "+value.toString()
         }
+    }
+
+    def documentType = {attrs ->
+        Map document = attrs.document
+        if (document.type == 'image') {
+            out << 'image'
+        }
+        else {
+            if (document.filename) {
+                int i = document.filename.lastIndexOf('.')
+                if (i >= 0 && i<document.filename.length() -1) {
+                    out << document.filename.substring(i, document.filename.length())
+                }
+                else {
+                    out << document.type
+                }
+            }
+        }
+    }
+
+    def comparisonClass = { attrs ->
+
+        if (attrs.current != null && attrs.previous != null) {
+            if (attrs.current > attrs.previous) {
+                out << "up"
+            }
+            else if (attrs.current < attrs.previous) {
+                out << "down"
+            }
+        }
+
+    }
+
+    def renderComparison = { attrs ->
+
+        List original = attrs.original
+        List changed = attrs.changed
+        int i = attrs.i
+        String property = attrs.property
+
+        out << '<span class="original hide">'
+        if (original && original.size() > i) {
+            out << original[i][property]
+        }
+        out << '</span>'
+        out << '<span class="changed hide">'
+        if (changed && changed.size() > i) {
+            out << changed[i][property]
+        }
+        out << '</span>'
+        out << '<span class="diff"></span>'
     }
 }

@@ -213,7 +213,7 @@ class ModelTagLib {
                 return "jQuery.inArray(${dependency.source}(), ${dependency.values as JSON}) >= 0"
             }
             else if (dependency.value) {
-                return "${depedency.source}() === ${dependency.value}"
+                return "${dependency.source}() === ${dependency.value}"
             }
             return "${dependency.source}()"
         }

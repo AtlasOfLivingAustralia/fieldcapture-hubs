@@ -1,4 +1,4 @@
-<%@ page contentType="text/html;charset=UTF-8" %>
+<%@ page import="au.org.ala.fieldcapture.SettingPageType" contentType="text/html;charset=UTF-8" %>
 <!DOCTYPE html>
 <html>
 <head>
@@ -19,14 +19,18 @@
             organisationEditUrl: '${g.createLink(action:"edit", id:"${organisation.organisationId}")}',
             organisationListUrl: '${g.createLink(action:"list")}',
             organisationViewUrl: '${g.createLink(action:"index", id:"${organisation.organisationId}")}',
+            organisationReportUrl: "${g.createLink(action:'editOrganisationReport')}",
+            organisationReportPDFUrl: "${g.createLink(action:'performanceReportPDF')}",
             organisationMembersUrl: "${loadPermissionsUrl}",
             imageLocation:"${resource(dir:'/images')}",
             logoLocation:"${resource(dir:'/images/filetypes')}",
             adHocReportsUrl: '${g.createLink(action:"getAdHocReportTypes")}',
-            dashboardUrl: "${g.createLink(controller: 'report', action: 'loadReport', params:[fq:'organisationFacet:'+organisation.name])}",
+            dashboardUrl: "${g.createLink(controller: 'report', action: 'loadReport', params:[fq:'organisationFacet:'+organisation.name, organisationId:organisation.organisationId])}",
+            performanceComparisonReportUrl: "${g.createLink(controller: 'report', action: 'performanceAssessmentComparisonReport', params:[organisationId:organisation.organisationId])}",
+            performanceAssessmentSummaryReportUrl: "${g.createLink(controller: 'report', action: 'performanceAssessmentSummaryReport', params:[organisationId:organisation.organisationId])}",
             activityViewUrl: '${g.createLink(controller: 'activity', action:'index')}',
             activityEditUrl: '${g.createLink(controller: 'activity', action:'enterData')}',
-            reportCreateUrl: '${g.createLink( action:'createAdHocReport')}',
+            reportCreateUrl: '${g.createLink( action:'createAdHocReport', id:organisation.organisationId)}',
             submitReportUrl: '${g.createLink( action:'ajaxSubmitReport', id:"${organisation.organisationId}")}',
             approveReportUrl: '${g.createLink( action:'ajaxApproveReport', id:"${organisation.organisationId}")}',
             rejectReportUrl: '${g.createLink( action:'ajaxRejectReport', id:"${organisation.organisationId}")}',
@@ -72,7 +76,7 @@
     </div>
 </div>
 
-<g:render template="/shared/declaration"/>
+<g:render template="/shared/declaration" model="${[declarationType:au.org.ala.fieldcapture.SettingPageType.ORGANISATION_DECLARATION]}"/>
 
 <r:script>
 
@@ -138,10 +142,16 @@
             }
         });
 
-        var storedTab = amplify.store(organisationTabStorageKey);
+        var storedTab = window.location.hash;
+        if (!storedTab) {
+            storedTab = amplify.store(organisationTabStorageKey);
+        }
 
         if (storedTab) {
-            $(storedTab + '-tab').tab('show');
+            var $tab = $(storedTab + '-tab');
+            if ($tab[0]) {
+                $tab.tab('show');
+            }
         }
 
         <g:if test="${content.admin.visible}">

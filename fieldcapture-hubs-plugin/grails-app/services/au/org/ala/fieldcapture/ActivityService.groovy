@@ -9,7 +9,9 @@ class ActivityService {
     def webService, grailsApplication, metadataService
 
     public static final String PROGRESS_PLANNED = 'planned'
-    private static def PROGRESS = [PROGRESS_PLANNED, 'started', 'finished', 'cancelled', 'deferred']
+    public static final String PROGRESS_FINISHED = 'finished'
+    public static final String PROGRESS_STARTED = 'started'
+    private static def PROGRESS = [PROGRESS_PLANNED, PROGRESS_STARTED, PROGRESS_FINISHED, 'cancelled', 'deferred']
 
     public static Comparator<String> PROGRESS_COMPARATOR = {a,b -> PROGRESS.indexOf(a) <=> PROGRESS.indexOf(b)}
 
@@ -129,6 +131,18 @@ class ActivityService {
     def isReport(activity) {
         def model = metadataService.getActivityModel(activity.type)
         return model.type == 'Report'
+    }
+
+    boolean isFinished(activity) {
+        return activity?.progress == PROGRESS_FINISHED
+    }
+
+    boolean isStarted(activity) {
+        return activity?.progress == PROGRESS_STARTED
+    }
+
+    boolean isStartedOrFinished(activity) {
+        return isFinished(activity) || isStarted(activity)
     }
 
     /**

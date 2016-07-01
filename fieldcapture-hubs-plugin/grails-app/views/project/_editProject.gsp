@@ -126,6 +126,12 @@
 
     </div>
 </div>
+<div class="row-fluid" data-bind="if:!contractDatesFixed()" >
+    <div class="span12">
+        <label class="checkbox" for="modifyActivityDates">Update activity dates to match project date changes?<input type="checkbox" id="modifyActivityDates" checked="checked" data-bind="checked:changeActivityDates">
+        <fc:iconHelp>Checking this box will cause activity dates to be adjusted to match the changes to the project dates.  This is not advised except for single stage projects like the green army.</fc:iconHelp></label>
+    </div>
+</div>
 
 <div class="row-fluid">
     <div class="span4">

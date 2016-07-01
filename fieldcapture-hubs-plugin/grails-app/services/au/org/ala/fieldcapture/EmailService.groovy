@@ -12,6 +12,7 @@ class EmailService {
             def subjectLine = settingService.getSettingText(mailSubjectTemplate, model)
             def body = settingService.getSettingText(mailTemplate, model).markdownToHtml()
 
+            log.info("Sending email: ${subjectLine} to: ${recipient}, from: ${sender}, cc:${ccList}, body: ${body}")
             // This is to prevent spamming real users while testing.
             def emailFilter = grailsApplication.config.emailFilter
             if (emailFilter) {
@@ -29,8 +30,9 @@ class EmailService {
                     recipient = [userService.getUser().userName]
                 }
                 ccList = ccList.findAll {it ==~ emailFilter}
+
+                log.info("After filtering, mail will be sent to:  ${recipient}, from: ${sender}, cc:${ccList}")
             }
-            log.info("Sending email: ${subjectLine} to: ${recipient}, from: ${sender}, cc:${ccList}, body: ${body}")
 
             mailService.sendMail {
                 to recipient

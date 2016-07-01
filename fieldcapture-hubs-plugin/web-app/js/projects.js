@@ -308,10 +308,15 @@ function ProjectViewModel(project, isUserEditor, organisations) {
     self.contractEndDate = ko.observable(project.contractEndDate).extend({simpleDate: false});
 
     self.transients = self.transients || {};
+    self.transients.programs = [];
+    self.transients.subprograms = {};
+    self.transients.subprogramsToDisplay = ko.computed(function () {
+        return self.transients.subprograms[self.associatedProgram()];
+    });
 
     var isBeforeToday = function(date) {
         return moment(date) < moment().startOf('day');
-    }
+    };
     var calculateDurationInDays = function(startDate, endDate) {
         var start = moment(startDate);
         var end = moment(endDate);
@@ -330,15 +335,16 @@ function ProjectViewModel(project, isUserEditor, organisations) {
         return end.toDate().toISOStringNoMillis();
     };
 
-    var contractDatesFixed = function() {
-        var programs = self.transients.programs;
+    self.contractDatesFixed = ko.computed(function() {
+        var programs = (self.transients.programsModel && self.transients.programsModel.programs) || [];
+        var program = self.associatedProgram(); // Checked outside the loop to force the dependency checker to register this variable (the first time this is computed, the array is empty)
         for (var i=0; i<programs.length; i++) {
-            if (programs[i].name === self.associatedProgram()) {
+            if (programs[i].name === program) {
                 return programs[i].projectDatesContracted;
             }
         }
         return true;
-    };
+    });
 
     self.transients.daysRemaining = ko.pureComputed(function() {
         var end = self.plannedEndDate();
@@ -408,7 +414,7 @@ function ProjectViewModel(project, isUserEditor, organisations) {
         if (updatingDurations) {
             return;
         }
-        if (contractDatesFixed()) {
+        if (self.contractDatesFixed()) {
             if (!self.plannedEndDate()) {
                 return;
             }
@@ -472,7 +478,7 @@ function ProjectViewModel(project, isUserEditor, organisations) {
         if (updatingDurations) {
             return;
         }
-        if (contractDatesFixed()) {
+        if (self.contractDatesFixed()) {
             if (!self.contractEndDate()) {
                 return;
             }
@@ -499,11 +505,7 @@ function ProjectViewModel(project, isUserEditor, organisations) {
     });
 
     self.transients.projectId = project.projectId;
-    self.transients.programs = [];
-    self.transients.subprograms = {};
-    self.transients.subprogramsToDisplay = ko.computed(function () {
-        return self.transients.subprograms[self.associatedProgram()];
-    });
+
     self.transients.dataSharingLicenses = [
             {lic:'CC BY', name:'Creative Commons Attribution'},
             {lic:'CC BY-NC', name:'Creative Commons Attribution-NonCommercial'},
@@ -560,6 +562,7 @@ function ProjectViewModel(project, isUserEditor, organisations) {
     });
 
     self.loadPrograms = function (programsModel) {
+        self.transients.programsModel = programsModel;
         $.each(programsModel.programs, function (i, program) {
             if (program.readOnly && self.associatedProgram() != program.name) {
                 return;
