@@ -181,7 +181,7 @@ var photoPointPhotos = function(site, photoPoint, activityId, existingPhotos, co
         files:files,
 
         uploadConfig : {
-            url: config.imageUploadUrl || fcConfig.imageUploadUrl,
+            url: (config && config.imageUploadUrl) || fcConfig.imageUploadUrl,
             target: files
         },
         removePhoto : function (photo) {
