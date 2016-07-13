@@ -202,7 +202,8 @@ class DashboardTagLib {
         if (!data) {
             return
         }
-        def chartId = label + '_chart'
+        out << '<div class="span6">'
+        def chartId = (label + '_chart').replaceAll(" ", "-")
 
         out << "<div class='chartTitle'>${title}${helpText}</div>"
 
@@ -227,6 +228,7 @@ class DashboardTagLib {
                 out << gvisualization.barCoreChart([elementId: chartId, legendTextStyle:chartFont(), fontSize:11, tooltipTextStyle:chartFont(), legend:"none", dynamicLoading: true, title: title, columns: columns, data: data, chartArea:new Expando(left:140, top:topMargin, bottom:bottomMargin, width:'290', height:height-topMargin-bottomMargin), width:'450', height:height, backgroundColor: 'transparent'])
                 break;
         }
+        out << '</div>'
     }
 
     def chartFont() {
