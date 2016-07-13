@@ -87,17 +87,21 @@ var PhotoPointViewModel = function(site, activity, config) {
         return toSave;
     };
 
-    self.isDirty = function() {
-        var isDirty = false;
-        $.each(self.photoPoints(), function(i, photoPoint) {
-            isDirty = isDirty || photoPoint.isDirty();
-        });
-        return isDirty;
+    // Simulate the behaviour of the dirty flag manually.
+    self.dirtyFlag = {
+        isDirty:ko.computed(function() {
+            var dirty = false;
+            $.each(self.photoPoints(), function(i, photo) {
+                dirty = dirty || photo.dirtyFlag.isDirty();
+            });
+            return dirty;
+        }),
+        reset:function() {
+            $.each(self.photoPoints(), function(i, photo) {
+                photo.dirtyFlag.reset();
+            });
+        }
     };
-
-    self.reset = function() {};
-
-
 };
 
 var photoPointPOI = function(data) {
@@ -134,14 +138,12 @@ var photoPointPhotos = function(site, photoPoint, activityId, existingPhotos, co
     var files = ko.observableArray();
     var photos = ko.observableArray();
     var isNewPhotopoint = !photoPoint;
-    var isDirty = isNewPhotopoint;
-
     var photoPoint = photoPointPOI(photoPoint);
 
     $.each(existingPhotos, function(i, photo) {
         photos.push(photoPointPhoto(photo));
     });
-
+    var selfDirty = ko.observable(isNewPhotopoint);
 
     files.subscribe(function(newValue) {
         var f = newValue.splice(0, newValue.length);
@@ -164,7 +166,8 @@ var photoPointPhotos = function(site, photoPoint, activityId, existingPhotos, co
 
 
             };
-            isDirty = true;
+            selfDirty(true);
+
             if (isNewPhotopoint && data.lat && data.lng && !photoPoint.geometry.decimalLatitude() && !photoPoint.geometry.decimalLongitude()) {
                 photoPoint.geometry.decimalLatitude(data.lat);
                 photoPoint.geometry.decimalLongitude(data.lng);
@@ -196,21 +199,30 @@ var photoPointPhotos = function(site, photoPoint, activityId, existingPhotos, co
             return isNewPhotopoint ? 'editablePhotoPoint' : 'readOnlyPhotoPoint'
         },
         isNew : function() { return isNewPhotopoint },
-        isDirty: function() {
-            if (isDirty) {
-                return true;
-            };
-            var tmpPhotos = photos();
-            for (var i=0; i<tmpPhotos.length; i++) {
-                if (tmpPhotos[i].dirtyFlag.isDirty()) {
+        dirtyFlag: {
+            isDirty: ko.computed(function() {
+                if (selfDirty()) {
                     return true;
                 }
+                var tmpPhotos = photos();
+                for (var i=0; i<tmpPhotos.length; i++) {
+                    if (tmpPhotos[i].dirtyFlag.isDirty()) {
+                        return true;
+                    }
+                }
+                return false;
+            }),
+            reset: function() {
+                selfDirty(false);
+                var tmpPhotos = photos();
+                for (var i=0; i<tmpPhotos.length; i++) {
+                    tmpPhotos[i].dirtyFlag.reset();
+                }
             }
-            return false;
         }
 
     }
-}
+};
 
 var photoPointPhoto = function(data) {
     if (!data) {
