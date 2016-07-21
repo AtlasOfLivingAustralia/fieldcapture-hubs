@@ -108,13 +108,25 @@ function convertToIsoDate(date) {
                 day = date.substr(0,2),
                 hours = date.length > 12 ? date.substr(11,2) : 0,
                 minutes = date.length > 15 ? date.substr(14,2) : 0;
-            return new Date(year, month, day, hours, minutes).toISOStringNoMillis();
+            var dt = new Date(year, month, day, hours, minutes);
+            if (isValidDate(dt)) {
+                return dt.toISOStringNoMillis();
+            }
+            else {
+                return '';
+            }
         } else {
             return '';
         }
     } else if (typeof date === 'object') {
         // assume a date object
-        return date.toISOStringNoMillis();
+        if (isValidDate(date)) {
+            return date.toISOStringNoMillis();
+        }
+        else {
+            return '';
+        }
+
     } else {
         return '';
     }
