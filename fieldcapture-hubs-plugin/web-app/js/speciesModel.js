@@ -90,13 +90,14 @@ var SpeciesViewModel = function(data, speciesLists) {
         self.transients.textFieldValue(self.name());
         if (self.guid()) {
 
-            var profileUrl = fcConfig.bieUrl + '/species/' + self.guid();
+            var profileUrl = fcConfig.bieUrl + '/species/' + encodeURIComponent(self.guid());
             $.ajax({
-                url: fcConfig.speciesProfileUrl+'/' + self.guid(),
+                url: fcConfig.speciesProfileUrl+'/' + encodeURIComponent(self.guid()),
                 dataType: 'json',
                 success: function (data) {
                     var profileInfo = '<a href="'+profileUrl+'" target="_blank">';
-                    var imageUrl = data.taxonConcept.smallImageUrl;
+                    var imageUrl = data.thumbnail || (data.taxonConcept && data.taxonConcept.smallImageUrl);
+
                     if (imageUrl) {
                         profileInfo += "<img title='Click to show profile' class='taxon-image ui-corner-all' src='"+imageUrl+"'>";
                     }

@@ -432,7 +432,7 @@ class FCTagLib {
         def requestUri = removeContext(serverUrl) + request.forwardURI
         def logoutUrl = attrs.logoutUrl ?: serverUrl + "/session/logout"
         def loginReturnToUrl = attrs.loginReturnToUrl ?: requestUri
-        def logoutReturnToUrl = attrs.logoutReturnToUrl ?: requestUri
+        def logoutReturnToUrl = attrs.logoutReturnToUrl ?: params.returnTo ?: requestUri
         def casLoginUrl = attrs.casLoginUrl ?: grailsApplication.config.security.cas.loginUrl ?: "https://auth.ala.org.au/cas/login"
         def casLogoutUrl = attrs.casLogoutUrl ?: grailsApplication.config.security.cas.logoutUrl ?: "https://auth.ala.org.au/cas/logout"
         def cssClass = attrs.cssClass?:"btn btn-small btn-inverse btn-login"
