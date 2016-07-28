@@ -78,7 +78,7 @@
                 <fc:siteFacet site="${site}" facet="nrm" label="NRM:"/>
             </p>
             <p>
-                <fc:siteFacet site="${site}" facet="elect" label="Electorate:"/>
+                <fc:siteFacet site="${site}" facet="elect" label="Electorate:" titleCase="true"/>
             </p>
             <p>
                 <fc:siteFacet site="${site}" facet="locality" label="Locality:"/>

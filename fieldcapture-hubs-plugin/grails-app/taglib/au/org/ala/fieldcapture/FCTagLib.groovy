@@ -3,6 +3,7 @@ package au.org.ala.fieldcapture
 import au.org.ala.cas.util.AuthenticationCookieUtils
 import grails.converters.JSON
 import groovy.xml.MarkupBuilder
+import org.apache.commons.lang.WordUtils
 import org.codehaus.groovy.grails.web.json.JSONArray
 import org.codehaus.groovy.grails.web.json.JSONObject
 import org.codehaus.groovy.grails.web.servlet.mvc.GrailsParameterMap
@@ -787,7 +788,12 @@ class FCTagLib {
             StringBuilder value = new StringBuilder()
             int max = attrs.max ? Math.min(Integer.parseInt(attrs.max), facetValue.size()):facetValue.size()
             for (int i in 0..(max-1)) {
-                value.append(g.message(code:'label.'+facetValue[i], default:facetValue[i]))
+                def defaultValue = facetValue[i]
+                if (attrs.titleCase) {
+                    defaultValue = WordUtils.capitalize(defaultValue?defaultValue.toLowerCase():'')
+                }
+
+                value.append(g.message(code:'label.'+facetValue[i], default:defaultValue))
                 if (i < max-1) {
                     value.append(', ')
                 }
