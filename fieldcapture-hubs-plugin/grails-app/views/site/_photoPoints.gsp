@@ -28,7 +28,7 @@
                             <tbody data-bind="foreach:photos">
                                 <tr data-bind="visible:status() !== 'deleted'">
                                     <td style="width:40%;">
-                                        <a data-bind="attr:{href:url, alt:name, title:'[click to expand] '+name}" target="_photo" rel="gallery"><img data-bind="attr:{src:thumbnailUrl}"></a>
+                                        <a data-bind="attr:{href:url, alt:name, title:'[click to expand] ' + (name() || filename()), 'data-fancybox-title':name()||filename()}" target="_photo" rel="gallery"><img data-bind="attr:{src:thumbnailUrl}"></a>
                                     </td>
                                     <td style="width:45%;" data-bind="template:{name:'${readOnly?'photoViewTemplate':'photoEditTemplate'}'}">
 
