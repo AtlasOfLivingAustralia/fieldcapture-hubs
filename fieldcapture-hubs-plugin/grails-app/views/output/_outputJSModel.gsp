@@ -1,7 +1,7 @@
 <r:script>
     <g:set var="outputNameAsIdentifer" value="${fc.toSingleWord([name: outputName])}"/>
     // load dynamic models - usually objects in a list
-    <md:jsModelObjects model="${model}" site="${site}" speciesLists="${speciesLists}" edit="${edit}"/>
+    <md:jsModelObjects model="${model}" site="${site}" speciesLists="${speciesLists}" edit="${edit}" printable="${printable?:''}"/>
 
     window["${outputNameAsIdentifer + 'ViewModel'}"] = function (output, site, config) {
         var self = this;
@@ -26,7 +26,7 @@
         self.transients.dummy = ko.observable();
 
         // add declarations for dynamic data
-        <md:jsViewModel model="${model}"  output="${outputName}"  edit="${edit}"/>
+        <md:jsViewModel model="${model}"  output="${outputName}"  edit="${edit}" printable="${printable?:''}"/>
 
         // this will be called when generating a savable model to remove transient properties
         self.removeBeforeSave = function (jsData) {

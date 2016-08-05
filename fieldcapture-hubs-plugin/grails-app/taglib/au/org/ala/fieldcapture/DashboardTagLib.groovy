@@ -21,10 +21,10 @@ class DashboardTagLib {
                 renderTarget(score, target)
             }
             else if (!score.score.displayType) {
-                renderSingleScore(score)
+                renderSingleScore(score, attrs)
             }
             else {
-                renderGroupedScore(score)
+                renderGroupedScore(score, attrs)
             }
         }
         catch (Exception e) {
@@ -128,7 +128,7 @@ class DashboardTagLib {
             </div>"""
     }
 
-    private void renderSingleScore(score) {
+    private void renderSingleScore(score, attrs) {
         switch (score.score.aggregationType.name) {
 
             case 'COUNT':
@@ -136,7 +136,7 @@ class DashboardTagLib {
             case 'AVERAGE':
 
                 def result = score.result as Double ?: 0
-                out << "<div><b>${score.score.label}</b>${helpText(score)} : ${g.formatNumber(type:'number',number:result, maxFractionDigits: 2, groupingUsed:true)}</div>"
+                out << "<div><b>${score.score.label}</b>${helpText(score, attrs)} : ${g.formatNumber(type:'number',number:result, maxFractionDigits: 2, groupingUsed:true)}</div>"
                 break
             case 'HISTOGRAM':
                 if (score.result.size() <= 1) {
@@ -144,7 +144,7 @@ class DashboardTagLib {
                 }
                 def chartData = toArray(score.result)
                 def chartType = score.score.displayType?:'piechart'
-                drawChart(chartType, score.score.label, score.score.label, helpText(score), [['string', score.score.label], ['number', 'Count']], chartData)
+                drawChart(chartType, score.score.label, score.score.label, helpText(score, attrs), [['string', score.score.label], ['number', 'Count']], chartData)
                 break
             case 'SET':
                 out << "<div><b>${score.score.label}</b> :${score.result.join(',')}</div>"
@@ -160,14 +160,14 @@ class DashboardTagLib {
         chartData
     }
 
-    private def helpText(score) {
-        if (score.score.description) {
+    private def helpText(score, attrs) {
+        if (score.score.description && !attrs.printable) {
             return fc.iconHelp([title:'']){score.score.description}
         }
         return ''
     }
 
-    private void renderGroupedScore(score) {
+    private void renderGroupedScore(score, attrs) {
         if (score.result && score.result.size() == 1) {
             return
         }
@@ -177,13 +177,13 @@ class DashboardTagLib {
             case 'COUNT':
                 def chartData = score.groups.collect{[it.group, it.results[0].result]}.findAll{it[1]}.sort{a,b -> a[0].compareTo(b[0])}
                 def chartType = score.score.displayType?:'piechart'
-                drawChart(chartType, score.score.label, score.label?:'', helpText(score), [['string', score.label?:''], ['number', score.score.label]], chartData)
+                drawChart(chartType, score.score.label, score.label?:'', helpText(score, attrs), [['string', score.label?:''], ['number', score.score.label]], chartData)
 
                 break
             case 'HISTOGRAM':
                 def chartData = toArray(score.result)
                 def chartType = score.score.displayType?:'piechart'
-                drawChart(chartType, score.score.label, score.score.label, helpText(score), [['string', score.score.label], ['number', 'Count']], chartData)
+                drawChart(chartType, score.score.label, score.score.label, helpText(score, attrs), [['string', score.score.label], ['number', 'Count']], chartData)
                 break
 
         }

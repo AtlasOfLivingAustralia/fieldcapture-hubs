@@ -75,7 +75,12 @@ class ModelTagLib {
         def validate = validationAttribute(attrs, model, editable)
 
         if (attrs.printable) {
-            renderer = new PrintModelWidgetRenderer()
+            if (attrs.printable == 'pdf') {
+                renderer = new PDFModelWidgetRenderer()
+            }
+            else {
+                renderer = new PrintModelWidgetRenderer()
+            }
         } else {
             def toEdit = editable && !model.computed && !model.noEdit
             if (toEdit) {
@@ -499,15 +504,15 @@ class ModelTagLib {
 
     def table(out, attrs, model) {
 
-        def isprint = attrs.printable
+        def isprintblankform = attrs.printable && attrs.printable != 'pdf'
 
         def extraClassAttrs = model.class ?: ""
-        def tableClass = isprint ? "printed-form-table" : ""
+        def tableClass = isprintblankform ? "printed-form-table" : ""
         def validation = model.editableRows && model.source ? "data-bind=\"independentlyValidated:data.${model.source}\"":""
         out << "<div class=\"row-fluid ${extraClassAttrs}\">\n"
         out << INDENT*3 << "<table class=\"table table-bordered ${model.source} ${tableClass}\" ${validation}>\n"
         tableHeader out, attrs, model
-        if (isprint) {
+        if (isprintblankform) {
             tableBodyPrint out, attrs, model
         } else {
             tableBodyEdit out, attrs, model
