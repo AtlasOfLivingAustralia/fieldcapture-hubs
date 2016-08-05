@@ -11,7 +11,7 @@
     </div>
     <g:if test="${!output.outputNotCompleted}">
         <!-- add the dynamic components -->
-        <md:modelView model="${outputModel}" site="${site}"/>
+        <md:modelView model="${outputModel}" site="${site}" printable="${printable}"/>
     </g:if>
     <r:script>
         $(function(){

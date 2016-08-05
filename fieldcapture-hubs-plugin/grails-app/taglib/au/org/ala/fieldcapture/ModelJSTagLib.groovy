@@ -430,7 +430,8 @@ class ModelJSTagLib {
                         out << INDENT*3 << "}\n"
                         break;
                     case 'species':
-                        out << INDENT*3 << "this.${col.name} =  new SpeciesViewModel(data['${col.name}'], speciesLists);\n"
+                        def printable = attrs.printable ? attrs.printable : ''
+                        out << INDENT*3 << "this.${col.name} =  new SpeciesViewModel(data['${col.name}'], speciesLists, {printable:'${printable}'});\n"
                         break
                     case 'stringList':
                         out << INDENT*3 << "this.${col.name}=ko.observableArray(orEmptyArray(data['${col.name}']));\n";
@@ -662,7 +663,8 @@ class ModelJSTagLib {
     }
 
     def speciesModel(attrs, model, out) {
-        out << INDENT*3 << "self.data.${model.name} = new SpeciesViewModel({}, speciesLists);\n"
+        def printable = attrs.printable ? attrs.printable : ''
+        out << INDENT*3 << "self.data.${model.name} = new SpeciesViewModel({}, speciesLists, {printable:'${printable}'});\n"
     }
 
     def modelConstraints(model, out) {
