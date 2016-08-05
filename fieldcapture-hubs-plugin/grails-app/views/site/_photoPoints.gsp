@@ -1,14 +1,16 @@
 <g:if test="${!printView}">
 <div data-bind="visible:!site">
-    No site has been selected.  To add photos to this activity, select a site.
+    No site has been selected.  <g:if test="${!readOnly}">To add photos to this activity, select a site.</g:if>
 </div>
 
 <div data-bind="visible:site">
     <div data-bind="visible:photoPoints().length == 0">
-       <p>There are no photo points defined for the selected site.  To create a photo point, use the "New Photo Point" button below.</p>
+       <p>There are no photo points defined for the selected site.  <g:if test="${!readOnly}">To create a photo point, use the "New Photo Point" button below.</g:if></p>
     </div>
 
+    <g:if test="${!readOnly}">
     All points of interest associated with the site will display here. Only attach photos to the photo points relevant to this activity.
+    </g:if>
     <table id="photoPointTable" class="table table-bordered photoPoints imageList">
         <thead>
             <tr>
@@ -26,7 +28,7 @@
                             <tbody data-bind="foreach:photos">
                                 <tr data-bind="visible:status() !== 'deleted'">
                                     <td style="width:40%;">
-                                        <a data-bind="attr:{href:url, alt:name, title:'[click to expand] '+name}" target="_photo" rel="gallery"><img data-bind="attr:{src:thumbnailUrl}"></a>
+                                        <a data-bind="attr:{href:url, alt:name, title:'[click to expand] ' + (name() || filename()), 'data-fancybox-title':name()||filename()}" target="_photo" rel="gallery"><img data-bind="attr:{src:thumbnailUrl}"></a>
                                     </td>
                                     <td style="width:45%;" data-bind="template:{name:'${readOnly?'photoViewTemplate':'photoEditTemplate'}'}">
 
@@ -94,7 +96,6 @@
 
     </table>
 </div>
-    <g:render template="/shared/imagerViewerModal"></g:render>
 
 <script type="text/html" id="readOnlyPhotoPoint">
 
