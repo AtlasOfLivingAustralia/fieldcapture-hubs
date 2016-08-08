@@ -192,10 +192,15 @@ function formatBytes(bytes) {
  **/
 function showAlert(message, alerttype, target) {
 
-    $('#'+target).append('<div id="alertdiv" class="alert ' +  alerttype + '"><a class="close" data-dismiss="alert">×</a><span>'+message+'</span></div>')
+    showAlertWithSelector(message, alerttype, '#'+target);
+}
+
+function showAlertWithSelector(message, alerttype, targetSelector) {
+
+    $(targetSelector).append('<div class="alert ' +  alerttype + ' auto-close-alert"><a class="close" data-dismiss="alert">×</a><span>'+message+'</span></div>')
 
     setTimeout(function() { // this will automatically close the alert and remove this if the users doesnt close it in 5 secs
-        $("#alertdiv").remove();
+        $(".auto-close-alert").remove();
     }, 5000);
 }
 
@@ -231,7 +236,7 @@ function autoSaveModel(viewModel, saveUrl, options) {
         storageKey:window.location.href+'.autosaveData',
         autoSaveIntervalInSeconds:60,
         restoredDataWarningSelector:"#restoredData",
-        resultsMessageId:"save-result-placeholder",
+        resultsMessageSelector:"#save-result-placeholder",
         timeoutMessageSelector:"#timeoutMessage",
         errorMessage:"Failed to save your data: ",
         successMessage:"Save successful!",
@@ -336,8 +341,8 @@ function autoSaveModel(viewModel, saveUrl, options) {
                     if (config.blockUIOnSave) {
                         $.unblockUI();
                     }
-                    showAlert(config.errorMessage + data.detail + ' \n' + data.error,
-                        "alert-error",config.resultsMessageId);
+                    showAlertWithSelector(config.errorMessage + data.detail + ' \n' + data.error,
+                        "alert-error",config.resultsMessageSelector);
                     if (typeof errorCallback === 'function') {
                         errorCallback(data);
                     }
@@ -350,7 +355,7 @@ function autoSaveModel(viewModel, saveUrl, options) {
                         blockUIWithMessage(config.blockUISaveSuccessMessage);
                     }
                     else {
-                        showAlert(config.successMessage, "alert-success", config.resultsMessageId);
+                        showAlertWithSelector(config.successMessage, "alert-success", config.resultsMessageSelector);
                     }
                     viewModel.cancelAutosave();
                     viewModel.dirtyFlag.reset();
