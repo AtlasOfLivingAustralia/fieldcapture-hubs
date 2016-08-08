@@ -210,7 +210,7 @@ class DashboardTagLib {
         switch (type) {
 
             case 'piechart':
-                out << "<div id=\"${chartId}\"></div>"
+                out << "<div id=\"${chartId}\" class=\"chart\"></div>"
                 out << gvisualization.pieCoreChart([elementId: chartId,  chartArea:new Expando(left:20, top:5, right:20, width:'430', height:'300'), dynamicLoading: true, title: title, columns: columns, data: data, width:'450', height:'300', backgroundColor: 'transparent'])
                 break;
             case 'barchart':
@@ -220,10 +220,10 @@ class DashboardTagLib {
                 def height = Math.max(300, data.size()*20+topMargin+bottomMargin)
                 if (height > 500) {
                     topMargin = 0
-                    out << "<div id=\"${chartId}\" style=\"height:500px; overflow-y:scroll; margin-bottom:20px;\"></div>"
+                    out << "<div id=\"${chartId}\" class=\"chart\" style=\"height:500px; overflow-y:scroll; margin-bottom:20px;\"></div>"
                 }
                 else {
-                    out << "<div id=\"${chartId}\"></div>"
+                    out << "<div id=\"${chartId}\" class=\"chart\"></div>"
                 }
                 out << gvisualization.barCoreChart([elementId: chartId, legendTextStyle:chartFont(), fontSize:11, tooltipTextStyle:chartFont(), legend:"none", dynamicLoading: true, title: title, columns: columns, data: data, chartArea:new Expando(left:140, top:topMargin, bottom:bottomMargin, width:'290', height:height-topMargin-bottomMargin), width:'450', height:height, backgroundColor: 'transparent'])
                 break;
