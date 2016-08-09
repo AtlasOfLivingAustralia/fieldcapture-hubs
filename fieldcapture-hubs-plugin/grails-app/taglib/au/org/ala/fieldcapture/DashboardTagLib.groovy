@@ -144,7 +144,7 @@ class DashboardTagLib {
                 }
                 def chartData = toArray(score.result)
                 def chartType = score.score.displayType?:'piechart'
-                drawChart(chartType, score.score.label, score.score.label, helpText(score, attrs), [['string', score.score.label], ['number', 'Count']], chartData)
+                drawChart(chartType, score.score.label, score.score.label, helpText(score, attrs), [['string', score.score.label], ['number', 'Count']], chartData, attrs)
                 break
             case 'SET':
                 out << "<div><b>${score.score.label}</b> :${score.result.join(',')}</div>"
@@ -177,13 +177,13 @@ class DashboardTagLib {
             case 'COUNT':
                 def chartData = score.groups.collect{[it.group, it.results[0].result]}.findAll{it[1]}.sort{a,b -> a[0].compareTo(b[0])}
                 def chartType = score.score.displayType?:'piechart'
-                drawChart(chartType, score.score.label, score.label?:'', helpText(score, attrs), [['string', score.label?:''], ['number', score.score.label]], chartData)
+                drawChart(chartType, score.score.label, score.label?:'', helpText(score, attrs), [['string', score.label?:''], ['number', score.score.label]], chartData, attrs)
 
                 break
             case 'HISTOGRAM':
                 def chartData = toArray(score.result)
                 def chartType = score.score.displayType?:'piechart'
-                drawChart(chartType, score.score.label, score.score.label, helpText(score, attrs), [['string', score.score.label], ['number', 'Count']], chartData)
+                drawChart(chartType, score.score.label, score.score.label, helpText(score, attrs), [['string', score.score.label], ['number', 'Count']], chartData, attrs)
                 break
 
         }
@@ -198,11 +198,11 @@ class DashboardTagLib {
 
     }
 
-    private void drawChart(type, label, title, helpText, columns, data) {
+    private void drawChart(type, label, title, helpText, columns, data, attrs) {
         if (!data) {
             return
         }
-        out << '<div class="span6">'
+        out << '<div class="chart-plus-title">'
         def chartId = (label + '_chart').replaceAll(" ", "-")
 
         out << "<div class='chartTitle'>${title}${helpText}</div>"
@@ -218,7 +218,7 @@ class DashboardTagLib {
                 def topMargin = 5
                 def bottomMargin = 50
                 def height = Math.max(300, data.size()*20+topMargin+bottomMargin)
-                if (height > 500) {
+                if (!attrs.printable && height > 500) {
                     topMargin = 0
                     out << "<div id=\"${chartId}\" class=\"chart\" style=\"height:500px; overflow-y:scroll; margin-bottom:20px;\"></div>"
                 }
