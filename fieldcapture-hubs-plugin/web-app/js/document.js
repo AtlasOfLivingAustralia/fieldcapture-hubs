@@ -40,6 +40,13 @@ function DocumentViewModel (doc, owner, settings) {
     this.filetypeImg = function () {
         return self.settings.imageLocation + '/filetypes/' + iconnameFromFilename(self.filename());
     };
+    this.iconImgUrl = function() {
+        if (self.type == 'image' || (self.contentType() && self.contentType().indexOf('image') == 0)) {
+            return self.thumbnailUrl;
+        }
+        return self.filetypeImg();
+    };
+    this.uploadDate = ko.observable(doc.lastUpdated).extend({simpleDate:false});
     this.status = ko.observable(doc.status || 'active');
     this.attribution = ko.observable(doc ? doc.attribution : '');
     this.license = ko.observable(doc ? doc.license : '');
