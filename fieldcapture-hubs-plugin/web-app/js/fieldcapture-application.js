@@ -563,19 +563,7 @@ function Documents() {
             if (listContains(contentTypes.pdf, contentType)) {
                 val = fcConfig.pdfViewer + '?file=' + encodeURIComponent(selectedDoc.url);
             } else if (listContains(contentTypes.convert, contentType)) {
-
-                // jq promises are fundamentally broken, so...
-                val = $.Deferred(function(dfd) {
-                    $.get(fcConfig.pdfgenUrl, {"file": selectedDoc.url }, $.noop, "json")
-                        .promise()
-                        .done(function(data) {
-                            dfd.resolve(fcConfig.pdfViewer + '?file=' + encodeURIComponent(data.location));
-                        })
-                        .fail(function(jqXHR, textStatus, errorThrown) {
-                            console.warn('get pdf failed', jqXHR, textStatus, errorThrown);
-                            dfd.resolve(fcConfig.errorViewer || '');
-                        })
-                }).promise();
+                val = fcConfig.pdfgenUrl+'?file='+encodeURIComponent(selectedDoc.url);
             } else if (listContains(contentTypes.image, contentType)) {
                 val = fcConfig.imgViewer + '?file=' + encodeURIComponent(selectedDoc.url);
             } else if (listContains(contentTypes.video, contentType)) {
