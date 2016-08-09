@@ -37,7 +37,7 @@ class ResourceController {
             result = [error:"Error generating a PDF"]
         }
         if (result.error) {
-            render view:'/error', model:[error:"An error occurred generating the MERI plan report."]
+            render view:'error'
         }
 
     }
