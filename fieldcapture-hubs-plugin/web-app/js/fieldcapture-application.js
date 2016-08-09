@@ -532,6 +532,10 @@ function Documents() {
         return true;
     };
 
+    self.isSelected = function(data) {
+        return data == ko.utils.unwrapObservable(self.selectedDocument);
+    };
+
     self.previewTemplate = ko.pureComputed(function() {
         var selectedDoc = self.selectedDocument();
 
