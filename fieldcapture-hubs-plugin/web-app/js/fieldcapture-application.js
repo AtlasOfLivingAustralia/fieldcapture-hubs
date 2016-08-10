@@ -592,6 +592,20 @@ function Documents() {
         });
     });
 
+
+    self.distinctDocumentProperty = function(prop) {
+        var results = [];
+        for (var i=0; i<self.documents().length; i++) {
+            var value = ko.utils.unwrapObservable(self.documents()[i][prop]);
+
+            if (value && results.indexOf(value) < 0) {
+                results.push(value);
+            }
+        }
+        results.sort();
+        return results;
+    };
+
     self.docViewerClass = ko.pureComputed(function() {
         return self.selectedDocument() ? 'span6': 'hidden';
     });

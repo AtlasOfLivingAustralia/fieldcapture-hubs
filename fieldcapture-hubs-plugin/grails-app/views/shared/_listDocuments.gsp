@@ -1,40 +1,48 @@
+<style type="text/css">
+    #docs-table th {
+        white-space: normal;
+    }
+    #docs-table .media-object {
+        width:32px;
+        min-width: 32px;
+        height: 32px;
+    }
+    #filter-by-stage {
+        margin-bottom: 5px;
+    }
+
+</style>
 <div class="row-fluid row-eq-height" id="${containerId}">
     <div class="span4">
-        %{--<div class="btn-toolbar">--}%
-            %{--<div class="input-prepend input-append text-left">--}%
-                %{--<span class="add-on"><i class="fa fa-filter"></i></span>--}%
-                %{--<input type="text" class="input-xlarge" placeholder="Filter documents..." data-bind="textInput: documentFilter">--}%
-                %{--<div class="btn-group">--}%
-                    %{--<button type="button" class="btn dropdown-toggle" style="padding-bottom:3px" data-toggle="dropdown">--}%
-                        %{--<span data-bind="text: documentFilterField().label"></span>--}%
-                        %{--<span class="caret"></span>--}%
-                    %{--</button>--}%
-                    %{--<ul class="dropdown-menu" data-bind="foreach: documentFilterFieldOptions">--}%
-                        %{--<li><a data-bind="{ text: $data.label, click: $parent.documentFilterField }"></a></li>--}%
-                    %{--</ul>--}%
-                %{--</div>--}%
-            %{--</div>--}%
-        %{--</div>--}%
+        <div class="row-fluid">
+            <div id="filter-by-stage" class="btn-group pull-right">
+                <a class="btn dropdown-toggle" href="#">
+                    <i class="fa fa-filter"></i> Filter by stage
+                    <span class="caret"></span>
+                </a>
+                <ul class="dropdown-menu" data-bind="foreach:distinctDocumentProperty('stage')">
+                    <li><a href="#"><label class="checkbox"> <input name="stage-filter" class="checkbox" type="checkbox" data-bind="attr:{value:$data}" checked> Stage <span data-bind="text:$data"></span></label></a> </li>
+                </ul>
 
-        %{--<div class="well well-small fc-docs-list-well">--}%
-            %{--<ul class="nav nav-list fc-docs-list" data-bind="foreach: { data: filteredDocuments, afterAdd: showListItem, beforeRemove: hideListItem }">--}%
-                %{--<li class="pointer" data-bind="{ if: (role() == '${filterBy}' || 'all' == '${filterBy}') && role() != '${ignore}' && role() != 'variation', click: $parent.selectDocument, css: { active: $parent.selectedDocument() == $data } }">--}%
-                    %{--<div class="clearfix space-after media" data-bind="template:ko.utils.unwrapObservable(type) === 'image' ? 'imageDocTmpl' : 'objDocTmpl'"></div>--}%
-                %{--</li>--}%
-            %{--</ul>--}%
-        %{--</div>--}%
+            </div>
 
+
+        </div>
+        <div></div>
         <table id="docs-table" class="table">
             <thead>
+            <tr>
                 <th></th>
                 <th>Name</th>
                 <th>Stage</th>
-                <th>Date</th>
+                <th>Date Uploaded</th>
                 <th></th>
+            </tr>
+
             </thead>
             <tbody data-bind="foreach: filteredDocuments">
                 <tr data-bind="click: $parent.selectDocument">
-                    <td><img class="media-object" data-bind="attr:{src:iconImgUrl(), alt:contentType, title:name}" alt="document icon" style="width:32px; height:32px;"></td>
+                    <td><img class="media-object" data-bind="attr:{src:iconImgUrl(), alt:contentType, title:name}" alt="document icon"></td>
 
                     <td>
                          <span data-bind="text:name"></span>
@@ -53,6 +61,7 @@
                 </tr>
             </tbody>
         </table>
+
     </div>
     <div class="fc-resource-preview-container span8" data-bind="{ template: { name: previewTemplate } }"></div>
 </div>
