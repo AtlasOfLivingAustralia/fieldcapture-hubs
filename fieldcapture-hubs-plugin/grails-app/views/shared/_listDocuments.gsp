@@ -21,7 +21,7 @@
                     <span class="caret"></span>
                 </a>
                 <ul class="dropdown-menu" data-bind="foreach:distinctDocumentProperty('stage')">
-                    <li><a href="#"><label class="checkbox"> <input name="stage-filter" class="checkbox" type="checkbox" data-bind="attr:{value:$data}" checked> Stage <span data-bind="text:$data"></span></label></a> </li>
+                    <li><a href="#"><label class="checkbox"> <input name="stage-filter" class="checkbox" type="checkbox" data-bind="attr:{value:$data}"> Stage <span data-bind="text:$data"></span></label></a> </li>
                 </ul>
 
             </div>
