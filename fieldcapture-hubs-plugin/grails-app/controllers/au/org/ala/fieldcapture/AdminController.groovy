@@ -22,6 +22,7 @@ class AdminController {
     def siteService
     def outputService
     def documentService
+    def organisationService
 
     def index() {}
 
@@ -386,7 +387,7 @@ class AdminController {
             results = searchService.allProjects(params, searchTerm)
         }
 
-        render(view: 'audit', model:[results: results, searchTerm: params.searchTerm])
+        render(view: 'audit', model:[results: results, searchTerm: params.searchTerm, searchType:'Project', action:'auditProject', id:'projectId'])
     }
 
     def auditProject() {
@@ -404,6 +405,42 @@ class AdminController {
             flash.message = "No project specified!"
             redirect(action:'audit')
         }
+    }
+
+    def auditOrganisationSearch() {
+
+        def results = []
+        def searchTerm = params.searchTerm as String
+        if (searchTerm) {
+            if (!searchTerm.endsWith("*")) {
+                searchTerm += "*"
+            }
+            results = organisationService.search(0, 50, searchTerm)
+        }
+
+        render(view: 'audit', model:[results: results, searchTerm: params.searchTerm, searchType:'Organisation', action:'auditOrganisation', id:'organisationId'])
+    }
+
+    def auditOrganisation() {
+        def id = params.id
+        if (id) {
+            def organisation = organisationService.get(id)
+            if (organisation) {
+                def messages = auditService.getAuditMessagesForOrganisation(id)
+                [organisation: organisation, messages: messages?.messages, userMap: messages?.userMap]
+            } else {
+                flash.message = "Specified organisation id does not exist!"
+                redirect(action:'audit')
+            }
+        } else {
+            flash.message = "No organisation specified!"
+            redirect(action:'audit')
+        }
+    }
+
+    def auditSettings() {
+        Map messages = auditService.getAuditMessagesForSettings()
+        [messages: messages?.messages, userMap: messages?.userMap, nameKey:'key']
     }
 
     def auditMessageDetails() {

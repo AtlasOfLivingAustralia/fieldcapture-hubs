@@ -33,7 +33,7 @@
     </div>
     <div class="row-fluid">
         <div class="span12 text-right">
-            <a href="${createLink(action:'auditProject', params:[id: projectId,searchTerm:searchTerm])}" class="btn btn-default btn-small"><i class="icon-backward"></i> Back</a>
+            <a href="${params.returnTo}" class="btn btn-default btn-small"><i class="icon-backward"></i> Back</a>
         </div>
     </div>
 
