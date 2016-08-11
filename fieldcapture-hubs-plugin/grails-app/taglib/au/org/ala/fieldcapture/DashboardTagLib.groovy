@@ -21,10 +21,10 @@ class DashboardTagLib {
                 renderTarget(score, target)
             }
             else if (!score.score.displayType) {
-                renderSingleScore(score)
+                renderSingleScore(score, attrs)
             }
             else {
-                renderGroupedScore(score)
+                renderGroupedScore(score, attrs)
             }
         }
         catch (Exception e) {
@@ -128,7 +128,7 @@ class DashboardTagLib {
             </div>"""
     }
 
-    private void renderSingleScore(score) {
+    private void renderSingleScore(score, attrs) {
         switch (score.score.aggregationType.name) {
 
             case 'COUNT':
@@ -136,7 +136,7 @@ class DashboardTagLib {
             case 'AVERAGE':
 
                 def result = score.result as Double ?: 0
-                out << "<div><b>${score.score.label}</b>${helpText(score)} : ${g.formatNumber(type:'number',number:result, maxFractionDigits: 2, groupingUsed:true)}</div>"
+                out << "<div><b>${score.score.label}</b>${helpText(score, attrs)} : ${g.formatNumber(type:'number',number:result, maxFractionDigits: 2, groupingUsed:true)}</div>"
                 break
             case 'HISTOGRAM':
                 if (score.result.size() <= 1) {
@@ -144,7 +144,7 @@ class DashboardTagLib {
                 }
                 def chartData = toArray(score.result)
                 def chartType = score.score.displayType?:'piechart'
-                drawChart(chartType, score.score.label, score.score.label, helpText(score), [['string', score.score.label], ['number', 'Count']], chartData)
+                drawChart(chartType, score.score.label, score.score.label, helpText(score, attrs), [['string', score.score.label], ['number', 'Count']], chartData, attrs)
                 break
             case 'SET':
                 out << "<div><b>${score.score.label}</b> :${score.result.join(',')}</div>"
@@ -160,14 +160,14 @@ class DashboardTagLib {
         chartData
     }
 
-    private def helpText(score) {
-        if (score.score.description) {
+    private def helpText(score, attrs) {
+        if (score.score.description && !attrs.printable) {
             return fc.iconHelp([title:'']){score.score.description}
         }
         return ''
     }
 
-    private void renderGroupedScore(score) {
+    private void renderGroupedScore(score, attrs) {
         if (score.result && score.result.size() == 1) {
             return
         }
@@ -177,13 +177,13 @@ class DashboardTagLib {
             case 'COUNT':
                 def chartData = score.groups.collect{[it.group, it.results[0].result]}.findAll{it[1]}.sort{a,b -> a[0].compareTo(b[0])}
                 def chartType = score.score.displayType?:'piechart'
-                drawChart(chartType, score.score.label, score.label?:'', helpText(score), [['string', score.label?:''], ['number', score.score.label]], chartData)
+                drawChart(chartType, score.score.label, score.label?:'', helpText(score, attrs), [['string', score.label?:''], ['number', score.score.label]], chartData, attrs)
 
                 break
             case 'HISTOGRAM':
                 def chartData = toArray(score.result)
                 def chartType = score.score.displayType?:'piechart'
-                drawChart(chartType, score.score.label, score.score.label, helpText(score), [['string', score.score.label], ['number', 'Count']], chartData)
+                drawChart(chartType, score.score.label, score.score.label, helpText(score, attrs), [['string', score.score.label], ['number', 'Count']], chartData, attrs)
                 break
 
         }
@@ -198,11 +198,11 @@ class DashboardTagLib {
 
     }
 
-    private void drawChart(type, label, title, helpText, columns, data) {
+    private void drawChart(type, label, title, helpText, columns, data, attrs) {
         if (!data) {
             return
         }
-        out << '<div class="span6">'
+        out << '<div class="chart-plus-title">'
         def chartId = (label + '_chart').replaceAll(" ", "-")
 
         out << "<div class='chartTitle'>${title}${helpText}</div>"
@@ -210,7 +210,7 @@ class DashboardTagLib {
         switch (type) {
 
             case 'piechart':
-                out << "<div id=\"${chartId}\"></div>"
+                out << "<div id=\"${chartId}\" class=\"chart\"></div>"
                 out << gvisualization.pieCoreChart([elementId: chartId,  chartArea:new Expando(left:20, top:5, right:20, width:'430', height:'300'), dynamicLoading: true, title: title, columns: columns, data: data, width:'450', height:'300', backgroundColor: 'transparent'])
                 break;
             case 'barchart':
@@ -218,12 +218,12 @@ class DashboardTagLib {
                 def topMargin = 5
                 def bottomMargin = 50
                 def height = Math.max(300, data.size()*20+topMargin+bottomMargin)
-                if (height > 500) {
+                if (!attrs.printable && height > 500) {
                     topMargin = 0
-                    out << "<div id=\"${chartId}\" style=\"height:500px; overflow-y:scroll; margin-bottom:20px;\"></div>"
+                    out << "<div id=\"${chartId}\" class=\"chart\" style=\"height:500px; overflow-y:scroll; margin-bottom:20px;\"></div>"
                 }
                 else {
-                    out << "<div id=\"${chartId}\"></div>"
+                    out << "<div id=\"${chartId}\" class=\"chart\"></div>"
                 }
                 out << gvisualization.barCoreChart([elementId: chartId, legendTextStyle:chartFont(), fontSize:11, tooltipTextStyle:chartFont(), legend:"none", dynamicLoading: true, title: title, columns: columns, data: data, chartArea:new Expando(left:140, top:topMargin, bottom:bottomMargin, width:'290', height:height-topMargin-bottomMargin), width:'450', height:height, backgroundColor: 'transparent'])
                 break;

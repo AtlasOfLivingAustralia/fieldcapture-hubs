@@ -3,9 +3,10 @@
  * Manages the species data type in the output model.
  * Allows species information to be searched for and displayed.
  */
-var SpeciesViewModel = function(data, speciesLists) {
+var SpeciesViewModel = function(data, speciesLists, options) {
 
     var self = this;
+
     self.guid = ko.observable();
     self.name = ko.observable();
     self.listId = ko.observable();
@@ -88,7 +89,7 @@ var SpeciesViewModel = function(data, speciesLists) {
         self['listId'](orBlank(data.listId));
 
         self.transients.textFieldValue(self.name());
-        if (self.guid()) {
+        if (self.guid() && !options.printable) {
 
             var profileUrl = fcConfig.bieUrl + '/species/' + encodeURIComponent(self.guid());
             $.ajax({

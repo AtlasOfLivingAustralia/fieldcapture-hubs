@@ -91,7 +91,7 @@ class WebService {
             conn.setRequestProperty("Authorization", grailsApplication.config.api_key);
         }
 
-        def headers = [HttpHeaders.CONTENT_DISPOSITION, HttpHeaders.TRANSFER_ENCODING]
+        def headers = [HttpHeaders.CONTENT_DISPOSITION]
         def resp = [status:conn.responseCode]
         if (conn.responseCode == 200) {
             response.setContentType(conn.getContentType())

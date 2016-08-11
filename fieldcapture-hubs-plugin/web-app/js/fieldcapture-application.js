@@ -192,10 +192,15 @@ function formatBytes(bytes) {
  **/
 function showAlert(message, alerttype, target) {
 
-    $('#'+target).append('<div id="alertdiv" class="alert ' +  alerttype + '"><a class="close" data-dismiss="alert">×</a><span>'+message+'</span></div>')
+    showAlertWithSelector(message, alerttype, '#'+target);
+}
+
+function showAlertWithSelector(message, alerttype, targetSelector) {
+
+    $(targetSelector).append('<div class="alert ' +  alerttype + ' auto-close-alert"><a class="close" data-dismiss="alert">×</a><span>'+message+'</span></div>')
 
     setTimeout(function() { // this will automatically close the alert and remove this if the users doesnt close it in 5 secs
-        $("#alertdiv").remove();
+        $(".auto-close-alert").remove();
     }, 5000);
 }
 
@@ -231,7 +236,7 @@ function autoSaveModel(viewModel, saveUrl, options) {
         storageKey:window.location.href+'.autosaveData',
         autoSaveIntervalInSeconds:60,
         restoredDataWarningSelector:"#restoredData",
-        resultsMessageId:"save-result-placeholder",
+        resultsMessageSelector:"#save-result-placeholder",
         timeoutMessageSelector:"#timeoutMessage",
         errorMessage:"Failed to save your data: ",
         successMessage:"Save successful!",
@@ -336,8 +341,8 @@ function autoSaveModel(viewModel, saveUrl, options) {
                     if (config.blockUIOnSave) {
                         $.unblockUI();
                     }
-                    showAlert(config.errorMessage + data.detail + ' \n' + data.error,
-                        "alert-error",config.resultsMessageId);
+                    showAlertWithSelector(config.errorMessage + data.detail + ' \n' + data.error,
+                        "alert-error",config.resultsMessageSelector);
                     if (typeof errorCallback === 'function') {
                         errorCallback(data);
                     }
@@ -350,7 +355,7 @@ function autoSaveModel(viewModel, saveUrl, options) {
                         blockUIWithMessage(config.blockUISaveSuccessMessage);
                     }
                     else {
-                        showAlert(config.successMessage, "alert-success", config.resultsMessageId);
+                        showAlertWithSelector(config.successMessage, "alert-success", config.resultsMessageSelector);
                     }
                     viewModel.cancelAutosave();
                     viewModel.dirtyFlag.reset();
@@ -527,6 +532,10 @@ function Documents() {
         return true;
     };
 
+    self.isSelected = function(data) {
+        return data == ko.utils.unwrapObservable(self.selectedDocument);
+    };
+
     self.previewTemplate = ko.pureComputed(function() {
         var selectedDoc = self.selectedDocument();
 
@@ -558,19 +567,7 @@ function Documents() {
             if (listContains(contentTypes.pdf, contentType)) {
                 val = fcConfig.pdfViewer + '?file=' + encodeURIComponent(selectedDoc.url);
             } else if (listContains(contentTypes.convert, contentType)) {
-
-                // jq promises are fundamentally broken, so...
-                val = $.Deferred(function(dfd) {
-                    $.get(fcConfig.pdfgenUrl, {"file": selectedDoc.url }, $.noop, "json")
-                        .promise()
-                        .done(function(data) {
-                            dfd.resolve(fcConfig.pdfViewer + '?file=' + encodeURIComponent(data.location));
-                        })
-                        .fail(function(jqXHR, textStatus, errorThrown) {
-                            console.warn('get pdf failed', jqXHR, textStatus, errorThrown);
-                            dfd.resolve(fcConfig.errorViewer || '');
-                        })
-                }).promise();
+                val = fcConfig.pdfgenUrl+'?file='+encodeURIComponent(selectedDoc.url);
             } else if (listContains(contentTypes.image, contentType)) {
                 val = fcConfig.imgViewer + '?file=' + encodeURIComponent(selectedDoc.url);
             } else if (listContains(contentTypes.video, contentType)) {
@@ -594,6 +591,20 @@ function Documents() {
             return (doc[field.fun]() || '').toLowerCase().indexOf(lcFilter) !== -1;
         });
     });
+
+
+    self.distinctDocumentProperty = function(prop) {
+        var results = [];
+        for (var i=0; i<self.documents().length; i++) {
+            var value = ko.utils.unwrapObservable(self.documents()[i][prop]);
+
+            if (value && results.indexOf(value) < 0) {
+                results.push(value);
+            }
+        }
+        results.sort();
+        return results;
+    };
 
     self.docViewerClass = ko.pureComputed(function() {
         return self.selectedDocument() ? 'span6': 'hidden';

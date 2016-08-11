@@ -12,7 +12,7 @@ import static groovyx.net.http.Method.GET
 
 class ResourceController {
 
-    def grailsApplication
+    def grailsApplication, webService, commonService
 
     def viewer() {}
 
@@ -26,29 +26,19 @@ class ResourceController {
 
     // proxy this request to work around browsers (firefox) that don't follow redirects properly :(
     def pdfUrl() {
-        def url = params.file
 
-        def http = new HTTPBuilder(grailsApplication.config.pdfgen.baseURL)
-        AbstractHttpClient ahc = http.client
-        BasicHttpParams params = new BasicHttpParams();
-        params.setParameter("http.protocol.handle-redirects",false)
-        ahc.setParams(params)
-
-        def location = http.request(GET, TEXT) {
-            uri.path = 'api/pdf';
-            uri.query = ['docUrl': url]
-
-            response.success = { rsp ->
-                rsp.headers?.Location
-            }
+        String url = grailsApplication.config.pdfgen.baseURL+'api/pdf'+commonService.buildUrlParamsFromMap(docUrl:params.file, cacheable:false)
+        Map result
+        try {
+            result = webService.proxyGetRequest(response, url, false, false, 10*60*1000)
+        }
+        catch (Exception e) {
+            log.error("Error generating a PDF", e)
+            result = [error:"Error generating a PDF"]
+        }
+        if (result.error) {
+            render view:'error'
         }
 
-        if (!location) {
-            def error = ['error': 'error getting pdf url']
-            render error as JSON, status: 500
-        }
-
-        def result = ['location': location]
-        render result as JSON
     }
 }
