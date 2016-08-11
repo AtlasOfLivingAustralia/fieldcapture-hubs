@@ -23,57 +23,10 @@
             </div>
         </div>
 
+    <g:set var="returnTo" value="${createLink(action:'auditProject', id:project.projectId, params:[searchTerm:params.searchTerm])}"/>
 
-        <div class="row well well-small">
-            <g:if test="${messages}">
-                <table style="width: 95%;" class="table table-striped table-bordered table-hover" id="project-list">
-                    <thead>
-                        <th>Date</th>
-                        <th>Action</th>
-                        <th>Type</th>
-                        <th>Name</th>
-                        <th>User</th>
-                        <th></th>
-                    </thead>
-                    <tbody>
-                        <g:set var="project" value="${project}"/>
-                        <g:each in="${messages}" var="message">
-                            <tr>
-                                <td><!-- ${DateUtils.displayFormatWithTimeNoSpace(message?.date)} --> ${DateUtils.displayFormatWithTime(message?.date)}</td>
-                                <td>${message.eventType}</td>
-                                <td>${message.entityType?.substring(message.entityType?.lastIndexOf('.')+1)}</td>
-                                <td>${message.entity?.name} ${message.entity?.type} <small>(${message.entityId})</small></td>
-                                <g:set var="displayName" value="${userMap[message.userId] ?: message.userId }" />
-                                <td><g:encodeAs codec="HTML">${displayName}</g:encodeAs></td>
-                                <td><a class="btn btn-small" href="${createLink(action:'auditMessageDetails', params:[projectId: project.projectId, id:message.id, compareId: message.entity.compareId, searchTerm: searchTerm])}">
-                                        <i class="icon-search"></i>
-                                    </a>
-                                </td>
-                            </tr>
-                        </g:each>
-                    </tbody>
-                </table>
-
-            </g:if>
-            <g:else>
-                <div>No messages found!</div>
-            </g:else>
-        </div>
-
+    <g:render template="auditMessageList"></g:render>
 
     </body>
 </html>
-
-<r:script type="text/javascript">
-    $(document).ready(function() {
-        $('#project-list').DataTable({
-            "order": [[ 0, "desc" ]],
-            "aoColumnDefs": [{ "sType": "date-uk", "aTargets": [0] }],
-            "oLanguage": {
-                "sSearch": "Search: "
-            }
-        });
-        $('.dataTables_filter input').attr("placeholder", "Date, Action, Type, Name, User");
-    });
-</r:script>
 
