@@ -236,7 +236,7 @@
                             metaModel: act.model || {},
                             edit: function () {
                                 document.location.href = fcConfig.activityEditUrl + '/' + this.activityId +
-                                    "?returnTo=" + here;
+                                    "?returnTo=" + encodeURIComponent(here);
                             }
                         };
                         $.each(act.outputs, function (j, out) {
@@ -264,7 +264,7 @@
                 self.hideElement = function(elem) { if (elem.nodeType === 1) $(elem).slideUp(function() { $(elem).remove(); }) };
                 self.newActivity = function () {
                     document.location.href = fcConfig.activityCreateUrl +
-                    "?siteId=${site.siteId}&returnTo=" + here;
+                    "?siteId=${site.siteId}&returnTo=" + encodeURIComponent(here);
                 };
                 self.notImplemented = function () {
                     alert("Not implemented yet.")
