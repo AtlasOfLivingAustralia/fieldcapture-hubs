@@ -1,19 +1,6 @@
-<style type="text/css">
-    #docs-table th {
-        white-space: normal;
-    }
-    #docs-table .media-object {
-        width:32px;
-        min-width: 32px;
-        height: 32px;
-    }
-    #filter-by-stage {
-        margin-bottom: 5px;
-    }
 
-</style>
 <div class="row-fluid row-eq-height" id="${containerId}">
-    <div class="span4">
+    <div class="span5">
         <div class="row-fluid">
             <div id="filter-by-stage" class="btn-group pull-right">
                 <a class="btn dropdown-toggle" href="#">
@@ -29,7 +16,8 @@
 
         </div>
         <div></div>
-        <table class="docs-table table">
+        %{-- The use of the width attribute (as opposed to a css style) is to allow for correct resizing behaviour of the DataTable --}%
+        <table class="docs-table table" width="100%">
             <thead>
             <tr>
                 <th></th>
@@ -63,7 +51,7 @@
         </table>
 
     </div>
-    <div class="fc-resource-preview-container span8" data-bind="{ template: { name: previewTemplate } }"></div>
+    <div class="fc-resource-preview-container span7" data-bind="{ template: { name: previewTemplate } }"></div>
 </div>
 
 <script id="iframeViewer" type="text/html">
