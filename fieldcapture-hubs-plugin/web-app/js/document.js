@@ -483,3 +483,64 @@ var HelpLinksViewModel = function(helpLinks, validationElementSelector) {
     $(validationElementSelector).validationEngine();
     autoSaveModel(self, fcConfig.documentBulkUpdateUrl, {blockUIOnSave:true});
 };
+
+function initialiseDocumentTable(containerSelector) {
+    var tableSelector = containerSelector + ' .docs-table';
+    var table = $(tableSelector).DataTable(
+        {
+            "columnDefs": [
+                {"type": "alt-string", "targets": 0},
+                {"width":"6em", "targets": [3]},
+                {"width":"4em", "targets": [2]}],
+            "order":[[2, 'desc'], [3, 'desc']],
+            "dom":
+            "<'row-fluid'<'span5'l><'span7'f>r>" +
+            "<'row-fluid'<'span12't>>" +
+            "<'row-fluid'<'span6'i><'span6'p>>"
+
+        });
+
+    $(tableSelector +" tr").on('click', function(e) {
+        $(tableSelector + " tr.info").removeClass('info');
+        $(e.currentTarget).addClass("info");
+    });
+
+    function searchStage(searchString) {
+        table.columns(2).search(searchString, true).draw();
+    }
+
+    $(containerSelector + " input[name='stage-filter']").click(function(e) {
+        var searchString = '';
+        $(containerSelector + " input[name='stage-filter']").each(function(val) {
+            var $el = $(this);
+
+            if ($el.is(":checked")) {
+                if (searchString) {
+                    searchString += '|';
+                }
+
+                searchString += $el.val();
+            }
+        });
+
+        searchStage(searchString);
+
+    });
+
+    var filterSelector = containerSelector + ' #filter-by-stage';
+    $(filterSelector + ' a').on('click', function (event) {
+        if (event.target == this) {
+            event.preventDefault();
+            $(this).parent().toggleClass('open');
+        }
+
+    });
+    $('body').on('click', function(e) {
+        if (!$(filterSelector).is(e.target)
+            && $(filterSelector).has(e.target).length === 0
+            && $('.open').has(e.target).length === 0
+        ) {
+            $(filterSelector).removeClass('open');
+        }
+    });
+}
