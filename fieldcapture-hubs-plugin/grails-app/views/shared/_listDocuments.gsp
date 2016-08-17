@@ -29,7 +29,7 @@
 
         </div>
         <div></div>
-        <table id="docs-table" class="table">
+        <table class="docs-table table">
             <thead>
             <tr>
                 <th></th>
@@ -101,7 +101,6 @@
 
             var docListViewModel = new DocListViewModel(${documents ?: []});
             ko.applyBindings(docListViewModel, document.getElementById('${containerId}'));
-            $("#docs-table").DataTable();
         }
     });
 
