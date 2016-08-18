@@ -29,6 +29,7 @@
 
             </thead>
             <tbody data-bind="foreach: filteredDocuments">
+                <!-- ko if:(role() == '${filterBy}' || 'all' == '${filterBy}') && role() != '${ignore}' && role() != 'variation' -->
                 <tr data-bind="click: $parent.selectDocument">
                     <td><img class="media-object" data-bind="attr:{src:iconImgUrl(), alt:contentType, title:name}" alt="document icon"></td>
 
@@ -47,6 +48,7 @@
                         </a>
                     </td>
                 </tr>
+                <!-- /ko -->
             </tbody>
         </table>
 
