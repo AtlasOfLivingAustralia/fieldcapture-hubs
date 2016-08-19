@@ -630,8 +630,9 @@ function ProjectViewModel(project, isUserEditor, organisations) {
 };
 
 function newDocumentDefaults(project) {
-    var maxStages = project.reports ? project.reports.length : 0 ;
-    var currentStage  = findStageFromDate(project.reports, new Date().toISOStringNoMillis());
+    var reports = project.reports || [];
+    var maxStages = reports.length;
+    var currentStage  = findStageFromDate(reports, new Date().toISOStringNoMillis());
     var match = currentStage.match("Stage (\d+)");
     if (match) {
         currentStage = match[1];
