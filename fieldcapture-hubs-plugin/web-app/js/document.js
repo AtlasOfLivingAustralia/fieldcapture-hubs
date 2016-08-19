@@ -301,22 +301,27 @@ function attachViewModelToFileUpload(uploadUrl, documentViewModel, uiSelector, p
     // We are keeping the reference to the helper here rather than the view model as it doesn't serialize correctly
     // (i.e. calls to toJSON fail).
     documentViewModel.save = function() {
-        if (documentViewModel.filename() && fileUploadHelper !== undefined) {
-            fileUploadHelper.submit();
-            fileUploadHelper = null;
-        }
-        else {
-            // There is no file attachment but we can save the document anyway.
-            $.post(
-                uploadUrl,
-                {document:documentViewModel.toJSONString()},
-                function(result) {
-                    var resp = JSON.parse(result).resp;
-                    documentViewModel.fileUploaded(resp);
-                })
-                .fail(function() {
-                    documentViewModel.fileUploadFailed('Error uploading document');
-                });
+        var result = $(uiSelector).find('form').validationEngine("validate");
+        if (result) {
+
+
+            if (documentViewModel.filename() && fileUploadHelper !== undefined) {
+                fileUploadHelper.submit();
+                fileUploadHelper = null;
+            }
+            else {
+                // There is no file attachment but we can save the document anyway.
+                $.post(
+                    uploadUrl,
+                    {document: documentViewModel.toJSONString()},
+                    function (result) {
+                        var resp = JSON.parse(result).resp;
+                        documentViewModel.fileUploaded(resp);
+                    })
+                    .fail(function () {
+                        documentViewModel.fileUploadFailed('Error uploading document');
+                    });
+            }
         }
     }
 }
@@ -374,8 +379,9 @@ function showDocumentAttachInModal(uploadUrl, documentViewModel, modalSelector, 
         $modal.find('form').validationEngine({'custom_error_messages': {
             '#thirdPartyConsentCheckbox': {
                 'required': {'message':'The privacy declaration is required for images viewable by everyone'}
-            }
-        }, 'autoPositionUpdate':true, promptPosition:'inline'});
+            },
+
+        }, scroll:false, autoPositionUpdate:true, promptPosition:'inline'});
     });
 
     return result;
