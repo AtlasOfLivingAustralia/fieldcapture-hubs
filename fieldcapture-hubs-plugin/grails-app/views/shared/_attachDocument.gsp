@@ -76,7 +76,7 @@
                         <label for="thirdPartyConsentDeclarationMade" class="control-label">Privacy declaration</label>
                         <div id="thirdPartyConsentDeclarationMade" class="controls">
                             <label id="thirdPartyDeclarationText" class="checkbox" for="thirdPartyConsentDeclarationMade">
-                                <input id="thirdPartyConsentCheckbox" type="checkbox" name="thirdPartyConsentDeclarationMade" class="validate[required]" data-bind="checked:thirdPartyConsentDeclarationMade">
+                                <input id="thirdPartyConsentCheckbox" type="checkbox" name="thirdPartyConsentDeclarationMade" data-validation-engine="validate[required]" data-bind="checked:thirdPartyConsentDeclarationMade">
                                 <fc:getSettingContent settingType="${au.org.ala.fieldcapture.SettingPageType.THIRD_PARTY_PHOTO_CONSENT_DECLARATION}"/>
                             </label>
                         </div>
