@@ -850,7 +850,7 @@ var SitesViewModel =  function(sites, map, mapFeatures, isUserEditor) {
         });
     };
     this.editSite = function (site) {
-        var url = fcConfig.siteEditUrl + '/' + site.siteId + '?returnTo=' + fcConfig.returnTo;
+        var url = fcConfig.siteEditUrl + '/' + site.siteId + '?returnTo=' + encodeURIComponent(fcConfig.returnTo);
         document.location.href = url;
     };
     this.deleteSite = function (site) {
@@ -871,7 +871,7 @@ var SitesViewModel =  function(sites, map, mapFeatures, isUserEditor) {
         });
     };
     this.viewSite = function (site) {
-        var url = fcConfig.siteViewUrl + '/' + site.siteId + '?returnTo=' + fcConfig.returnTo;
+        var url = fcConfig.siteViewUrl + '/' + site.siteId + '?returnTo=' + encodeURIComponent(fcConfig.returnTo);
         document.location.href = url;
     };
     this.addSite = function () {

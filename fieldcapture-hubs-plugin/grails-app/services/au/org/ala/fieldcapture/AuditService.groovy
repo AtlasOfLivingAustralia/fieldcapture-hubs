@@ -10,6 +10,16 @@ class AuditService {
         return webService.getJson(url, 60000)
     }
 
+    def getAuditMessagesForOrganisation(String organisationId) {
+        String url = grailsApplication.config.ecodata.baseUrl + 'audit/getAuditMessagesForOrganisation?organisationId=' + organisationId
+        return webService.getJson(url, 60000)
+    }
+
+    def getAuditMessagesForSettings() {
+        String url = grailsApplication.config.ecodata.baseUrl + 'audit/getAuditMessagesForSettings?keyPrefix=merit'
+        return webService.getJson(url, 60000)
+    }
+
     def getAuditMessage(String messageId) {
         String url = grailsApplication.config.ecodata.baseUrl + 'audit/ajaxGetAuditMessage/' + messageId
         return webService.getJson(url)

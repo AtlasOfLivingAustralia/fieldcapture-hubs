@@ -1,19 +1,6 @@
-<style type="text/css">
-    #docs-table th {
-        white-space: normal;
-    }
-    #docs-table .media-object {
-        width:32px;
-        min-width: 32px;
-        height: 32px;
-    }
-    #filter-by-stage {
-        margin-bottom: 5px;
-    }
 
-</style>
 <div class="row-fluid row-eq-height" id="${containerId}">
-    <div class="span4">
+    <div class="span5">
         <div class="row-fluid">
             <div id="filter-by-stage" class="btn-group pull-right">
                 <a class="btn dropdown-toggle" href="#">
@@ -29,7 +16,8 @@
 
         </div>
         <div></div>
-        <table id="docs-table" class="table">
+        %{-- The use of the width attribute (as opposed to a css style) is to allow for correct resizing behaviour of the DataTable --}%
+        <table class="docs-table table" width="100%">
             <thead>
             <tr>
                 <th></th>
@@ -41,6 +29,7 @@
 
             </thead>
             <tbody data-bind="foreach: filteredDocuments">
+                <!-- ko if:(role() == '${filterBy}' || 'all' == '${filterBy}') && role() != '${ignore}' && role() != 'variation' -->
                 <tr data-bind="click: $parent.selectDocument">
                     <td><img class="media-object" data-bind="attr:{src:iconImgUrl(), alt:contentType, title:name}" alt="document icon"></td>
 
@@ -59,11 +48,12 @@
                         </a>
                     </td>
                 </tr>
+                <!-- /ko -->
             </tbody>
         </table>
 
     </div>
-    <div class="fc-resource-preview-container span8" data-bind="{ template: { name: previewTemplate } }"></div>
+    <div class="fc-resource-preview-container span7" data-bind="{ template: { name: previewTemplate } }"></div>
 </div>
 
 <script id="iframeViewer" type="text/html">
@@ -101,7 +91,6 @@
 
             var docListViewModel = new DocListViewModel(${documents ?: []});
             ko.applyBindings(docListViewModel, document.getElementById('${containerId}'));
-            $("#docs-table").DataTable();
         }
     });
 
