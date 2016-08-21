@@ -23,7 +23,7 @@
                 <th></th>
                 <th>Name</th>
                 <th>Stage</th>
-                <th>Date Uploaded</th>
+                <th>Date last updated</th>
                 <th></th>
             </tr>
 
