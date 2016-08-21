@@ -44,4 +44,12 @@ class RoleService {
 
         return rolesCopy
     }
+
+    public Set getAllowedGrantManagerRoles() {
+        return new HashSet([GRANT_MANAGER_ROLE])
+    }
+
+    public Set getAllowedUserRoles() {
+        return new HashSet([PROJECT_ADMIN_ROLE, PROJECT_EDITOR_ROLE])
+    }
 }

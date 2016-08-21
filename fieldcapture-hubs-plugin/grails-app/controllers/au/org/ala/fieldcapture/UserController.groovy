@@ -67,15 +67,13 @@ class UserController {
         String userId = params.userId
         String projectId = params.entityId
         String role = params.role
-        def adminUser = authService.userDetails()
 
-        if (adminUser && userId && projectId && role) {
-            if (role == 'caseManager' && !userService.userIsSiteAdmin()) {
-                render status:403, text: 'Permission denied - ADMIN role required'
-            } else if (projectService.isUserAdminForProject(adminUser.userId, projectId)) {
-                render userService.addUserAsRoleToProject(userId, projectId, role) as JSON
+        if (userId && projectId && role) {
+            Map response = userService.addUserAsRoleToProject(userId, projectId, role)
+            if (response.error) {
+                render status: 400, text: response.error
             } else {
-                render status:403, text: 'Permission denied'
+                render response as JSON
             }
         } else {
             render status:400, text: 'Required params not provided: userId, role, projectId'
@@ -86,15 +84,14 @@ class UserController {
         String userId = params.userId
         String organisationId = params.entityId
         String role = params.role
-        def adminUser = authService.userDetails()
 
-        if (adminUser && userId && organisationId && role) {
-            if (role == 'caseManager' && !userService.userIsSiteAdmin()) {
-                render status:403, text: 'Permission denied - ADMIN role required'
-            } else if (organisationService.isUserAdminForOrganisation(organisationId)) {
-                render userService.addUserAsRoleToOrganisation(userId, organisationId, role) as JSON
-            } else {
-                render status:403, text: 'Permission denied'
+        if (userId && organisationId && role) {
+            Map result = organisationService.addUserAsRoleToOrganisation(userId, organisationId, role) as JSON
+            if (result.error) {
+                render status:400, text: result.error
+            }
+            else {
+                render result as JSON
             }
         } else {
             render status:400, text: 'Required params not provided: userId, role, projectId'

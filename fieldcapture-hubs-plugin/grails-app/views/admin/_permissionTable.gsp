@@ -1,4 +1,4 @@
-
+<!-- ko stopBinding:true -->
 <div class="row-fluid">
     <div class="span6">
         <table class="table table-condensed" id="existingMembersTable" style="">
@@ -23,6 +23,8 @@
         </div>
     </div>
 </div>
+
+<!-- /ko -->
 
 <r:script>
 
