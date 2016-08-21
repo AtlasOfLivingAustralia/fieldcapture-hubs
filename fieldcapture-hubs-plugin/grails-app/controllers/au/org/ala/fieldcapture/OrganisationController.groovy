@@ -184,15 +184,14 @@ class OrganisationController {
         String userId = params.userId
         String organisationId = params.entityId
         String role = params.role
-        def adminUser = userService.getUser()
 
-        if (adminUser && userId && organisationId && role) {
-            if (role == 'caseManager' && !userService.userIsSiteAdmin()) {
-                render status:403, text: 'Permission denied - ADMIN role required'
-            } else if (organisationService.isUserAdminForOrganisation(organisationId)) {
-                render organisationService.addUserAsRoleToOrganisation(userId, organisationId, role) as JSON
-            } else {
-                render status:403, text: 'Permission denied'
+        if (userId && organisationId && role) {
+            Map result = organisationService.addUserAsRoleToOrganisation(userId, organisationId, role) as JSON
+            if (result.error) {
+                render status:400, text: result.error
+            }
+            else {
+                render result as JSON
             }
         } else {
             render status:400, text: 'Required params not provided: userId, role, projectId'

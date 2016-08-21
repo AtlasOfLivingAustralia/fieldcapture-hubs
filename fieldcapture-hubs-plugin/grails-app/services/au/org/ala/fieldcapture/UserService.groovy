@@ -1,9 +1,11 @@
 package au.org.ala.fieldcapture
 
+import au.org.ala.web.CASRoles
+
 import javax.annotation.PostConstruct
 
 class UserService {
-   def grailsApplication, authService, webService
+   def grailsApplication, authService, webService, roleService, projectService, organisationService
     def auditBaseUrl = ""
 
     @PostConstruct
@@ -87,8 +89,49 @@ class UserService {
     }
 
     def addUserAsRoleToProject(String userId, String projectId, String role) {
+        Map result = checkRoles(userId, role)
+        if (result.error) {
+            return result
+        }
+        def submittingUser = authService.userDetails()
+        if (!projectService.isUserAdminForProject(submittingUser.userId, projectId)) {
+            return [error:'Permission denied']
+        }
         def url = grailsApplication.config.ecodata.baseUrl + "permissions/addUserAsRoleToProject?userId=${userId}&projectId=${projectId}&role=${role}"
         webService.getJson(url)
+    }
+
+    private Map checkRoles(String userId, String role) {
+
+        def submittingUser = authService.userDetails()
+
+        if (!submittingUser) {
+            return [error:'Permission denied']
+        }
+
+        if (role == RoleService.GRANT_MANAGER_ROLE && !userIsSiteAdmin()) {
+            return [error: 'Permission denied']
+        }
+
+        au.org.ala.web.UserDetails userDetails = authService.getUserForUserId(userId)
+
+        if (!userDetails) {
+            return [error:'No user exists with id: '+userId]
+        }
+
+        if (!userDetails.hasRole(grailsApplication.config.security.cas.adminRole) && !userDetails.hasRole(CASRoles.ROLE_ADMIN)) {
+
+            if (userDetails.hasRole(grailsApplication.config.security.cas.officerRole)) {
+                if (!(role in roleService.allowedGrantManagerRoles)) {
+                    return [error: 'Grant managers cannot be assigned an ' + role + ' role']
+                }
+            } else {
+                if (!(role in roleService.allowedUserRoles)) {
+                    return [error: 'Users cannot be assigned a grant manager role']
+                }
+            }
+        }
+
     }
 
     def removeUserWithRole(projectId, userId, role) {
@@ -97,6 +140,15 @@ class UserService {
     }
 
     def addUserAsRoleToOrganisation(String userId, String organisationId, String role) {
+        Map result = checkRoles(userId, role)
+        if (result.error) {
+            return result
+        }
+        def submittingUser = authService.userDetails()
+        if (!organisationService.isUserAdminForOrganisation(submittingUser.userId, organisationId)) {
+            return [error:'Permission denied']
+        }
+
         def url = grailsApplication.config.ecodata.baseUrl + "permissions/addUserAsRoleToOrganisation?userId=${userId}&organisationId=${organisationId}&role=${role}"
         webService.getJson(url)
     }
@@ -133,5 +185,22 @@ class UserService {
     def checkEmailExists(String email) {
         def user = authService.getUserForEmailAddress(email)
         return user?.userId
+    }
+
+    Set getAllowedUserRoles(String email) {
+        def user = authService.getUserForEmailAddress(email)
+
+        def roles
+        if (!user) {
+            roles = new HashSet()
+        }
+        else if (user.hasRole(grailsApplication.config.security.cas.officerRole)) {
+            // Don't allow grant managers to be assigned admin / editor roles
+            roles = roleService.allowedGrantManagerRoles
+        }
+        else {
+            roles = roleService.allowedUserRoles
+        }
+        roles
     }
 }
