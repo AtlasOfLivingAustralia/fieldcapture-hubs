@@ -8,6 +8,7 @@
         if (!output) {
             output = {};
         }
+        var activityId = output.activityId || '${activityId?:""}';
         self.name = "${outputName}";
         self.outputId = orBlank(output.outputId);
 
@@ -69,7 +70,7 @@
 
         self.attachDocument = function(target) {
             var url = config.documentUpdateUrl || fcConfig.documentUpdateUrl;
-            showDocumentAttachInModal(url, new DocumentViewModel({role:'information'},{key:'activityId', value:output.activityId}), '#attachDocument')
+            showDocumentAttachInModal(url, new DocumentViewModel({role:'information'},{key:'activityId', value:activityId}), '#attachDocument')
                     .done(function(result) {
                         target(new DocumentViewModel(result))
                     });
