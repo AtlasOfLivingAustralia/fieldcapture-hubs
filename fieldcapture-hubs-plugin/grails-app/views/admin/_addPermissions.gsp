@@ -91,7 +91,9 @@
                 data: { userId: userId, role: role, entityId: id }
             })
             .done(function(result) { updateStatusMessage("user was added with role " + decodeCamelCase(role)); })
-            .fail(function(jqXHR, textStatus, errorThrown) { alert(jqXHR.responseText); })
+            .fail(function(jqXHR, textStatus, errorThrown) {
+                bootbox.alert(jqXHR.responseText);
+            })
             .always(function(result) { resetAddForm(); });
         } else {
             alert("Required fields are: userId and role.");

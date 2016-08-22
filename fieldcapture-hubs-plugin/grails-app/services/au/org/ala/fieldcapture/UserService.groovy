@@ -123,14 +123,15 @@ class UserService {
 
             if (userDetails.hasRole(grailsApplication.config.security.cas.officerRole)) {
                 if (!(role in roleService.allowedGrantManagerRoles)) {
-                    return [error: 'Grant managers cannot be assigned an ' + role + ' role']
+                    return [error: 'User '+userDetails.displayName+' doesn\'t have the correct level of system access to be assigned a '+role+' role.  Please contact <a href="mailto:merit@environment.gov.au">merit@environment.gov.au</a> if this is an issue.']
                 }
             } else {
                 if (!(role in roleService.allowedUserRoles)) {
-                    return [error: 'Users cannot be assigned a grant manager role']
+                    return [error:  'User '+userDetails.displayName+' doesn\'t have the correct level of system access to be assigned a grant manager role.  Please contact <a href="mailto:merit@environment.gov.au">merit@environment.gov.au</a> if this is an issue.']
                 }
             }
         }
+        return [success:true]
 
     }
 
