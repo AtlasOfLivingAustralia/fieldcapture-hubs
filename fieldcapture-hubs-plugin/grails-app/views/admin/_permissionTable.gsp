@@ -1,4 +1,4 @@
-
+<!-- ko stopBinding:true -->
 <div class="row-fluid">
     <div class="span6">
         <table class="table table-condensed" id="existingMembersTable" style="">
@@ -23,6 +23,8 @@
         </div>
     </div>
 </div>
+
+<!-- /ko -->
 
 <r:script>
 
@@ -133,7 +135,7 @@
                         message = "<span class='label label-important'>Important</span><p><b>If you modify your access level you may need assistance to get it back.</b></p><p>Are you sure you want to change your access to this project from " + currentRole + " to " + decodeCamelCase(role)+"?</p>";
                     }
                     else {
-                        message = "Are you sure you want to change this user's access from " + currentRole + " to " + decodeCamelCase(role) + "?";
+                        message = "Are you sure you want to change this user's access from " + currentRole + " to " + decodeCamelCase(role).replace('Case','Grant') + "?";
                     }
 
                     bootbox.confirm(message, function(result) {
