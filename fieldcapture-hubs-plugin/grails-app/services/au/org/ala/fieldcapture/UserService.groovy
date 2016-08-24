@@ -145,8 +145,8 @@ class UserService {
         if (result.error) {
             return result
         }
-        def submittingUser = authService.userDetails()
-        if (!organisationService.isUserAdminForOrganisation(submittingUser.userId, organisationId)) {
+
+        if (!organisationService.isUserAdminForOrganisation(organisationId)) {
             return [error:'Permission denied']
         }
 
