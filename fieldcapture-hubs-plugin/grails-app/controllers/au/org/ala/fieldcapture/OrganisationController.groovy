@@ -186,7 +186,7 @@ class OrganisationController {
         String role = params.role
 
         if (userId && organisationId && role) {
-            Map result = organisationService.addUserAsRoleToOrganisation(userId, organisationId, role) as JSON
+            Map result = organisationService.addUserAsRoleToOrganisation(userId, organisationId, role)
             if (result.error) {
                 render status:400, text: result.error
             }
