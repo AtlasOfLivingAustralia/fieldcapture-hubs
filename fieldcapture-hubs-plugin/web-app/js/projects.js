@@ -633,13 +633,7 @@ function newDocumentDefaults(project) {
     var reports = project.reports || [];
     var maxStages = reports.length;
     var currentStage  = findStageFromDate(reports, new Date().toISOStringNoMillis());
-    var match = currentStage.match("Stage (\d+)");
-    if (match) {
-        currentStage = match[1];
-    }
-    else {
-        currentStage = '';
-    }
+    currentStage = stageNumberFromStage(currentStage);
 
     return {role:'information', maxStages: maxStages, stage:currentStage};
 }
