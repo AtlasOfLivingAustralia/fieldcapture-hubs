@@ -120,7 +120,7 @@ class OrganisationService {
             params.sort = sort
         }
         def results = searchService.fulltextSearch(
-                params, false // Don't use the default facet query because organisations won't match it
+                params, true
         )
         results
     }
