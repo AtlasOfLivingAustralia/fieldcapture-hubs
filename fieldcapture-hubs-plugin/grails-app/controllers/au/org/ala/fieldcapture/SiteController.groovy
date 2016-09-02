@@ -95,16 +95,17 @@ class SiteController {
     }
 
     def ajaxDeleteSitesFromProject(String id){
+
+        def payload = request.JSON
         // permissions check - id is the projectId here
         if (!projectService.canUserEditProject(userService.getCurrentUserId(), id)) {
-            render status:403, text: "Access denied: User does not have permission to edit site: ${id}"
+            render status:403, text: "Access denied: User does not have permission to delete sites"
             return
         }
 
-        def status = siteService.deleteSitesFromProject(id)
-        if (status < 400) {
-            def result = [status: 'deleted']
-            render result as JSON
+        Map resp = siteService.deleteSitesFromProject(id, payload.siteIds)
+        if (resp.statusCode < 400) {
+            render resp.resp as JSON
         } else {
             def result = [status: status]
             render result as JSON
@@ -123,12 +124,13 @@ class SiteController {
             return
         }
 
-        def site = siteService.get(siteId, [raw:'true'])
-        def projects = site.projects
-        projects.remove(projectId)
-
-        def result = siteService.update(siteId, [projects:projects])
-        render result as JSON
+        Map resp = siteService.deleteSitesFromProject(id, [siteId])
+        if (resp.statusCode < 400) {
+            render resp.resp as JSON
+        } else {
+            def result = [status: status]
+            render result as JSON
+        }
 
     }
 

@@ -1,3 +1,8 @@
+<style type="text/css">
+div.dataTables_filter input {
+    margin-left:0;
+}
+</style>
 <g:set var="wordForSite" value="${wordForSite?:'site'}"/>
 <div id="sitesList">
     <div data-bind="visible: sites.length == 0">
@@ -11,103 +16,66 @@
         </g:if>
     </div>
 
+
     <div class="row-fluid"  data-bind="visible: sites.length > 0">
-        <div class="span5 well list-box">
-            <div class="row-fluid">
-                <div class="span7">
-                <div class="control-group">
-                    <div class="input-append">
-                        <input type="text" class="filterinput input-medium"
-                               data-bind="value: sitesFilter, valueUpdate:'keyup'"
-                               title="Type a few characters to restrict the list." name="sites"
-                               placeholder="filter"/>
-                        <button type="button" class="btn" data-bind="click:clearFilter"
-                                title="clear"><i class="icon-remove"></i></button>
-                    </div>
-                    <span id="site-filter-warning" class="label filter-label label-warning"
-                          style="display:none;margin-left:4px;"
-                          data-bind="visible:sitesFilter().length > 0,valueUpdate:'afterkeyup'">Filtered</span>
-                </div>
+        <div class="span5">
 
-                <div class="scroll-list">
-                    <ul id="siteList" style="list-style: none; margin-left: 0px;"
-                        data-bind="template: {foreach:displayedSites},
-                                                      beforeRemove: hideElement,
-                                                      afterAdd: showElement">
-                        <li data-bind="event: {mouseover: $root.highlight, mouseout: $root.unhighlight}">
-                            <g:if test="${editable}">
-                                <span>
-                                    <button type="button" data-bind="click:$root.editSite" class="btn btn-container"><i class="icon-edit" title="Edit ${wordForSite.capitalize()}"></i></button>
-                                    <button type="button" data-bind="click:$root.viewSite" class="btn btn-container"><i class="icon-eye-open" title="View ${wordForSite.capitalize()}"></i></button>
-                                    <button type="button" data-bind="click:$root.deleteSite" class="btn btn-container"><i class="icon-remove" title="Delete ${wordForSite.capitalize()}"></i></button>
-                                </span>
+            <div class="row-fluid" style="padding-bottom: 10px;">
+                <div class="span12">
 
-                                <a style="margin-left:10px;" data-bind="text:name, attr: {href:'${createLink(controller: "site", action: "index")}' + '/' + siteId}"></a>
-                            </g:if>
-                            <g:else>
-                                <span data-bind="text:name"></span>
-                            </g:else>
-                        </li>
-                    </ul>
+                    Actions:  <span class="btn-group">
+                        <a data-bind="click: $root.addSite" class="btn" title="Create a new site for your project"><i class="fa fa-plus"></i> New</a>
+                        <a data-bind="click: $root.uploadShapefile" type="button" class="btn" title="Create sites for your project by uploading a shapefile"><i class="fa fa-upload"></i> Upload</a>
+                        <a data-bind="click: $root.downloadShapefile" type="button" class="btn" title="Download your project sites in shapefile format"><i class="fa fa-download"></i> Download</a>
+                        <button data-bind="click: $root.removeSelectedSites, enable:$root.selectedSiteIds().length > 0" type="button" class="btn" title="Delete selected sites"><i class="fa fa-trash"></i> Delete</button>
+                    </span>
                 </div>
-                <div id="paginateTable" data-bind="visible:sites.length>pageSize">
-                    <span id="paginationInfo" style="display:inline-block;float:left;margin-top:4px;"></span>
-                    <div class="btn-group">
-                        <button class="btn btn-small prev" data-bind="click:prevPage,enable:(offset()-pageSize) >= 0"><i class="icon-chevron-left"></i>&nbsp;previous</button>
-                        <button class="btn btn-small next" data-bind="click:nextPage,enable:(offset()+pageSize) < filteredSites().length">next&nbsp;<i class="icon-chevron-right"></i></button>
-                    </div>
-                    <g:if env="development">
-                        total: <span id="total" data-bind="text:filteredSites().length"></span>
-                        offset: <span id="offset" data-bind="text:offset"></span>
-                    </g:if>
-                </div>
-
             </div>
 
-                <g:if test="${editable}">
+            %{-- The use of the width attribute (as opposed to a css style) is to allow for correct resizing behaviour of the DataTable --}%
+            <table id="sites-table" class="sites-table table" width="100%">
+                <thead>
+                <tr>
+                    <th><input type="checkbox" id="select-all-sites"></th>
+                    <th></th>
+                    <th>Name</th>
+                    <th>Updated</th>
+                    <th></th>
+                </tr>
 
-                    <div class="span5">
+                </thead>
+                <tbody data-bind="foreach: sites">
+                <tr data-bind="click: $parent.selectDocument">
+                    <th><input type="checkbox" name="select-site" data-bind="checked:selected"></th>
+                    <td>
+                        <g:if test="${editable}">
+                            <span>
+                                <button type="button" data-bind="click:$root.editSite" class="btn btn-container"><i class="icon-edit" title="Edit ${wordForSite.capitalize()}"></i></button>
+                                <button type="button" data-bind="click:$root.viewSite" class="btn btn-container"><i class="icon-eye-open" title="View ${wordForSite.capitalize()}"></i></button>
+                                <button type="button" data-bind="click:$root.deleteSite" class="btn btn-container"><i class="icon-remove" title="Delete ${wordForSite.capitalize()}"></i></button>
+                            </span>
+                        </g:if>
 
-                            <div class="btn-group btn-group-vertical">
-                                <a data-bind="click: $root.addSite" type="button" class="btn ">Add new ${wordForSite}</a>
-                                <a data-bind="click: $root.addExistingSite" type="button" class="btn">Add existing ${wordForSite}</a>
-                                <a data-bind="click: $root.uploadShapefile" type="button" class="btn">Upload ${wordForSite}s from shapefile</a>
-                                <a data-bind="click: $root.downloadShapefile" type="button" class="btn">Download ${wordForSite}s as shapefile</a>
-                                <a data-bind="click: $root.removeAllSites" type="button" class="btn">Delete all ${wordForSite}s</a>
-                            </div>
+                    <td>
+                        <a style="margin-left:10px;" data-bind="text:name, attr: {href:'${createLink(controller: "site", action: "index")}' + '/' + siteId}"></a>
+                    </td>
+                    <td>
+                        <span data-bind="text:convertToSimpleDate(lastUpdated)"></span>
+                    </td>
+                    <td>
+                        <span data-bind="text:lastUpdated"></span>
+                    </td>
 
-                    </div>
-                </g:if>
-            </div>
+                </tr>
+
+                </tbody>
+            </table>
+
         </div>
+
+
         <div class="span7">
             <div id="map" style="width:100%"></div>
         </div>
     </div>
 </div>
-
-<r:script>
-   function initialiseSites(sites) {
-        var mapOptions = {
-            zoomToBounds:true,
-            zoomLimit:16,
-            highlightOnHover:true,
-            features:[],
-            featureService: "${createLink(controller: 'proxy', action: 'feature')}",
-            wmsServer: "${grailsApplication.config.spatial.geoserverUrl}"
-        };
-
-        map = init_map_with_features({
-                mapContainer: "map",
-                scrollwheel: false,
-                featureService: "${createLink(controller: 'proxy', action: 'feature')}",
-                wmsServer: "${grailsApplication.config.spatial.geoserverUrl}"
-            },
-            mapOptions
-        );
-        var mapFeatures = <fc:modelAsJavascript model="${mapFeatures?:[]}"/>;
-        var sitesViewModel = new SitesViewModel(sites, map, mapFeatures, ${editable ?: false});
-        ko.applyBindings(sitesViewModel, document.getElementById('sitesList'));
-
-    };
-</r:script>

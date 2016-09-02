@@ -277,8 +277,8 @@ class SiteService {
         webService.doDelete(grailsApplication.config.ecodata.baseUrl + 'site/' + id)
     }
 
-    def deleteSitesFromProject(projectId){
-        webService.doDelete(grailsApplication.config.ecodata.baseUrl + 'project/deleteSites/' + projectId)
+    def deleteSitesFromProject(String projectId, List siteIds, boolean deleteOrphans = true){
+        webService.doPost(grailsApplication.config.ecodata.baseUrl + 'project/deleteSites/' + projectId, [siteIds:siteIds, deleteOrphans:deleteOrphans])
     }
 
     /**
