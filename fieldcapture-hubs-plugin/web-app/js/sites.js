@@ -745,10 +745,21 @@ var SitesViewModel =  function(sites, map, mapFeatures, isUserEditor) {
     if (mapFeatures.features) {
         features = mapFeatures.features;
     }
+
     self.sites = $.map(sites, function (site, i) {
         var feature = features[i] || site.extent ? site.extent.geometry : null;
         site.feature = feature;
+        site.selected = ko.observable(false);
         return site;
+    });
+    self.selectedSiteIds = ko.computed(function() {
+        var siteIds = [];
+        $.each(self.sites, function(i, site) {
+            if (site.selected()) {
+                siteIds.push(site.siteId);
+            }
+        });
+        return siteIds;
     });
     self.sitesFilter = ko.observable("");
     self.throttledFilter = ko.computed(self.sitesFilter).extend({throttle: 400});
@@ -835,16 +846,29 @@ var SitesViewModel =  function(sites, map, mapFeatures, isUserEditor) {
     this.unhighlight = function () {
         map.unHighlightFeatureById(ko.utils.unwrapObservable(this.name));
     };
-    this.removeAllSites = function () {
-        bootbox.confirm("Are you sure you want to remove these sites? This will remove the links to this project but will NOT remove the sites from the site.", function (result) {
+    this.removeSelectedSites = function () {
+        bootbox.confirm("Are you sure you want to remove these sites?", function (result) {
             if (result) {
-                var that = this;
-                $.get(fcConfig.sitesDeleteUrl, function (data) {
-                    if (data.status === 'deleted') {
-                        //self.sites.remove(that);
+                var siteIds = self.selectedSiteIds();
+
+                $.ajax({
+                    url: fcConfig.sitesDeleteUrl,
+                    type: 'POST',
+                    data: JSON.stringify({siteIds:siteIds}),
+                    contentType: 'application/json'
+                }).done(function(data) {
+                    if (data.warnings && data.warnings.length) {
+                        bootbox.alert("Not all sites were able to be deleted.  Sites associated with an activity were not deleted.", function() {
+                            document.location.href = here;
+                        });
                     }
-                    //FIXME - currently doing a page reload, not nice
-                    document.location.href = here;
+                    else {
+                        document.location.href = here;
+                    }
+                }).fail(function(data) {
+                    bootbox.alert("An error occurred while deleting the sites.  Please contact support if the problem persists.", function() {
+                        document.location.href = here;
+                    })
                 });
             }
         });
@@ -858,13 +882,12 @@ var SitesViewModel =  function(sites, map, mapFeatures, isUserEditor) {
             if (result) {
 
                 $.get(fcConfig.siteDeleteUrl + '?siteId=' + site.siteId, function (data) {
-                    $.each(self.sites, function (i, tmpSite) {
-                        if (site.siteId === tmpSite.siteId) {
-                            self.sites.splice(i, 1);
-                            return false;
-                        }
-                    });
-                    self.filterSites(self.sitesFilter());
+                    if (data.warnings && data.warnings.length) {
+                        bootbox.alert("The site could not be deleted as it is used by a project activity.");
+                    }
+                    else {
+                        document.location.href = here;
+                    }
                 });
 
             }
