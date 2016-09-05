@@ -52,7 +52,8 @@ enum SettingPageType {
     PERFORMANCE_REPORT_REJECTED_EMAIL_SUBJECT_LINE('performanceReportRejectedSubject', 'Subject line for the \'Report has been rejected\' email', 'fielddata.performanceReportRejected.emailSubject'),
     THIRD_PARTY_PHOTO_CONSENT_DECLARATION('thirdPartyPhotoConsent', 'Declaration text for consent from third parties who appear in images', 'fielddata.thirdPartyConsent.text'),
     HELP_LINKS_TITLE('helpLinksTitle', 'Title for the Helpful Links section of the homepage', 'fielddata.helpLinksTitle.text'),
-    ORGANISATION_LIST_PAGE_HEADER('organisationListHeader', 'Header content for the organisation list page', 'fielddata.organisationListHeader')
+    ORGANISATION_LIST_PAGE_HEADER('organisationListHeader', 'Header content for the organisation list page', 'fielddata.organisationListHeader'),
+    HOME_PAGE_STATISTICS('homePageStatistics', 'Configuration for the home page stats', 'statistics.config')
     String name
     String title
     String key
