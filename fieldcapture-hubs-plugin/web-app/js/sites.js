@@ -789,21 +789,43 @@ var SitesViewModel =  function(sites, map, mapFeatures, isUserEditor) {
             $(elem).remove();
         })
     };
-    self.clearSiteFilter = function () {
-        self.sitesFilter("");
-    };
-    self.nextPage = function () {
-        self.offset(self.offset() + self.pageSize);
+
+    var previousIndicies = [];
+    function compareIndicies(indicies1, indicies2) {
+
+        if (indicies1 == indicies2) {
+            return true;
+        }
+
+        if (indicies1.length != indicies2.length) {
+            return false;
+        }
+        for (var i=0; i<indicies1.length; i++) {
+            if (indicies1[i] != indicies2[i]) {
+                return false;
+            }
+        }
+        return true;
+    }
+    /** Callback from datatables event listener so we can keep the map in sync with the table filter / pagination */
+    self.sitesFiltered = function(indicies) {
+        if (compareIndicies(indicies || [], previousIndicies)) {
+            return;
+        }
+        self.displayedSites([]);
+        if (indicies) {
+            for (var i=0; i<indicies.length; i++) {
+                self.displayedSites.push(self.sites[indicies[i]]);
+            }
+        }
         self.displaySites();
+        previousIndicies.splice(0, previousIndicies.length);
+        Array.prototype.push.apply(previousIndicies, indicies);
+
     };
-    self.prevPage = function () {
-        self.offset(self.offset() - self.pageSize);
-        self.displaySites();
-    };
+
     self.displaySites = function () {
         map.clearFeatures();
-
-        self.displayedSites(self.filteredSites.slice(self.offset(), self.offset() + self.pageSize));
 
         var features = $.map(self.displayedSites(), function (obj, i) {
             return obj.feature;
@@ -812,33 +834,6 @@ var SitesViewModel =  function(sites, map, mapFeatures, isUserEditor) {
 
     };
 
-    self.throttledFilter.subscribe(function (val) {
-        self.offset(0);
-
-        self.filterSites(val);
-    });
-
-    self.filterSites = function (filter) {
-        if (filter) {
-            var regex = new RegExp('\\b' + filter, 'i');
-
-            self.filteredSites([]);
-            $.each(self.sites, function (i, site) {
-                if (regex.test(ko.utils.unwrapObservable(site.name))) {
-                    self.filteredSites.push(site);
-                }
-            });
-            self.displaySites();
-        }
-        else {
-            self.filteredSites(self.sites);
-            self.displaySites();
-        }
-    };
-    self.clearFilter = function (model, event) {
-
-        self.sitesFilter("");
-    };
 
     this.highlight = function () {
         map.highlightFeatureById(ko.utils.unwrapObservable(this.name));
