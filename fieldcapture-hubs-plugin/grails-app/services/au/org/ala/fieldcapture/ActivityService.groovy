@@ -11,7 +11,10 @@ class ActivityService {
     public static final String PROGRESS_PLANNED = 'planned'
     public static final String PROGRESS_FINISHED = 'finished'
     public static final String PROGRESS_STARTED = 'started'
-    private static def PROGRESS = [PROGRESS_PLANNED, PROGRESS_STARTED, PROGRESS_FINISHED, 'cancelled', 'deferred']
+    public static final String PROGRESS_DEFERRED = 'deferred'
+    public static final String PROGRESS_CANCELLED = 'cancelled'
+
+    private static def PROGRESS = [PROGRESS_PLANNED, PROGRESS_STARTED, PROGRESS_FINISHED, PROGRESS_CANCELLED, PROGRESS_DEFERRED]
 
     public static Comparator<String> PROGRESS_COMPARATOR = {a,b -> PROGRESS.indexOf(a) <=> PROGRESS.indexOf(b)}
 
@@ -141,8 +144,20 @@ class ActivityService {
         return activity?.progress == PROGRESS_STARTED
     }
 
+    boolean isDeferred(Map activity) {
+        return activity?.progress == PROGRESS_DEFERRED
+    }
+
+    boolean isCancelled(Map activity) {
+        return activity?.progress == PROGRESS_CANCELLED
+    }
+
     boolean isStartedOrFinished(activity) {
         return isFinished(activity) || isStarted(activity)
+    }
+
+    boolean isDeferredOrCancelled(activity) {
+        return isDeferred(activity) || isCancelled(activity)
     }
 
     /**

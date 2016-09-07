@@ -34,7 +34,7 @@
                     <td><img class="media-object" data-bind="attr:{src:iconImgUrl(), alt:contentType, title:name}" alt="document icon"></td>
 
                     <td>
-                         <span data-bind="text:name"></span>
+                         <span data-bind="text:name() || filename()"></span>
                     </td>
                     <td>
                         <span data-bind="text:stage"></span>

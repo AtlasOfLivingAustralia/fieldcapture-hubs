@@ -1101,3 +1101,15 @@ $(function() {
         }
     });
 });
+
+function stageNumberFromStage(stage) {
+    var stageRegexp = /Stage (\d+)/;
+    var match = stageRegexp.exec(stage);
+    if (match) {
+        stage = match[1];
+    }
+    else {
+        stage = '';
+    }
+    return stage
+}

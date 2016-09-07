@@ -47,6 +47,7 @@ class SearchService {
         params.query = params.query?:"*:*"
         params.highlight = params.highlight?:true
         params.flimit = 999
+        params.fsort = "term"
         def url = elasticBaseUrl + commonService.buildUrlParamsFromMap(params)
         webService.getJson(url)
     }

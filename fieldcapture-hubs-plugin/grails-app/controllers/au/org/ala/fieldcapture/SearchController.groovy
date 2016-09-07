@@ -11,7 +11,8 @@ class SearchController {
      * @return resp
      */
     def index(String query) {
-        params.facets = StringUtils.join(SettingService.getHubConfig().availableFacets, ',')+',className'
+        params.facets = 'className,'+ StringUtils.join(SettingService.getHubConfig().availableFacets, ',')
+        params.weightResultsByEntity = true
         [facetsList: params.facets.tokenize(","), results: searchService.fulltextSearch(params)]
     }
 
@@ -71,6 +72,28 @@ class SearchController {
 
         render response as JSON
     }
+
+    @PreAuthorise(accessLevel = 'siteAdmin', redirectController ='home', redirectAction = 'index')
+    def downloadOrganisationData() {
+
+        params.query = "docType:organisation"
+        def path = "search/downloadOrganisationData"
+
+        def facets = []
+        facets.addAll(params.getList("fq"))
+        facets << "className:au.org.ala.ecodata.Organisation"
+        params.put("fq", facets)
+        params.put("downloadUrl", g.createLink(controller:'document', action:'downloadProjectDataFile', absolute: true)+'/')
+        params.put("systemEmail", grailsApplication.config.fieldcapture.system.email.address)
+        params.put("senderEmail", grailsApplication.config.fieldcapture.system.email.address)
+        searchService.addDefaultFacetQuery(params)
+        def url = grailsApplication.config.ecodata.baseUrl + path +  commonService.buildUrlParamsFromMap(params)
+        def response = webService.doPostWithParams(url, [:]) // POST because the URL can get long.
+
+        render response as JSON
+    }
+
+
 
     @PreAuthorise(accessLevel = 'siteAdmin', redirectController ='home', redirectAction = 'index')
     def downloadSummaryData() {
