@@ -83,73 +83,6 @@ class AdminController {
         render(view:'bulkLoadUserPermissions', model:[user: user, results: results])
     }
 
-    @PreAuthorise(accessLevel = 'alaAdmin', redirectController = "admin")
-    def metadata() {
-        [activitiesMetadata: metadataService.activitiesModel()]
-    }
-
-    @PreAuthorise(accessLevel = 'alaAdmin', redirectController = "admin")
-    def activityModel() {
-        [activitiesModel: metadataService.activitiesModel()]
-    }
-
-    @PreAuthorise(accessLevel = 'alaAdmin', redirectController = "admin")
-    def programsModel() {
-        [programsModel: metadataService.programsModel(), activityTypes:metadataService.activityTypesList()]
-    }
-
-    def updateActivitiesModel() {
-        def model = request.JSON
-        log.debug model
-        metadataService.updateActivitiesModel(model)
-        flash.message = "Activity model updated."
-        def result = model
-        render result
-    }
-
-    def updateProgramsModel() {
-        def model = request.JSON
-        log.debug model
-        metadataService.updateProgramsModel(model)
-        flash.message = "Programs model updated."
-        def result = model
-        render result
-    }
-
-    @PreAuthorise(accessLevel = 'alaAdmin', redirectController = "admin")
-    def outputModels() {
-        def model = [activitiesModel: metadataService.activitiesModel()]
-        if (params.open) {
-            model.open = params.open
-        }
-        model
-    }
-
-    @PreAuthorise(accessLevel = 'alaAdmin', redirectController = "admin")
-    def rawOutputModels() {
-        def model = [activitiesModel: metadataService.activitiesModel()]
-        if (params.open) {
-            model.open = params.open
-        }
-        model
-    }
-
-    def getOutputDataModel(String id) {
-        log.debug(id)
-        def model = metadataService.getDataModel(id)
-        render model as JSON
-    }
-
-    def updateOutputDataModel(String id) {
-        def model = request.JSON
-        log.debug "template = ${id} model = ${model}"
-        log.debug "model class is ${model.getClass()}"
-        metadataService.updateOutputDataModel(model, id)
-        flash.message = "Output data model updated."
-        def result = model
-        render result
-    }
-
     @PreAuthorise(accessLevel = 'siteAdmin', redirectController = "admin")
     def staticPages() {
         def settings = []
@@ -506,54 +439,6 @@ class AdminController {
             adminService.migratePhotoPoints()
         }
         render text:'ok'
-    }
-
-    @PreAuthorise(accessLevel = 'alaAdmin', redirectController = "admin")
-    def manageHubs() {
-        render view:'editHub', model:[programsModel: metadataService.programsModel()]
-    }
-
-    @PreAuthorise(accessLevel = 'alaAdmin', redirectController = "admin")
-    def listHubs() {
-        List hubs = settingService.listHubs()?.collect{it.urlPath}
-        render hubs as JSON
-    }
-
-    @PreAuthorise(accessLevel = 'alaAdmin', redirectController = "admin")
-    def loadHubSettings(String id) {
-        HubSettings hubSettings = settingService.getHubSettings(id)
-        if (!hubSettings) {
-            hubSettings = new HubSettings()
-        }
-        render hubSettings as JSON
-    }
-
-    @PreAuthorise(accessLevel = 'alaAdmin', redirectController = "admin")
-    def saveHubSettings() {
-        def json = request.JSON
-        def documents = json.remove('documents')
-
-
-        documents.each { document ->
-            def response = documentService.saveStagedImageDocument(document)
-            if (response?.content.documentId) {
-                def savedDoc = documentService.get(response.content.documentId)
-                if (savedDoc.role == 'banner') {
-                    json.bannerUrl = savedDoc.url
-                }
-                else if (savedDoc.role == 'logo') {
-                    json.logoUrl = savedDoc.url
-                }
-            }
-
-        }
-
-        HubSettings settings = new HubSettings(json)
-        settingService.updateHubSettings(settings)
-
-        def message = [status:'ok']
-        render message as JSON
-
     }
 
 
