@@ -56,6 +56,20 @@ class ImageController {
                 if (loc) {
                     exif.latitude = gpsDirectory.getDescription(GpsDirectory.TAG_GPS_LATITUDE)
                     exif.longitude = gpsDirectory.getDescription(GpsDirectory.TAG_GPS_LONGITUDE)
+                    exif.bearing = gpsDirectory.getDescription(GpsDirectory.TAG_GPS_IMG_DIRECTION)
+                    exif.bearingRef = gpsDirectory.getDescription(GpsDirectory.TAG_GPS_IMG_DIRECTION_REF)
+                    // Avoiding the conversion from magnetic to true north
+                    if (exif.bearingRef && exif.bearingRef.startsWith("T")) {
+                        if (exif.bearing && exif.bearing.endsWith(" degrees")) {
+                            try {
+                                exif.decBearing = Double.parseDouble(exif.bearing.substring(0, exif.bearing.indexOf(" degrees")))
+                            }
+                            catch (Exception e) {
+                                log.warn("Non numberic bearing in EXIF: "+exif.bearing)
+                            }
+
+                        }
+                    }
                     exif.decLat = loc.latitude
                     exif.decLng = loc.longitude
                 }
@@ -172,8 +186,11 @@ class ImageController {
                         time: isoDateStrToTime((exifMd.date)),
                         decimalLatitude: doubleToString(exifMd.decLat),
                         decimalLongitude: doubleToString(exifMd.decLng),
+                        decimalBearing: doubleToString(exifMd.decBearing),
                         verbatimLatitude: exifMd.latitude,
                         verbatimLongitude: exifMd.longitude,
+                        bearing: exifMd.bearing,
+                        bearingRef: exifMd.bearingRef,
                         url: encodeImageURL(grailsApplication.config.upload.images.url,filename),
                         thumbnail_url: encodeImageURL(grailsApplication.config.upload.images.url, thumbFilename),
                         delete_url: encodeImageURL(grailsApplication.config.grails.serverURL+"/image/delete?filename=", filename),

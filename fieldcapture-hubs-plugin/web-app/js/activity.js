@@ -40,6 +40,17 @@ var PhotoPointViewModel = function(site, activity, config) {
 
     var self = this;
 
+    var defaults = {
+        savePhotoPointUrl: fcConfig.savePhotoPointUrl,
+        deletePhotoPointUrl: fcConfig.deletePhotoPointUrl,
+        newPhotoPointModalSelector: '#edit-photopoint',
+        newPhotoPointMapHolderSelector: '#photoPointMapHolder',
+        activityMapHolderSelector: '#map-holder',
+        mapSelector: '#smallMap'
+    };
+    var options = $.extend(defaults, config);
+
+
     self.site = site;
     self.photoPoints = ko.observableArray();
 
@@ -54,35 +65,138 @@ var PhotoPointViewModel = function(site, activity, config) {
     }
 
     self.removePhotoPoint = function(photoPoint) {
-        self.photoPoints.remove(photoPoint);
+
+        $.ajax({
+            url: options.deletePhotoPointUrl+'/'+site.siteId+'?poiId='+photoPoint.photoPoint.poiId,
+            method: "POST"
+        }).done(function(data) {
+            if (!data ||  data.error) {
+                bootbox.alert("Failed to delete the Photo Point.");
+            }
+            else {
+                self.photoPoints.remove(photoPoint);
+            }
+        }).fail(function() {
+            bootbox.alert("Failed to delete the Photo Point.");
+        });
+
+    };
+
+    self.editPhotoPoint = function(photoPointWithPhotos) {
+        self.addOrEditPhotoPoint(photoPointWithPhotos, photoPointWithPhotos.photoPoint.modelForSaving());
     };
 
     self.addPhotoPoint = function() {
-        self.photoPoints.push(photoPointPhotos(site, null, activity.activityId, [], config));
+        self.addOrEditPhotoPoint(null);
+    };
+
+    self.addOrEditPhotoPoint = function(photoPointWithPhotos, photoPointData, successCallback) {
+        var map = alaMap.map;
+        var originalBounds = map.getBounds();
+        $(options.newPhotoPointModalSelector).modal('show').on('shown', function() {
+            // "Borrow" the map display from the top of the page as it is already displaying the site / zoomed etc.
+            $(options.newPhotoPointMapHolderSelector).append($(options.mapSelector));
+            google.maps.event.trigger(map, "resize");
+
+        }).validationEngine('attach', {scroll:false});
+
+        var model = new EditPhotoPointViewModel(photoPointData, map, config);
+
+        var cleanup = function() {
+            model.cleanup();
+
+            // Return the map to the top of the page.
+            $(options.activityMapHolderSelector).append($(options.mapSelector));
+            google.maps.event.trigger(map, "resize");
+            map.fitBounds(originalBounds);
+            $(options.newPhotoPointModalSelector).modal('hide');
+            ko.cleanNode($(options.newPhotoPointModalSelector)[0]);
+
+        };
+        model.save = function() {
+            var valid = $(options.newPhotoPointModalSelector).validationEngine("validate");
+
+            if (valid) {
+                var jsData = model.photoPoint.modelForSaving();
+                var json = JSON.stringify(jsData);
+                var url = options.savePhotoPointUrl+'/'+site.siteId;
+                $.ajax({
+                    url: url,
+                    data: json,
+                    method: "POST",
+                    contentType: "application/json"
+                }).done(function(data) {
+                    if (!data || !data.resp || data.resp.error) {
+                        bootbox.alert("Failed to save Photo Point!");
+                    }
+                    else {
+                        if (!photoPointWithPhotos) {
+                            jsData.poiId = data.resp.poiId;
+                            photoPointWithPhotos = photoPointPhotos(site, jsData, activity.activityId, [], config, !photoPointWithPhotos);
+                            self.photoPoints.push(photoPointWithPhotos);
+                        }
+                        else {
+                            photoPointWithPhotos.photoPoint.update(jsData);
+                        }
+                        cleanup();
+                        if (successCallback) {
+                            successCallback(photoPointWithPhotos);
+                        }
+                    }
+
+                }).fail(function() {
+                    bootbox.alert("Failed to save Photo Point!");
+                });
+            }
+        };
+        model.cancel = function() {
+            cleanup();
+        };
+        ko.applyBindings(model, $(options.newPhotoPointModalSelector)[0]);
+    };
+
+    var newPhotoPointPhotoHolder = ko.observableArray();
+    newPhotoPointPhotoHolder.subscribe(function(photos) {
+        if (!photos[0]) {
+            return;
+        }
+        var data = photos[0];
+
+        if (data.decimalLatitude && data.decimalLongitude) {
+            self.addOrEditPhotoPoint(null, {
+                name: '',
+                description:'',
+                geometry: {
+                    decimalLatitude: data.decimalLatitude,
+                    decimalLongitude  : data.decimalLongitude,
+                    bearing : data.decimalBearing
+                }
+            }, function(newPhotoPointModel) {
+                newPhotoPointModel.files(photos);
+            });
+        }
+        else {
+            bootbox.alert("We couldn't find GPS information in the supplied photo.  The photo point coordinates will default to the site centre.", function() {
+                self.addOrEditPhotoPoint(null, null, function(newPhotoPointModel) {
+                    newPhotoPointModel.files(photos);
+                });
+            });
+        }
+        newPhotoPointPhotoHolder([]);
+    });
+    self.newPhotoPointFromPhotoUploadConfig = {
+        url: (config && config.imageUploadUrl) || fcConfig.imageUploadUrl,
+        target: newPhotoPointPhotoHolder
     };
 
     self.modelForSaving = function() {
-        var siteId = site?site.siteId:''
+        var siteId = site?site.siteId:'';
         var toSave = {siteId:siteId, photos:[], photoPoints:[]};
 
         $.each(self.photoPoints(), function(i, photoPoint) {
-
-            if (photoPoint.isNew()) {
-                var newPhotoPoint = photoPoint.photoPoint.modelForSaving();
-                toSave.photoPoints.push(newPhotoPoint);
-                $.each(photoPoint.photos(), function(i, photo) {
-                    if (!newPhotoPoint.photos) {
-                        newPhotoPoint.photos = [];
-                    }
-                    newPhotoPoint.photos.push(photo.modelForSaving());
-                });
-            }
-            else {
-                $.each(photoPoint.photos(), function(i, photo) {
-                    toSave.photos.push(photo.modelForSaving());
-                });
-            }
-
+            $.each(photoPoint.photos(), function(i, photo) {
+                toSave.photos.push(photo.modelForSaving());
+            });
         });
         return toSave;
     };
@@ -116,8 +230,19 @@ var photoPointPOI = function(data) {
     var lng = ko.observable(data.geometry.decimalLongitude);
     var bearing = ko.observable(data.geometry.bearing);
 
+    var update = function(data) {
+        name(data.name);
+        description(data.description);
+        lat(data.geometry.decimalLatitude);
+        lng(data.geometry.decimalLongitude);
+        bearing(data.geometry.bearing);
 
-    return {
+    };
+    var modelForSaving = function() {
+        return ko.toJS(returnValue);
+    };
+
+    var returnValue = {
         poiId:data.poiId,
         name:name,
         description:description,
@@ -129,21 +254,73 @@ var photoPointPOI = function(data) {
             coordinates:[lng, lat]
         },
         type:'photopoint',
-        modelForSaving:function() { return ko.toJS(this); }
-    }
+        modelForSaving:modelForSaving,
+        update:update
+    };
+    return returnValue;
 };
 
-var photoPointPhotos = function(site, photoPoint, activityId, existingPhotos, config) {
+var EditPhotoPointViewModel = function(photopoint, map) {
+    var self = this;
+    self.photoPoint = photoPointPOI(photopoint);
+    self.isNew = !photopoint;
+
+    var lat = map.center.lat();
+    var lng = map.center.lng();
+
+
+    if (self.photoPoint.geometry.decimalLatitude()) {
+        lat = self.photoPoint.geometry.decimalLatitude();
+    }
+    else {
+        self.photoPoint.geometry.decimalLatitude(lat);
+    }
+    if (self.photoPoint.geometry.decimalLongitude()) {
+        lng = self.photoPoint.geometry.decimalLongitude();
+    }
+    else {
+        self.photoPoint.geometry.decimalLongitude(lng);
+    }
+
+    var bounds = new google.maps.LatLngBounds();
+    bounds.union(map.getBounds());
+
+    var markerPos = new google.maps.LatLng(lat,lng);
+    var marker = new google.maps.Marker({
+        position: markerPos,
+        draggable:true,
+        map:map
+    });
+    bounds = bounds.extend(markerPos);
+
+    map.fitBounds(bounds);
+
+    self.cleanup = function() {
+        marker.setMap(null);
+    };
+
+    marker.setIcon('https://maps.google.com/mapfiles/marker_yellow.png');
+
+    google.maps.event.addListener(
+        marker,
+        'dragend',
+        function(event) {
+            self.photoPoint.geometry.decimalLatitude(event.latLng.lat());
+            self.photoPoint.geometry.decimalLongitude(event.latLng.lng());
+        }
+    );
+
+};
+
+var photoPointPhotos = function(site, photoPoint, activityId, existingPhotos, config, isNew) {
 
     var files = ko.observableArray();
     var photos = ko.observableArray();
-    var isNewPhotopoint = !photoPoint;
     var photoPoint = photoPointPOI(photoPoint);
 
     $.each(existingPhotos, function(i, photo) {
         photos.push(photoPointPhoto(photo));
     });
-    var selfDirty = ko.observable(isNewPhotopoint);
 
     files.subscribe(function(newValue) {
         var f = newValue.splice(0, newValue.length);
@@ -166,9 +343,8 @@ var photoPointPhotos = function(site, photoPoint, activityId, existingPhotos, co
 
 
             };
-            selfDirty(true);
 
-            if (isNewPhotopoint && data.lat && data.lng && !photoPoint.geometry.decimalLatitude() && !photoPoint.geometry.decimalLongitude()) {
+            if (isNew && data.lat && data.lng && !photoPoint.geometry.decimalLatitude() && !photoPoint.geometry.decimalLongitude()) {
                 photoPoint.geometry.decimalLatitude(data.lat);
                 photoPoint.geometry.decimalLongitude(data.lng);
             }
@@ -196,14 +372,11 @@ var photoPointPhotos = function(site, photoPoint, activityId, existingPhotos, co
             }
         },
         template : function(photoPoint) {
-            return isNewPhotopoint ? 'editablePhotoPoint' : 'readOnlyPhotoPoint'
+            return isNew ? 'editablePhotoPoint' : 'readOnlyPhotoPoint'
         },
-        isNew : function() { return isNewPhotopoint },
+        isNew : function() { return isNew },
         dirtyFlag: {
             isDirty: ko.computed(function() {
-                if (selfDirty()) {
-                    return true;
-                }
                 var tmpPhotos = photos();
                 for (var i=0; i<tmpPhotos.length; i++) {
                     if (tmpPhotos[i].dirtyFlag.isDirty()) {
@@ -213,7 +386,6 @@ var photoPointPhotos = function(site, photoPoint, activityId, existingPhotos, co
                 return false;
             }),
             reset: function() {
-                selfDirty(false);
                 var tmpPhotos = photos();
                 for (var i=0; i<tmpPhotos.length; i++) {
                     tmpPhotos[i].dirtyFlag.reset();
