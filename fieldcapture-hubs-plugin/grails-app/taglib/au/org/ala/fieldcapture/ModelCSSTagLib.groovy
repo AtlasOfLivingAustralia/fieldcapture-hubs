@@ -47,9 +47,9 @@ class ModelCSSTagLib {
             if (width || textAlign) {
                 out << INDENT*2 << "table.${tableClass} tbody td:nth-child(${i+1}) {${width}${textAlign}}\n"
                 // If a width has been supplied, make sure an embedded select element doesn't override it.
-                if (width) {
-                    out << INDENT*2 << "table.${tableClass} tbody td:nth-child(${i+1})\n"
-                }
+//                if (width) {
+//                    out << INDENT*2 << "table.${tableClass} tbody td:nth-child(${i+1})\n"
+//                }
                 //out << INDENT*2 << "table.${tableClass} th:nth-child(${i+1}) {${width}${textAlign}}\n"
             }
         }
