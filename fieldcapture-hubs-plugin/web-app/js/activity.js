@@ -100,7 +100,7 @@ var PhotoPointViewModel = function(site, activity, config) {
 
         }).validationEngine('attach', {scroll:false});
 
-        var model = new EditPhotoPointViewModel(photoPointData, map, config);
+        var model = new EditPhotoPointViewModel(photoPointData, map, !photoPointWithPhotos);
 
         var cleanup = function() {
             model.cleanup();
@@ -260,10 +260,12 @@ var photoPointPOI = function(data) {
     return returnValue;
 };
 
-var EditPhotoPointViewModel = function(photopoint, map) {
+var EditPhotoPointViewModel = function(photopoint, map, isNew) {
     var self = this;
     self.photoPoint = photoPointPOI(photopoint);
-    self.isNew = !photopoint;
+    self.title = isNew ? "New Photo Point" : "Edit Photo Point";
+    self.newOrEditText = isNew ? "created" : "edited";
+    self.newOrEditText2 = isNew ? "" : "the edits";
 
     var lat = map.center.lat();
     var lng = map.center.lng();
