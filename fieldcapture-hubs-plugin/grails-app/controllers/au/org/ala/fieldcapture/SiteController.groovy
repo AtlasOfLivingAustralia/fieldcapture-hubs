@@ -1,6 +1,7 @@
 package au.org.ala.fieldcapture
 import grails.converters.JSON
-import org.codehaus.groovy.grails.web.json.JSONArray
+import org.apache.http.HttpStatus
+
 
 class SiteController {
 
@@ -359,6 +360,63 @@ class SiteController {
         if (!result)
             result = siteService.updateRaw(id, values)
         render result as JSON
+    }
+
+    def ajaxUpdatePOI(String id) {
+        def postBody = request.JSON
+
+        Map site = siteService.get(id)
+        if (!site) {
+            Map result = [error:"No site exists with id ${id}"]
+            response.status = HttpStatus.SC_NOT_FOUND
+            render result as JSON
+            return
+        }
+        Boolean canUpdate = isUserMemberOfSiteProjects(site)
+        if (!canUpdate) {
+
+            Map result = [error:"You are not authorized to create or update a POI"]
+            response.status = HttpStatus.SC_UNAUTHORIZED
+            render result as JSON
+        }
+
+        Map result = siteService.updatePOI(id, postBody)
+        render result as JSON
+    }
+
+    def ajaxDeletePOI(String id) {
+        if (!id || !params.poiId) {
+            Map result = [error:"The parameters id and poiId are mandatory"]
+            response.status = HttpStatus.SC_BAD_REQUEST
+            render result as JSON
+            return
+        }
+        Map site = siteService.get(id)
+        if (!site) {
+            Map result = [error:"No site exists with id ${id}"]
+            response.status = HttpStatus.SC_NOT_FOUND
+            render result as JSON
+            return
+        }
+        Boolean canUpdate = isUserMemberOfSiteProjects(site)
+        if (!canUpdate) {
+
+            Map result = [error:"You are not authorized to create or update a POI"]
+            response.status = HttpStatus.SC_UNAUTHORIZED
+            render result as JSON
+        }
+
+        int result = siteService.deletePOI(id, params.poiId)
+        if (result == HttpStatus.SC_OK) {
+            Map resp = [status:"deleted"]
+            render resp as JSON
+        }
+        else {
+            Map resp = [error:"Unable to delete photo point"]
+            response.status = result
+            render resp as JSON
+        }
+
     }
 
     def locationLookup(String id) {

@@ -84,16 +84,21 @@ class SiteService {
 
     def addPhotoPoint(siteId, photoPoint) {
         photoPoint.type = 'photopoint'
-        addPOI(siteId, photoPoint)
+        updatePOI(siteId, photoPoint)
     }
 
-    def addPOI(siteId, poi) {
+    def updatePOI(String siteId, Map poi) {
 
         if (!siteId) {
             throw new IllegalArgumentException("The siteId parameter cannot be null")
         }
         def url = "${grailsApplication.config.ecodata.baseUrl}site/${siteId}/poi"
         webService.doPost(url, poi)
+    }
+
+    int deletePOI(String siteId, String poiId) {
+        def url = "${grailsApplication.config.ecodata.baseUrl}site/${siteId}/poi/${poiId}"
+        webService.doDelete(url)
     }
 
     def get(id, Map urlParams = [:]) {
