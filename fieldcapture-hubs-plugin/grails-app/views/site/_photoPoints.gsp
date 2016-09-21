@@ -119,12 +119,12 @@
     <div id="edit-photopoint" class="modal hide fade validationEngineContainer">
         <div class="modal-header">
             <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-            <h3><span data-bind="if:!isNew">Edit Photo Point</span><span data-bind="if:isNew">New Photo Point</span></h3>
+            <h3 data-bind="text:title"></h3>
         </div>
         <div class="modal-body">
             <p>
-                This photo point will be <span data-bind="if:!isNew">updated</span><span data-bind="if:!isNew">created</span> when you press submit and
-                <span data-bind="if:!isNew">the updates</span> will remain even if you press "Cancel" on the activity form.
+                This photo point will be <span data-bind="text:newOrEditText"></span> when you press submit and
+                <span data-bind="text:newOrEditText2">the updates</span> will remain even if you press "Cancel" on the activity form.
             </p>
             <div class="row-fluid">
 
