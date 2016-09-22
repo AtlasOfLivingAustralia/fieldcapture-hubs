@@ -116,6 +116,10 @@ class SearchController {
         params.query = "docType:project"
         def path = "search/downloadShapefile"
 
+        params.put("downloadUrl", g.createLink(controller:'document', action:'downloadProjectDataFile', absolute: true)+'/')
+        params.put("systemEmail", grailsApplication.config.fieldcapture.system.email.address)
+        params.put("senderEmail", grailsApplication.config.fieldcapture.system.email.address)
+
         searchService.addDefaultFacetQuery(params)
         def url = grailsApplication.config.ecodata.baseUrl + path + commonService.buildUrlParamsFromMap(params)
         def resp = webService.proxyGetRequest(response, url, true, true,960000)
