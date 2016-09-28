@@ -42,6 +42,7 @@ class SearchService {
         if (applyDefaultFacetQuery) {
             addDefaultFacetQuery(params)
         }
+        handleDateFilters(params)
         params.offset = params.offset?:0
         params.max = params.max?:10
         params.query = params.query?:"*:*"
@@ -66,13 +67,7 @@ class SearchService {
     }
 
     def allProjects(params, String searchTerm = null) {
-        addDefaultFacetQuery(params)
-        //params.max = 9999
-        params.flimit = 999
-        params.fsort = "term"
-        //params.offset = 0
-
-        params.query = "docType:project"
+        configureProjectQuery(params)
         if (searchTerm) {
             params.query += " AND (" + searchTerm + ")"
         }
@@ -85,13 +80,7 @@ class SearchService {
     }
 
     def allProjectsWithSites(params, String searchTerm = null) {
-        addDefaultFacetQuery(params)
-        //params.max = 9999
-        params.flimit = 999
-        params.fsort = "term"
-        //params.offset = 0
-
-        params.query = "docType:project"
+        configureProjectQuery(params)
         if (searchTerm) {
             params.query += " AND " + searchTerm
         }
@@ -118,14 +107,9 @@ class SearchService {
     def HomePageFacets(originalParams) {
 
         def params = originalParams.clone()
-        params.flimit = 999
-        params.fsort = "term"
-        //params.offset = 0
-        params.query = "docType:project"
+        configureProjectQuery(params)
         HubSettings settings = SettingService.getHubConfig()
         params.facets = params.facets ?: StringUtils.join(settings.availableFacets, ',')
-
-        addDefaultFacetQuery(params)
 
         def url = grailsApplication.config.ecodata.baseUrl + 'search/elasticHome' + commonService.buildUrlParamsFromMap(params)
         log.debug "url = $url"
@@ -136,6 +120,32 @@ class SearchService {
         } catch(Exception e){
             log.error(e.getMessage(), e)
             [error:'Problem retrieving home page facets from: ' + url]
+        }
+    }
+
+    private void configureProjectQuery(params, boolean useDefaultFacetQuery = true) {
+        params.flimit = 999
+        params.fsort = "term"
+        //params.offset = 0
+        params.query = "docType:project"
+        handleDateFilters(params)
+        if (useDefaultFacetQuery) {
+            addDefaultFacetQuery(params)
+        }
+
+    }
+
+    private void handleDateFilters(params) {
+        if (params.fromDate || params.toDate) {
+            List fq = params.getList('fq')
+            if (!params.fromDate) {
+                fq += "_query:(plannedStartDate:[* TO ${params.toDate}])"
+            } else if (!params.toDate) {
+                fq += "_query:(plannedEndDate:[${params.fromDate} TO *])"
+            } else {
+                fq += "_query:(plannedEndDate:[${params.fromDate} TO *] AND plannedStartDate:[* TO ${params.toDate}])"
+            }
+            params.fq = fq
         }
     }
 
