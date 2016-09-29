@@ -174,6 +174,7 @@ class SiteController {
                 values[k] = reMarshallRepeatingObjects(v);
             }
         }
+        values.visibility = 'private'
         //log.debug (values as JSON).toString()
         siteService.update(id, values)
         chain(action: 'index', id:  id)

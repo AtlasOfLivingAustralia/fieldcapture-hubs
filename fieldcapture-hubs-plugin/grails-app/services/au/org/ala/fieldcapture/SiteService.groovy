@@ -120,6 +120,7 @@ class SiteService {
             def shapePid = persistSiteExtent(values.name, values.extent.geometry)
             values.extent.geometry.pid = shapePid.resp?.id
         }
+        values.visibility = 'private'
 
         if (id) {
             update(id, values)
@@ -259,7 +260,7 @@ class SiteService {
         def metadata = metadataService.getLocationMetadataForPoint(centroidLat, centroidLong)
         def strLat =  "" + centroidLat + ""
         def strLon = "" + centroidLong + ""
-        def values = [extent: [source: 'pid', geometry: [pid: geometryPid, type: 'pid', state: metadata.state, nrm: metadata.nrm, lga: metadata.lga, locality: metadata.locality, mvg: metadata.mvg, mvs: metadata.mvs, centre: [strLon, strLat]]], projects: [projectId], name: name, description: description, externalId:externalId]
+        def values = [extent: [source: 'pid', geometry: [pid: geometryPid, type: 'pid', state: metadata.state, nrm: metadata.nrm, lga: metadata.lga, locality: metadata.locality, mvg: metadata.mvg, mvs: metadata.mvs, centre: [strLon, strLat]]], projects: [projectId], name: name, description: description, externalId:externalId, visibility:'private']
         return create(values)
     }
 
