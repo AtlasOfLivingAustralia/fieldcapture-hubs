@@ -149,6 +149,20 @@ class SearchService {
         }
     }
 
+    private handleActivityDateFilters(params) {
+        if (params.fromDate || params.toDate) {
+            List fq = params.getList('fq')
+            if (!params.fromDate) {
+                fq += "_query:(plannedEndDate:[* TO ${params.toDate}])"
+            } else if (!params.toDate) {
+                fq += "_query:(plannedEndDate:[${params.fromDate} TO *])"
+            } else {
+                fq += "plannedEndDate:[${params.fromDate} TO ${params.toDate}]"
+            }
+            params.fq = fq
+        }
+    }
+
     def getProjectsForIds(params) {
         addDefaultFacetQuery(params)
         //params.max = 9999
@@ -177,6 +191,7 @@ class SearchService {
         cacheService.get("dashboard-"+params, {
             addDefaultFacetQuery(params)
             params.query = 'docType:project'
+            handleActivityDateFilters(params)
             def url = grailsApplication.config.ecodata.baseUrl + 'search/dashboardReport' + commonService.buildUrlParamsFromMap(params)
             webService.getJson(url, 1200000)
         })
@@ -184,13 +199,15 @@ class SearchService {
 
     }
 
-    def report(params) {
-        cacheService.get("dashboard-"+params, {
-            addDefaultFacetQuery(params)
-            params.query = 'docType:project'
-            def url = grailsApplication.config.ecodata.baseUrl + 'search/report' + commonService.buildUrlParamsFromMap(params)
-            webService.getJson(url, 1200000)
+    def outputTargetsReport(params) {
+        addDefaultFacetQuery(params)
+        handleDateFilters(params)
+        def url = grailsApplication.config.ecodata.baseUrl + 'search/targetsReport' + commonService.buildUrlParamsFromMap(params)
+
+        def results = cacheService.get("outputTargets-"+params, {
+            webService.getJson(url, 300000)
         })
+        results
     }
 
     def reportOnScores(List<String> scoreLabels, List<String> facets) {
