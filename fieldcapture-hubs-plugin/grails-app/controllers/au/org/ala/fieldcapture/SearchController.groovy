@@ -32,43 +32,13 @@ class SearchController {
         render speciesService.searchSpeciesList(sort, max, offset) as JSON
     }
 
-    @PreAuthorise(accessLevel = 'siteReadOnly', redirectController ='home', redirectAction = 'index')
-    def downloadSearchResults() {
-        def path = 'search/downloadSearchResults'
-        if (params.view == 'xlsx') {
-             path += ".xlsx"
-        }
-        def facets = []
-        facets.addAll(params.getList("fq"))
-        facets << "className:au.org.ala.ecodata.Project"
-        params.put("fq", facets)
-        searchService.addDefaultFacetQuery(params)
-        def url = grailsApplication.config.ecodata.baseUrl + path +  commonService.buildUrlParamsFromMap(params)
-        webService.proxyGetRequest(response, url, true, true)
-    }
-
     @PreAuthorise(accessLevel = 'siteAdmin', redirectController ='home', redirectAction = 'index')
     def downloadAllData() {
-
-        params.query = "docType:project"
-        def path = "search/downloadAllData"
-
-        if (params.view == 'xlsx' || params.view == 'json') {
-            path += ".${params.view}"
-        }else{
-            path += ".json"
-        }
-
-        def facets = []
-        facets.addAll(params.getList("fq"))
-        facets << "className:au.org.ala.ecodata.Project"
-        params.put("fq", facets)
         params.put("downloadUrl", g.createLink(controller:'document', action:'downloadProjectDataFile', absolute: true)+'/')
         params.put("systemEmail", grailsApplication.config.fieldcapture.system.email.address)
         params.put("senderEmail", grailsApplication.config.fieldcapture.system.email.address)
-        searchService.addDefaultFacetQuery(params)
-        def url = grailsApplication.config.ecodata.baseUrl + path +  commonService.buildUrlParamsFromMap(params)
-        def response = webService.doPostWithParams(url, [:]) // POST because the URL can get long.
+
+        def response = searchService.downloadAllData(params)
 
         render response as JSON
     }
@@ -97,32 +67,16 @@ class SearchController {
 
     @PreAuthorise(accessLevel = 'siteAdmin', redirectController ='home', redirectAction = 'index')
     def downloadSummaryData() {
-        params.query = "docType:project"
-        def path = "search/downloadSummaryData"
-
-        if (params.view == 'xlsx' || params.view == 'json') {
-            path += ".${params.view}"
-        }else{
-            path += ".json"
-        }
-
-        searchService.addDefaultFacetQuery(params)
-        def url = grailsApplication.config.ecodata.baseUrl + path + commonService.buildUrlParamsFromMap(params)
-        webService.proxyGetRequest(response, url, true, true,960000)
+       searchService.downloadSummaryData(params, response)
     }
 
     @PreAuthorise(accessLevel = 'siteAdmin', redirectController ='home', redirectAction = 'index')
     def downloadShapefile() {
-        params.query = "docType:project"
-        def path = "search/downloadShapefile"
-
         params.put("downloadUrl", g.createLink(controller:'document', action:'downloadProjectDataFile', absolute: true)+'/')
         params.put("systemEmail", grailsApplication.config.fieldcapture.system.email.address)
         params.put("senderEmail", grailsApplication.config.fieldcapture.system.email.address)
 
-        searchService.addDefaultFacetQuery(params)
-        def url = grailsApplication.config.ecodata.baseUrl + path + commonService.buildUrlParamsFromMap(params)
-        def resp = webService.proxyGetRequest(response, url, true, true,960000)
+        def resp = searchService.downloadShapefile(params, response)
         if (resp.status != 200) {
             render view:'/error', model:[error:resp.error]
         }

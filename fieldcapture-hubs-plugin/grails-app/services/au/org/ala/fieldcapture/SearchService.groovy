@@ -218,4 +218,45 @@ class SearchService {
         def url = grailsApplication.config.ecodata.baseUrl + 'search/scoresByLabel' + commonService.buildUrlParamsFromMap(reportParams)
         webService.getJson(url, 1200000)
     }
+
+    def downloadAllData(params) {
+        def path = "search/downloadAllData"
+
+        if (params.view == 'xlsx' || params.view == 'json') {
+            path += ".${params.view}"
+        }else{
+            path += ".json"
+        }
+
+        configureProjectQuery(params)
+        List facets = params.getList("fq")
+        facets << "className:au.org.ala.ecodata.Project"
+
+        def url = grailsApplication.config.ecodata.baseUrl + path +  commonService.buildUrlParamsFromMap(params)
+        webService.doPostWithParams(url, [:]) // POST because the URL can get long.
+    }
+
+    def downloadSummaryData(params, response) {
+
+        def path = "search/downloadSummaryData"
+
+        if (params.view == 'xlsx' || params.view == 'json') {
+            path += ".${params.view}"
+        }else{
+            path += ".json"
+        }
+
+        configureProjectQuery(params)
+        def url = grailsApplication.config.ecodata.baseUrl + path + commonService.buildUrlParamsFromMap(params)
+        webService.proxyGetRequest(response, url, true, true,960000)
+    }
+
+    def downloadShapefile(params, response) {
+
+        configureProjectQuery(params)
+
+        def path = "search/downloadShapefile"
+        def url = grailsApplication.config.ecodata.baseUrl + path + commonService.buildUrlParamsFromMap(params)
+        webService.proxyGetRequest(response, url, true, true,960000)
+    }
 }
