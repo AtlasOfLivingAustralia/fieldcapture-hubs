@@ -367,7 +367,7 @@ class FCTagLib {
             def includeThis = false
 
             // check if param name is needed
-            if (!(requiredList && !requiredList.contains(k))) {
+            if (!(requiredList && !requiredList.contains(k?.toLowerCase()))) {
                 includeThis = true
             }
 

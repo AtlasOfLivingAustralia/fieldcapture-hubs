@@ -42,6 +42,7 @@ class SearchService {
         if (applyDefaultFacetQuery) {
             addDefaultFacetQuery(params)
         }
+        handleDateFilters(params)
         params.offset = params.offset?:0
         params.max = params.max?:10
         params.query = params.query?:"*:*"
@@ -66,13 +67,7 @@ class SearchService {
     }
 
     def allProjects(params, String searchTerm = null) {
-        addDefaultFacetQuery(params)
-        //params.max = 9999
-        params.flimit = 999
-        params.fsort = "term"
-        //params.offset = 0
-
-        params.query = "docType:project"
+        configureProjectQuery(params)
         if (searchTerm) {
             params.query += " AND (" + searchTerm + ")"
         }
@@ -85,13 +80,7 @@ class SearchService {
     }
 
     def allProjectsWithSites(params, String searchTerm = null) {
-        addDefaultFacetQuery(params)
-        //params.max = 9999
-        params.flimit = 999
-        params.fsort = "term"
-        //params.offset = 0
-
-        params.query = "docType:project"
+        configureProjectQuery(params)
         if (searchTerm) {
             params.query += " AND " + searchTerm
         }
@@ -118,14 +107,9 @@ class SearchService {
     def HomePageFacets(originalParams) {
 
         def params = originalParams.clone()
-        params.flimit = 999
-        params.fsort = "term"
-        //params.offset = 0
-        params.query = "docType:project"
+        configureProjectQuery(params)
         HubSettings settings = SettingService.getHubConfig()
         params.facets = params.facets ?: StringUtils.join(settings.availableFacets, ',')
-
-        addDefaultFacetQuery(params)
 
         def url = grailsApplication.config.ecodata.baseUrl + 'search/elasticHome' + commonService.buildUrlParamsFromMap(params)
         log.debug "url = $url"
@@ -136,6 +120,46 @@ class SearchService {
         } catch(Exception e){
             log.error(e.getMessage(), e)
             [error:'Problem retrieving home page facets from: ' + url]
+        }
+    }
+
+    private void configureProjectQuery(params, boolean useDefaultFacetQuery = true) {
+        params.flimit = 999
+        params.fsort = "term"
+        //params.offset = 0
+        params.query = "docType:project"
+        handleDateFilters(params)
+        if (useDefaultFacetQuery) {
+            addDefaultFacetQuery(params)
+        }
+
+    }
+
+    private void handleDateFilters(params) {
+        if (params.fromDate || params.toDate) {
+            List fq = params.getList('fq')
+            if (!params.fromDate) {
+                fq += "_query:(plannedStartDate:[* TO ${params.toDate}])"
+            } else if (!params.toDate) {
+                fq += "_query:(plannedEndDate:[${params.fromDate} TO *])"
+            } else {
+                fq += "_query:(plannedEndDate:[${params.fromDate} TO *] AND plannedStartDate:[* TO ${params.toDate}])"
+            }
+            params.fq = fq
+        }
+    }
+
+    private handleActivityDateFilters(params) {
+        if (params.fromDate || params.toDate) {
+            List fq = params.getList('fq')
+            if (!params.fromDate) {
+                fq += "_query:(plannedEndDate:[* TO ${params.toDate}])"
+            } else if (!params.toDate) {
+                fq += "_query:(plannedEndDate:[${params.fromDate} TO *])"
+            } else {
+                fq += "plannedEndDate:[${params.fromDate} TO ${params.toDate}]"
+            }
+            params.fq = fq
         }
     }
 
@@ -167,6 +191,7 @@ class SearchService {
         cacheService.get("dashboard-"+params, {
             addDefaultFacetQuery(params)
             params.query = 'docType:project'
+            handleActivityDateFilters(params)
             def url = grailsApplication.config.ecodata.baseUrl + 'search/dashboardReport' + commonService.buildUrlParamsFromMap(params)
             webService.getJson(url, 1200000)
         })
@@ -174,13 +199,15 @@ class SearchService {
 
     }
 
-    def report(params) {
-        cacheService.get("dashboard-"+params, {
-            addDefaultFacetQuery(params)
-            params.query = 'docType:project'
-            def url = grailsApplication.config.ecodata.baseUrl + 'search/report' + commonService.buildUrlParamsFromMap(params)
-            webService.getJson(url, 1200000)
+    def outputTargetsReport(params) {
+        addDefaultFacetQuery(params)
+        handleDateFilters(params)
+        def url = grailsApplication.config.ecodata.baseUrl + 'search/targetsReport' + commonService.buildUrlParamsFromMap(params)
+
+        def results = cacheService.get("outputTargets-"+params, {
+            webService.getJson(url, 300000)
         })
+        results
     }
 
     def reportOnScores(List<String> scoreLabels, List<String> facets) {
@@ -190,5 +217,46 @@ class SearchService {
         }
         def url = grailsApplication.config.ecodata.baseUrl + 'search/scoresByLabel' + commonService.buildUrlParamsFromMap(reportParams)
         webService.getJson(url, 1200000)
+    }
+
+    def downloadAllData(params) {
+        def path = "search/downloadAllData"
+
+        if (params.view == 'xlsx' || params.view == 'json') {
+            path += ".${params.view}"
+        }else{
+            path += ".json"
+        }
+
+        configureProjectQuery(params)
+        List facets = params.getList("fq")
+        facets << "className:au.org.ala.ecodata.Project"
+
+        def url = grailsApplication.config.ecodata.baseUrl + path +  commonService.buildUrlParamsFromMap(params)
+        webService.doPostWithParams(url, [:]) // POST because the URL can get long.
+    }
+
+    def downloadSummaryData(params, response) {
+
+        def path = "search/downloadSummaryData"
+
+        if (params.view == 'xlsx' || params.view == 'json') {
+            path += ".${params.view}"
+        }else{
+            path += ".json"
+        }
+
+        configureProjectQuery(params)
+        def url = grailsApplication.config.ecodata.baseUrl + path + commonService.buildUrlParamsFromMap(params)
+        webService.proxyGetRequest(response, url, true, true,960000)
+    }
+
+    def downloadShapefile(params, response) {
+
+        configureProjectQuery(params)
+
+        def path = "search/downloadShapefile"
+        def url = grailsApplication.config.ecodata.baseUrl + path + commonService.buildUrlParamsFromMap(params)
+        webService.proxyGetRequest(response, url, true, true,960000)
     }
 }

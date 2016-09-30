@@ -279,9 +279,10 @@ class ModelJSTagLib {
         }
     }
 
-    def makeRowModelName(name) {
-        def rowModelName = "${name}Row"
-        return rowModelName[0].toUpperCase() + rowModelName.substring(1)
+    def makeRowModelName(String output, String name) {
+        String outputName = output.replaceAll(/\W/, '')
+        def rowModelName = "Output_${outputName}_${name}Row"
+        return rowModelName
     }
 
     /**
@@ -357,7 +358,7 @@ class ModelJSTagLib {
         def edit = attrs.edit as boolean
         def editableRows = viewModelFor(attrs, model.name, '')?.editableRows
         def observable = editableRows ? 'protectedObservable' : 'observable'
-        out << INDENT*2 << "var ${makeRowModelName(model.name)} = function (data) {\n"
+        out << INDENT*2 << "var ${makeRowModelName(attrs.model.modelName, model.name)} = function (data) {\n"
         out << INDENT*3 << "var self = this;\n"
         out << INDENT*3 << "if (!data) data = {};\n"
         out << INDENT*3 << "self.transients = {};\n"
@@ -507,7 +508,7 @@ class ModelJSTagLib {
     }
 
     def listViewModel(attrs, model, out) {
-        def rowModelName = makeRowModelName(model.name)
+        def rowModelName = makeRowModelName(attrs.model.modelName, model.name)
         def editableRows = viewModelFor(attrs, model.name, '')?.editableRows
         def defaultRows = []
         model.defaultRows?.each{

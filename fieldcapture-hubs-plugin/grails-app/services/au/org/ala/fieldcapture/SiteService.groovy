@@ -84,16 +84,21 @@ class SiteService {
 
     def addPhotoPoint(siteId, photoPoint) {
         photoPoint.type = 'photopoint'
-        addPOI(siteId, photoPoint)
+        updatePOI(siteId, photoPoint)
     }
 
-    def addPOI(siteId, poi) {
+    def updatePOI(String siteId, Map poi) {
 
         if (!siteId) {
             throw new IllegalArgumentException("The siteId parameter cannot be null")
         }
         def url = "${grailsApplication.config.ecodata.baseUrl}site/${siteId}/poi"
         webService.doPost(url, poi)
+    }
+
+    int deletePOI(String siteId, String poiId) {
+        def url = "${grailsApplication.config.ecodata.baseUrl}site/${siteId}/poi/${poiId}"
+        webService.doDelete(url)
     }
 
     def get(id, Map urlParams = [:]) {
@@ -115,6 +120,7 @@ class SiteService {
             def shapePid = persistSiteExtent(values.name, values.extent.geometry)
             values.extent.geometry.pid = shapePid.resp?.id
         }
+        values.visibility = 'private'
 
         if (id) {
             update(id, values)
@@ -254,7 +260,7 @@ class SiteService {
         def metadata = metadataService.getLocationMetadataForPoint(centroidLat, centroidLong)
         def strLat =  "" + centroidLat + ""
         def strLon = "" + centroidLong + ""
-        def values = [extent: [source: 'pid', geometry: [pid: geometryPid, type: 'pid', state: metadata.state, nrm: metadata.nrm, lga: metadata.lga, locality: metadata.locality, mvg: metadata.mvg, mvs: metadata.mvs, centre: [strLon, strLat]]], projects: [projectId], name: name, description: description, externalId:externalId]
+        def values = [extent: [source: 'pid', geometry: [pid: geometryPid, type: 'pid', state: metadata.state, nrm: metadata.nrm, lga: metadata.lga, locality: metadata.locality, mvg: metadata.mvg, mvs: metadata.mvs, centre: [strLon, strLat]]], projects: [projectId], name: name, description: description, externalId:externalId, visibility:'private']
         return create(values)
     }
 
