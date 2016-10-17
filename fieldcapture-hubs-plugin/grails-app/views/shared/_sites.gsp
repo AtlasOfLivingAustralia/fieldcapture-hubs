@@ -52,6 +52,12 @@
             url += "&fq=${fqList.collect{it.encodeAsURL()}.join('&fq=')}";
             facetsUsed = true;
         </g:if>
+        <g:if test="${params.fromDate}">
+            url += "&fromDate=${params.fromDate}";
+        </g:if>
+        <g:if test="${params.toDate}">
+            url += "&toDate=${params.toDate}";
+        </g:if>
         $("#legend-table").hide();
         $("#map-colorby-status").show();
         $.getJSON(url, function(data) {
