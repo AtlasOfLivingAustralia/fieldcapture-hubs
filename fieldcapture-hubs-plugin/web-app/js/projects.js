@@ -757,7 +757,7 @@ Output = function (name, scores, existingTargets, root) {
         return outcomeValue;
     }());
     this.outcomeTarget.subscribe(function() {
-        if (root.canEditOutputTargets()) {
+        if (root.targetsEditable()) {
             self.isSaving(true);
             root.saveOutputTargets();
         }
@@ -801,7 +801,7 @@ OutputTarget = function (target, outputName, value, isFirst, root) {
     this.isFirst = isFirst;
     this.units = target.units;
     this.target.subscribe(function() {
-        if (root.canEditOutputTargets()) {
+        if (root.targetsEditable()) {
             self.isSaving(true);
             root.saveOutputTargets();
         }
@@ -826,9 +826,13 @@ Outcome.prototype.toJSON = function () {
     delete clone.isSaving;
     return clone;
 };
-function OutputTargets(activities, targets, targetMetadata) {
+function OutputTargets(activities, targets, targetsEditable, targetMetadata, config) {
 
     var self = this;
+    var defaults = {
+        saveTargetsUrl: fcConfig.projectUpdateUrl
+    };
+    var options = $.extend(defaults, config);
 
     self.activitiesByOutputName = {};
 
@@ -852,7 +856,7 @@ function OutputTargets(activities, targets, targetMetadata) {
 
     self.findTarget = function(score, outputName) {
         var foundTarget = null;
-        $.each(targets, function(i, outputAndTargets) {
+        $.each(self.outputTargets(), function(i, outputAndTargets) {
             if (outputAndTargets.name == outputName) {
                 $.each(outputAndTargets.scores, function(j, target) {
                     if (target.scoreLabel == score.label) {
@@ -865,6 +869,8 @@ function OutputTargets(activities, targets, targetMetadata) {
         });
         return foundTarget;
     };
+
+    self.targetsEditable = targetsEditable;
 
     self.safeToRemove = function(activityType) {
 
@@ -891,7 +897,8 @@ function OutputTargets(activities, targets, targetMetadata) {
         return activityTypes[activityType] == 1;
     };
 
-    self.removeTargetsAssociatedWithActivityType = function(activityType, targets) {
+    self.removeTargetsAssociatedWithActivityType = function(activityType) {
+        var targets = self.outputTargets();
         $.each(targetMetadata[activityType], function(outputName, scores) {
             if (self.activitiesByOutputName[outputName].length == 1) {
                 $.each(targets, function(i, outputAndTargets) {
@@ -904,6 +911,58 @@ function OutputTargets(activities, targets, targetMetadata) {
             }
         });
     };
+
+    self.outputTargets = ko.observableArray([]);
+    self.saveOutputTargets = function() {
+        var targets = [];
+        $.each(self.outputTargets(), function (i, target) {
+            $.merge(targets, target.toJSON());
+        });
+
+        var json = JSON.stringify({outputTargets:targets});
+
+        return $.ajax({
+            url: options.saveTargetsUrl,
+            type: 'POST',
+            data: json,
+            contentType: 'application/json',
+            success: function (data) {
+                if (data.error) {
+                    alert(data.detail + ' \n' + data.error);
+                }
+            },
+            error: function (data) {
+                var status = data.status;
+                alert('An unhandled error occurred: ' + data.status);
+            },
+            complete: function(data) {
+                $.each(self.outputTargets(), function(i, target) {
+                    // The timeout is here to ensure the save indicator is visible long enough for the
+                    // user to notice.
+                    setTimeout(function(){target.clearSaving();}, 1000);
+                });
+            }
+        });
+
+    };
+
+    self.loadOutputTargets = function () {
+        var activityTypes = {},  // this just saves us checking multiple activities of the same type
+            uniqueOutputs = {};  // this ensures each output is unique
+        // collect the metadata for the unique outputs for the current set of activities
+        $.each(activities, function (i, activity) {
+            if (!activityTypes[activity.type] && targetMetadata[activity.type]) {
+                activityTypes[activity.type] = true;
+                $.each(targetMetadata[activity.type], function(outputName, scores) {
+                    if (!uniqueOutputs[outputName]) {
+                        uniqueOutputs[outputName] = true;
+                        self.outputTargets.push(new Output(outputName, scores, targets, self));
+                    }
+                });
+            }
+        });
+    }();
+
 
 
 }
