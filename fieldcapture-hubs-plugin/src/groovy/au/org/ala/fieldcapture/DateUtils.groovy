@@ -107,6 +107,12 @@ class DateUtils {
         return DISPLAY_DATE_FORMATTER_WITH_TIME_NOSPACE.print(parse(isoDate))
     }
 
+    static String dayBefore(String isoDate) {
+        DateTime date = parse(isoDate)
+        date = date.minusDays(1)
+        return format(date)
+    }
+
     /**
      * Formats the supplied ISO date string into local time with format of yyyy-MM-dd.  Used by the jquery validation
      * engine date validation routine.
