@@ -952,6 +952,11 @@ var BlogEntryViewModel = function(blogEntry) {
             return self.image().url;
         }
     });
+    self.imageThumbnailUrl =  ko.computed(function() {
+        if (self.image()) {
+            return self.image().thumbnailUrl || self.image().url;
+        }
+    });
 };
 
 var EditableBlogEntryViewModel = function(blogEntry, options) {
@@ -980,6 +985,11 @@ var EditableBlogEntryViewModel = function(blogEntry, options) {
     self.imageUrl = ko.computed(function() {
         if (self.image()) {
             return self.image().url;
+        }
+    });
+    self.imageThumbnailUrl =  ko.computed(function() {
+        if (self.image()) {
+            return self.image().thumbnailUrl || self.image().url;
         }
     });
     self.imageId = ko.computed(function() {
