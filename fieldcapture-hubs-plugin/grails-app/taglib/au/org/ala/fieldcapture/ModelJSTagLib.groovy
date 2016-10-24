@@ -540,6 +540,9 @@ class ModelJSTagLib {
                     });
                 }
             };
+            self.download${model.name}TemplateWithData = function() {
+                self.downloadDataTemplate('${model.name}');
+            }
 """
         }
         if (attrs.edit) {
@@ -561,6 +564,10 @@ class ModelJSTagLib {
             self.show${model.name}TableDataUpload = function() {
                 self.${model.name}TableDataUploadVisible(!self.${model.name}TableDataUploadVisible());
             };
+
+            self.templateDownloadUrl = function(type) {
+                return '${createLink(controller: 'proxy', action: 'excelOutputTemplate', params:[listName:model.name, type:attrs.output])}';
+            }
 
             self.${model.name}TableDataUploadOptions = {
                     url:'${createLink([controller: 'activity', action: 'ajaxUpload'])}',
