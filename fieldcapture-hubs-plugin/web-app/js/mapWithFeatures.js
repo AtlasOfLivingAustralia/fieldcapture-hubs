@@ -216,7 +216,7 @@
                     //load the overlay instead
                     var pid = loc.pid;
                     //console.log('Loading PID: ' + pid);
-                    f = new PIDLayer(pid, this.wmsServer, loc.style);
+                    f = new PIDLayer(pid, this.wmsServer, loc.style || 'restricted');
                     map.map.overlayMapTypes.push(f);
                     $.ajax({
                         url: this.featureService+ '?featureId=' + pid,
