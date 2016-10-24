@@ -26,6 +26,22 @@
         self.transients.questionText = config.optionalQuestionText || 'Not applicable';
         self.transients.dummy = ko.observable();
 
+        self.downloadDataTemplate = function(listName) {
+            var data = ko.mapping.toJS(self.data[listName](), {ignore:['transients']});
+            var params = {
+                listName:listName,
+                type:self.name,
+                data:JSON.stringify(data)
+            };
+            var url = '${createLink(controller: "activity", action: "excelOutputTemplate")}';
+            $.fileDownload(url, {
+                httpMethod:'POST',
+                data:params
+            });
+
+        };
+
+
         // add declarations for dynamic data
         <md:jsViewModel model="${model}"  output="${outputName}"  edit="${edit}" printable="${printable?:''}"/>
 
