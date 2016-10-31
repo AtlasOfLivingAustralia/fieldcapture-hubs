@@ -597,7 +597,7 @@ function Documents() {
         var results = [];
         for (var i=0; i<self.documents().length; i++) {
             var value = ko.utils.unwrapObservable(self.documents()[i][prop]);
-
+            value = value && String(value);
             if (value && results.indexOf(value) < 0) {
                 results.push(value);
             }
