@@ -597,7 +597,7 @@ function Documents() {
         var results = [];
         for (var i=0; i<self.documents().length; i++) {
             var value = ko.utils.unwrapObservable(self.documents()[i][prop]);
-
+            value = value && String(value);
             if (value && results.indexOf(value) < 0) {
                 results.push(value);
             }
@@ -952,6 +952,11 @@ var BlogEntryViewModel = function(blogEntry) {
             return self.image().url;
         }
     });
+    self.imageThumbnailUrl =  ko.computed(function() {
+        if (self.image()) {
+            return self.image().thumbnailUrl || self.image().url;
+        }
+    });
 };
 
 var EditableBlogEntryViewModel = function(blogEntry, options) {
@@ -980,6 +985,11 @@ var EditableBlogEntryViewModel = function(blogEntry, options) {
     self.imageUrl = ko.computed(function() {
         if (self.image()) {
             return self.image().url;
+        }
+    });
+    self.imageThumbnailUrl =  ko.computed(function() {
+        if (self.image()) {
+            return self.image().thumbnailUrl || self.image().url;
         }
     });
     self.imageId = ko.computed(function() {

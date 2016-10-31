@@ -704,8 +704,8 @@ class ModelTagLib {
             }
             out << INDENT*4 << "</tr>\n"
         }
+        colCount = (model.columns?.size()?:0) + 1
         if (attrs.edit && model.userAddedRows) {
-            colCount = (model.columns?.size()?:0) + 1
 
             out << INDENT*4 << """<tr><td colspan="${colCount}" style="text-align:left;">
                         <button type="button" class="btn btn-small" data-bind="click:add${model.source}Row"""
@@ -728,10 +728,9 @@ class ModelTagLib {
                 </div>"""
                 }
                 out << """<div class="text-left" style="margin:5px">
-                    <a href="${createLink(controller: 'proxy', action: 'excelOutputTemplate')}?type=${
-                    attrs.output
-                }&listName=${model.source}" target="${model.source}TemplateDownload" class="btn">Step 1 - Download template (.xlsx)</a>
+                    <a data-bind="attr:{'href':templateDownloadUrl('${model.source}')}" target="${model.source}TemplateDownload" class="btn">Step 1 - Download template (.xlsx)</a>
                 </div>
+
                 <div class="text-left" style="margin:5px;">
                     <input type="checkbox" data-bind="checked:appendTableRows" style="margin-right:5px">Append uploaded data to table (unticking this checkbox will result in all table rows being replaced)
                 </div>
@@ -746,6 +745,13 @@ class ModelTagLib {
             out<<"""</td></tr>"""
             out << """ <script id="${model.source}template-upload" type="text/x-tmpl">{% %}</script>
                        <script id="${model.source}template-download" type="text/x-tmpl">{% %}</script>"""
+        }
+        else if (!model.edit && !attrs.printable) {
+            out << """<tr><td colspan="${colCount}">
+            <div class="text-left" style="margin:5px">
+                <a data-bind="click:download${model.source}TemplateWithData" class="btn"><i class="fa fa-download"></i> Download the data from this table (.xlsx)</a>
+            </div>
+            </tr>"""
         }
         out << INDENT*4 << "</tfoot>\n"
 
