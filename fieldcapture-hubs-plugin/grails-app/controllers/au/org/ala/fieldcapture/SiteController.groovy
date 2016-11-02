@@ -42,7 +42,7 @@ class SiteController {
 
     def index(String id) {
         //log.debug(id)
-        def site = siteService.get(id, [view: 'scores'])
+        def site = siteService.get(id)
         if (site) {
             // permissions check - can't use annotation as we have to know the projectId in order to lookup access right
             if (!isUserMemberOfSiteProjects(site)) {

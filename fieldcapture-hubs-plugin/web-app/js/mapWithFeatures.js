@@ -513,7 +513,8 @@
 
             self.reset();
 
-        }
+        },
+
     };
 
     /*
@@ -535,11 +536,49 @@
         map.clearFeatures();
     }
 
+
+    var markersArray = [];
+
+    function addMarker(lat, lng, name, dragEvent){
+
+        var infowindow = new google.maps.InfoWindow({
+            content: '<span class="poiMarkerPopup">' + name +'</span>'
+        });
+
+        var marker = new google.maps.Marker({
+            position: new google.maps.LatLng(lat,lng),
+            title:name,
+            draggable:false,
+            map:map.map
+        });
+
+        marker.setIcon('https://maps.google.com/mapfiles/marker_yellow.png');
+
+        google.maps.event.addListener(marker, 'click', function() {
+            infowindow.open(map.map, marker);
+        });
+
+        markersArray.push(marker);
+    }
+
+    function removeMarkers(){
+        if (markersArray) {
+            for (var i in markersArray) {
+                markersArray[i].setMap(null);
+                //markersArray.removeAt(i);
+            }
+        }
+        markersArray = [];
+    }
+
     // expose these methods to the global scope
     windows.init_map_with_features = init;
     windows.mapSite = mapSite;
     windows.clearMap = clearMap;
+    windows.addMarker = addMarker;
+    windows.removeMarkers = removeMarkers;
     windows.alaMap = map;
+
 
 
 }(this));
