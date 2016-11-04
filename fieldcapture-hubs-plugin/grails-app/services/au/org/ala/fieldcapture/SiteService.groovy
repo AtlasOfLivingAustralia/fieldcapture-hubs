@@ -63,7 +63,7 @@ class SiteService {
                 Map docsByPOI = documents.documents.groupBy { it.poiId }
                 site.poi.each { poi ->
                     poi.photos = docsByPOI[poi.poiId]
-                    poi.photos.sort{it.dateTaken || ''}
+                    poi.photos?.sort{it.dateTaken || ''}
                 }
             }
         }
