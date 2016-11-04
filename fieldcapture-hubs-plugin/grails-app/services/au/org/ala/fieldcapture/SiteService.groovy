@@ -53,6 +53,22 @@ class SiteService {
         return null
     }
 
+    void addPhotoPointPhotosForSite(site) {
+
+        List pois = site.poi?.collect{it.poiId}
+        if (pois) {
+
+            Map documents = documentService.search(poiId: pois)
+            if (documents.documents) {
+                Map docsByPOI = documents.documents.groupBy { it.poiId }
+                site.poi.each { poi ->
+                    poi.photos = docsByPOI[poi.poiId]
+                    poi.photos.sort{it.dateTaken || ''}
+                }
+            }
+        }
+    }
+
     def injectLocationMetadata(List sites) {
         sites.each { site ->
             injectLocationMetadata(site)
