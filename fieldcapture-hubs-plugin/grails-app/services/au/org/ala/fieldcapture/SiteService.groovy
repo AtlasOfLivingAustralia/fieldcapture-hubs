@@ -53,7 +53,7 @@ class SiteService {
         return null
     }
 
-    void addPhotoPointPhotosForSite(site) {
+    void addPhotoPointPhotosForSite(site, activities) {
 
         List pois = site.poi?.collect{it.poiId}
         if (pois) {
@@ -63,6 +63,9 @@ class SiteService {
                 Map docsByPOI = documents.documents.groupBy { it.poiId }
                 site.poi.each { poi ->
                     poi.photos = docsByPOI[poi.poiId]
+                    poi.photos?.each{ photo ->
+                        photo.activity = activities?.find{it.activityId == photo.activityId}
+                    }
                     poi.photos?.sort{it.dateTaken || ''}
                 }
             }
