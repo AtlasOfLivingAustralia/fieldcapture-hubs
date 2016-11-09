@@ -831,7 +831,52 @@ var SitesViewModel =  function(sites, map, mapFeatures, isUserEditor) {
             return obj.feature;
         });
         map.replaceAllFeatures(features);
+        self.removeMarkers();
 
+        $.each(self.displayedSites(), function(i, site) {
+            if (site.poi) {
+                $.each(site.poi, function(j, poi) {
+                    if (poi.geometry) {
+                        self.addMarker(poi.geometry.decimalLatitude, poi.geometry.decimalLongitude, poi.name);
+                    }
+
+                });
+            }
+        });
+
+    };
+
+    var markersArray = [];
+
+    self.addMarker = function(lat, lng, name) {
+
+        var infowindow = new google.maps.InfoWindow({
+            content: '<span class="poiMarkerPopup">' + name +'</span>'
+        });
+
+        var marker = new google.maps.Marker({
+            position: new google.maps.LatLng(lat,lng),
+            title:name,
+            draggable:false,
+            map:map.map
+        });
+
+        marker.setIcon('https://maps.google.com/mapfiles/marker_yellow.png');
+
+        google.maps.event.addListener(marker, 'click', function() {
+            infowindow.open(map.map, marker);
+        });
+
+        markersArray.push(marker);
+    };
+
+    self.removeMarkers = function() {
+        if (markersArray) {
+            for (var i in markersArray) {
+                markersArray[i].setMap(null);
+            }
+        }
+        markersArray = [];
     };
 
 
