@@ -12,7 +12,7 @@ import org.opengis.feature.simple.SimpleFeature
 
 class SiteService {
 
-    def webService, grailsApplication, commonService, metadataService, userService
+    def webService, grailsApplication, commonService, metadataService, userService, reportService
     def documentService
     LinkGenerator grailsLinkGenerator
 
@@ -65,6 +65,8 @@ class SiteService {
                     poi.photos = docsByPOI[poi.poiId]
                     poi.photos?.each{ photo ->
                         photo.activity = activities?.find{it.activityId == photo.activityId}
+                        Map report = reportService.findReportForActivity(photo.activity)
+                        photo.stage = report?report.name:''
                     }
                     poi.photos?.sort{it.dateTaken || ''}
                 }
