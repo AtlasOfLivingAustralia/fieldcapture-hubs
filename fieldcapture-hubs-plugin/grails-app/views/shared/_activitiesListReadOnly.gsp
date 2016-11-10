@@ -10,8 +10,8 @@
     <table class="table table-condensed" id="activities">
         <thead>
         <tr data-bind="visible: activities().length > 0">
-            <th class="sort" data-bind="sortIcon:activitiesSort,click:sortBy" data-column="type">Type</th>
-            <th width="30%" class="sort" data-bind="sortIcon:activitiesSort,click:sortBy" data-column="description">Description</th>
+            <th width="20%" class="sort" data-bind="sortIcon:activitiesSort,click:sortBy" data-column="type">Type</th>
+            <th width="50%" class="sort" data-bind="sortIcon:activitiesSort,click:sortBy" data-column="description">Description</th>
             <th class="sort" data-bind="sortIcon:activitiesSort,click:sortBy" data-column="startDate">From</th>
             <th class="sort" data-bind="sortIcon:activitiesSort,click:sortBy" data-column="endDate">To</th>
             <g:if test="${showSites}">
