@@ -54,7 +54,7 @@ class SiteController {
             site.activities.each {
                 it.model = metadataService.getActivityModel(it.type)
             }
-            siteService.addPhotoPointPhotosForSite(site, site.activities)
+            siteService.addPhotoPointPhotosForSite(site, site.activities, site.projects)
             //siteService.injectLocationMetadata(site)
             [site: site,
              //activities: activityService.activitiesForProject(id),
