@@ -53,7 +53,7 @@ class SiteService {
         return null
     }
 
-    void addPhotoPointPhotosForSite(site, activities) {
+    void addPhotoPointPhotosForSite(Map site, List activities, List projects) {
 
         List pois = site.poi?.collect{it.poiId}
         if (pois) {
@@ -64,9 +64,25 @@ class SiteService {
                 site.poi.each { poi ->
                     poi.photos = docsByPOI[poi.poiId]
                     poi.photos?.each{ photo ->
+                        Map project = null
+                        if (photo.projectId) {
+                            project = projects.find{it.projectId == photo.projectId}
+                        }
                         photo.activity = activities?.find{it.activityId == photo.activityId}
-                        Map report = reportService.findReportForActivity(photo.activity)
-                        photo.stage = report?report.name:''
+                        if (photo.activity) {
+                            if (!project) {
+                                project = projects.find({it.projectId == photo.activity.projectId})
+                            }
+                            if (!project.reports) {
+                                project.reports = reportService.getReportsForProject(project.projectId)
+                            }
+                            Map report = reportService.findReportForDate(photo.activity.plannedEndDate, project.reports)
+                            photo.stage = report?report.name:''
+                        }
+                        photo.projectName = project?.name?:''
+                        photo.siteName = site.name
+                        photo.poiName = poi.name
+
                     }
                     poi.photos?.sort{it.dateTaken || ''}
                 }
