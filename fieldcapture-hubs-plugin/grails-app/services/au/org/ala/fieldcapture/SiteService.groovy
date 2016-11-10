@@ -64,17 +64,13 @@ class SiteService {
                 site.poi.each { poi ->
                     poi.photos = docsByPOI[poi.poiId]
                     poi.photos?.each{ photo ->
-                        Map project = null
-                        if (photo.projectId) {
-                            project = projects.find{it.projectId == photo.projectId}
-                        }
                         photo.activity = activities?.find{it.activityId == photo.activityId}
+                        photo.projectId = photo.activity?.projectId ?: photo.projectId
+                        Map project = projects.find{it.projectId == photo.projectId}
                         if (photo.activity) {
-                            if (!project) {
-                                project = projects.find({it.projectId == photo.activity.projectId})
-                            }
+
                             if (!project.reports) {
-                                project.reports = reportService.getReportsForProject(project.projectId)
+                                project.reports = reportService.getReportsForProject(photo.projectId)
                             }
                             Map report = reportService.findReportForDate(photo.activity.plannedEndDate, project.reports)
                             photo.stage = report?report.name:''
@@ -85,6 +81,7 @@ class SiteService {
 
                     }
                     poi.photos?.sort{it.dateTaken || ''}
+                    poi.photos = poi.photos?.findAll{it.projectId} // Remove photos not associated with a supplied project
                 }
             }
         }
