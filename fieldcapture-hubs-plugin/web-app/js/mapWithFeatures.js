@@ -238,7 +238,7 @@
 //                           self.featureBounds.extend(new google.maps.LatLng(0,0));
 //                           self.featureBounds.extend(new google.maps.LatLng(-90, 180));
                         }
-                        self.addFeature(f, loc);
+                        self.addFeature(f, loc, iw);
                     });
                     loaded = true;
                 } else {
@@ -283,9 +283,10 @@
                 });
             }
             if (loc.popup && iw) {
-                // add infoWindow popu
+                // add infoWindow popup
                 google.maps.event.addListener(f, 'click', function(event) {
                     iw.setContent(loc.popup);
+                    iw.setPosition(event.latLng);
                     iw.open(self.map, f);
                 });
 
@@ -358,7 +359,7 @@
             var self = this,
                 features = this.featureIndex[id];
             if (features) {
-                $.each(this.featureIndex[id], function (i,f) {
+                $.each(features, function (i,f) {
                     self.highlightFeature(f);
                 });
             }
@@ -376,13 +377,18 @@
         //
         highlightFeature: function (f) {
             if (!f) { return; }
+
             if (f instanceof google.maps.Marker) {
                 f.setOptions({icon: 'http://collections.ala.org.au/images/map/orange-dot.png'});
-            } else if (f instanceof google.maps.Polygon) {
+            } else if (f instanceof google.maps.Polygon || f instanceof google.maps.Circle) {
                 f.setOptions({
-                    strokeColor:'#BC2B03',
-                    fillColor:'#DF4A21'
+                    fillOpacity:1
                 });
+            } else if (f instanceof google.maps.ImageMapType) {
+                f.setOpacity(1);
+            }
+            else {
+                console.log(f);
             }
         },
         //
@@ -390,11 +396,12 @@
             if (!f) { return; }
             if (f instanceof google.maps.Marker) {
                 f.setOptions({icon: null});
-            } else if (f instanceof google.maps.Polygon) {
+            } else if (f instanceof google.maps.Polygon || f instanceof google.maps.Circle) {
                 f.setOptions({
-                    strokeColor:'#202020',
-                    fillColor:'#eeeeee'
+                    fillOpacity:0.5
                 });
+            } else if (f instanceof google.maps.ImageMapType) {
+                f.setOpacity(0.5);
             }
         },
         animateFeatureById: function (id) {
