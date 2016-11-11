@@ -824,11 +824,22 @@ var SitesViewModel =  function(sites, map, mapFeatures, isUserEditor) {
 
     };
 
+    self.highlightSite = function(index) {
+        map.highlightFeatureById(self.sites[index].siteId);
+    };
+
+    self.unHighlightSite = function(index) {
+        map.unHighlightFeatureById(self.sites[index].siteId);
+    };
+
     self.displaySites = function () {
         map.clearFeatures();
 
         var features = $.map(self.displayedSites(), function (obj, i) {
-            return obj.feature;
+            var f = obj.feature;
+            f.popup = obj.name;
+            f.id = obj.siteId;
+            return f;
         });
         map.replaceAllFeatures(features);
         self.removeMarkers();
@@ -880,12 +891,6 @@ var SitesViewModel =  function(sites, map, mapFeatures, isUserEditor) {
     };
 
 
-    this.highlight = function () {
-        map.highlightFeatureById(ko.utils.unwrapObservable(this.name));
-    };
-    this.unhighlight = function () {
-        map.unHighlightFeatureById(ko.utils.unwrapObservable(this.name));
-    };
     this.removeSelectedSites = function () {
         bootbox.confirm("Are you sure you want to remove these sites?", function (result) {
             if (result) {
