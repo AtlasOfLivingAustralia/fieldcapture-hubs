@@ -11,6 +11,7 @@ modules = {
         resource url: 'js/jquery.blockUI.js', plugin: 'fieldcapture-plugin'
         resource url: 'js/pagination.js', plugin:'fieldcapture-plugin'
         resource url: 'css/common.css', plugin: 'fieldcapture-plugin'
+        resource url: 'vendor/underscorejs/1.8.3/underscore-min.js', plugin: 'fieldcapture-plugin'
     }
 
     defaultSkin {
