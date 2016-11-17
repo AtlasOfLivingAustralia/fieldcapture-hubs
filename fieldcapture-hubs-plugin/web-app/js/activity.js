@@ -429,7 +429,7 @@ var photoPointPhoto = function(data) {
 function sortActivities(activities) {
     activities.sort(function (a,b) {
 
-        if (a.stageOrder !== undefined && b.stageOrder !== undefined) {
+        if (a.stageOrder !== undefined && b.stageOrder !== undefined && a.stageOrder != b.stageOrder) {
             return a.stageOrder - b.stageOrder;
         }
         if (a.sequence !== undefined && b.sequence !== undefined) {
@@ -510,6 +510,8 @@ var ActivityNavigationViewModel = function(projectId, activityId, config) {
         return '#';
 
     });
+
+    self.returnUrl = config.returnTo;
 
     function currentActivityIndex() {
         return _.findIndex(self.activities(), function (activity) {
