@@ -25,6 +25,7 @@
                 <th>Stage</th>
                 <th>Date last updated</th>
                 <th></th>
+                <th></th>
             </tr>
 
             </thead>
@@ -42,6 +43,10 @@
                     <td>
                         <span data-bind="text:uploadDate.formattedDate()"></span>
                     </td>
+                    <td>
+                        <span data-bind="text:uploadDate"></span>
+                    </td>
+
                     <td>
                         <a data-bind="attr:{href:url}" target="_blank">
                             <i class="fa fa-download"></i>
