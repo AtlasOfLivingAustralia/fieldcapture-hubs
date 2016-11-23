@@ -12,7 +12,7 @@ import org.opengis.feature.simple.SimpleFeature
 
 class SiteService {
 
-    def webService, grailsApplication, commonService, metadataService, userService
+    def webService, grailsApplication, commonService, metadataService, userService, reportService
     def documentService
     LinkGenerator grailsLinkGenerator
 
@@ -51,6 +51,40 @@ class SiteService {
             return metadataService.getLocationMetadataForPoint(loc.geometry.decimalLatitude, loc.geometry.decimalLongitude)
         }
         return null
+    }
+
+    void addPhotoPointPhotosForSite(Map site, List activities, List projects) {
+
+        List pois = site.poi?.collect{it.poiId}
+        if (pois) {
+
+            Map documents = documentService.search(poiId: pois)
+            if (documents.documents) {
+                Map docsByPOI = documents.documents.groupBy { it.poiId }
+                site.poi.each { poi ->
+                    poi.photos = docsByPOI[poi.poiId]
+                    poi.photos?.each{ photo ->
+                        photo.activity = activities?.find{it.activityId == photo.activityId}
+                        photo.projectId = photo.activity?.projectId ?: photo.projectId
+                        Map project = projects.find{it.projectId == photo.projectId}
+                        if (photo.activity) {
+
+                            if (!project.reports) {
+                                project.reports = reportService.getReportsForProject(photo.projectId)
+                            }
+                            Map report = reportService.findReportForDate(photo.activity.plannedEndDate, project.reports)
+                            photo.stage = report?report.name:''
+                        }
+                        photo.projectName = project?.name?:''
+                        photo.siteName = site.name
+                        photo.poiName = poi.name
+
+                    }
+                    poi.photos?.sort{it.dateTaken || ''}
+                    poi.photos = poi.photos?.findAll{it.projectId} // Remove photos not associated with a supplied project
+                }
+            }
+        }
     }
 
     def injectLocationMetadata(List sites) {

@@ -426,3 +426,112 @@ var photoPointPhoto = function(data) {
 
     return result;
 };
+function sortActivities(activities) {
+    activities.sort(function (a,b) {
+
+        if (a.stageOrder !== undefined && b.stageOrder !== undefined && a.stageOrder != b.stageOrder) {
+            return a.stageOrder - b.stageOrder;
+        }
+        if (a.sequence !== undefined && b.sequence !== undefined) {
+            return a.sequence - b.sequence;
+        }
+
+        if (a.plannedStartDate != b.plannedStartDate) {
+            return a.plannedStartDate < b.plannedStartDate ? -1 : (a.plannedStartDate > b.plannedStartDate ? 1 : 0);
+        }
+        var numericActivity = /[Aa]ctivity (\d+)(\w)?.*/;
+        var first = numericActivity.exec(a.description);
+        var second = numericActivity.exec(b.description);
+        if (first && second) {
+            var firstNum = Number(first[1]);
+            var secondNum = Number(second[1]);
+            if (firstNum == secondNum) {
+                // This is to catch activities of the form Activity 1a, Activity 1b etc.
+                if (first.length == 3 && second.length == 3) {
+                    return first[2] > second[2] ? 1 : (first[2] < second[2] ? -1 : 0);
+                }
+            }
+            return  firstNum - secondNum;
+        }
+        else {
+            if (a.dateCreated !== undefined && b.dateCreated !== undefined && a.dateCreated != b.dateCreated) {
+                return a.dateCreated < b.dateCreated ? 1 : -1;
+            }
+            return a.description > b.description ? 1 : (a.description < b.description ? -1 : 0);
+        }
+
+    });
+}
+
+var ActivityNavigationViewModel = function(projectId, activityId, config) {
+    var self = this;
+    self.activities = ko.observableArray();
+
+    self.stages = ko.observableArray();
+    self.selectedStage = ko.observable();
+    self.selectedActivity = ko.observable();
+    self.stageActivities = ko.observableArray();
+
+    self.selectedStage.subscribe(function (newStage) {
+        self.stageActivities( _.filter(self.activities(), function (activity) { return activity.stage == newStage  }));
+        self.selectedActivity(self.nextActivity());
+    });
+    self.hasNext = function() {
+        return self.nextActivity().activityId !== undefined;
+    };
+    self.hasPrevious = function() {
+        return self.previousActivity().activityId !== undefined;
+    };
+    self.nextActivityUrl = function() {
+        if (self.hasNext()) {
+            return config.activityUrl + '/' + self.nextActivity().activityId + (config.returnTo ? '?returnTo=' + encodeURIComponent(config.returnTo) : '');
+        }
+        return '#';
+
+    };
+    self.previousActivityUrl = function() {
+        if (self.hasPrevious()) {
+            return config.activityUrl + '/' + self.previousActivity().activityId + (config.returnTo ? '?returnTo=' + encodeURIComponent(config.returnTo) : '');
+        }
+        return '#';
+
+    };
+    self.nextActivity = function() {
+        return self.activities()[currentActivityIndex()+1] || {};
+    };
+    self.previousActivity = function() {
+        return self.activities()[currentActivityIndex()-1] || {};
+    };
+
+    self.navigateUrl = ko.computed(function() {
+        if (self.selectedActivity()) {
+            return config.activityUrl + '/' +self.selectedActivity().activityId + (config.returnTo ? '?returnTo=' + encodeURIComponent(config.returnTo) : '');
+        }
+        return '#';
+
+    });
+
+    self.returnUrl = config.returnTo;
+
+    function currentActivityIndex() {
+        return _.findIndex(self.activities(), function (activity) {
+           return activity.activityId == activityId;
+        });
+    }
+
+    self.activities.subscribe(function(activities) {
+
+        self.stages(_.uniq(_.pluck(activities, 'stage')));
+
+        if (self.hasNext()) {
+            var next = self.nextActivity();
+            self.selectedStage(next.stage);
+        }
+
+    });
+
+    $.get(config.navigationUrl).done(function (activities) {
+        sortActivities(activities);
+        self.activities(activities);
+    });
+};

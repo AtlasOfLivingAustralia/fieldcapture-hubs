@@ -42,7 +42,7 @@ class SiteController {
 
     def index(String id) {
         //log.debug(id)
-        def site = siteService.get(id, [view: 'scores'])
+        def site = siteService.get(id)
         if (site) {
             // permissions check - can't use annotation as we have to know the projectId in order to lookup access right
             if (!isUserMemberOfSiteProjects(site)) {
@@ -54,6 +54,7 @@ class SiteController {
             site.activities.each {
                 it.model = metadataService.getActivityModel(it.type)
             }
+            siteService.addPhotoPointPhotosForSite(site, site.activities, site.projects)
             //siteService.injectLocationMetadata(site)
             [site: site,
              //activities: activityService.activitiesForProject(id),

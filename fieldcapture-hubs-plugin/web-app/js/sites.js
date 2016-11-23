@@ -824,23 +824,73 @@ var SitesViewModel =  function(sites, map, mapFeatures, isUserEditor) {
 
     };
 
+    self.highlightSite = function(index) {
+        map.highlightFeatureById(self.sites[index].siteId);
+    };
+
+    self.unHighlightSite = function(index) {
+        map.unHighlightFeatureById(self.sites[index].siteId);
+    };
+
     self.displaySites = function () {
         map.clearFeatures();
 
         var features = $.map(self.displayedSites(), function (obj, i) {
-            return obj.feature;
+            var f = obj.feature;
+            f.popup = obj.name;
+            f.id = obj.siteId;
+            return f;
         });
         map.replaceAllFeatures(features);
+        self.removeMarkers();
+
+        $.each(self.displayedSites(), function(i, site) {
+            if (site.poi) {
+                $.each(site.poi, function(j, poi) {
+                    if (poi.geometry) {
+                        self.addMarker(poi.geometry.decimalLatitude, poi.geometry.decimalLongitude, poi.name);
+                    }
+
+                });
+            }
+        });
 
     };
 
+    var markersArray = [];
 
-    this.highlight = function () {
-        map.highlightFeatureById(ko.utils.unwrapObservable(this.name));
+    self.addMarker = function(lat, lng, name) {
+
+        var infowindow = new google.maps.InfoWindow({
+            content: '<span class="poiMarkerPopup">' + name +'</span>'
+        });
+
+        var marker = new google.maps.Marker({
+            position: new google.maps.LatLng(lat,lng),
+            title:name,
+            draggable:false,
+            map:map.map
+        });
+
+        marker.setIcon('https://maps.google.com/mapfiles/marker_yellow.png');
+
+        google.maps.event.addListener(marker, 'click', function() {
+            infowindow.open(map.map, marker);
+        });
+
+        markersArray.push(marker);
     };
-    this.unhighlight = function () {
-        map.unHighlightFeatureById(ko.utils.unwrapObservable(this.name));
+
+    self.removeMarkers = function() {
+        if (markersArray) {
+            for (var i in markersArray) {
+                markersArray[i].setMap(null);
+            }
+        }
+        markersArray = [];
     };
+
+
     this.removeSelectedSites = function () {
         bootbox.confirm("Are you sure you want to remove these sites?", function (result) {
             if (result) {
