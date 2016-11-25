@@ -38,6 +38,7 @@ module.exports = function (config) {
             'web-app/js/fieldcapture-application.js',
             'web-app/js/projects.js',
             'web-app/vendor/momentjs/moment.min.js',
+            'web-app/vendor/momentjs/moment-timezone-with-data.min.js',
             'web-app/js/organisation.js',
             'web-app/js/sites.js',
             'web-app/js/speciesModel.js',
