@@ -83,6 +83,12 @@ function isValidDate(d) {
 
 function convertToSimpleDate(isoDate, includeTime) {
     if (!isoDate) { return ''}
+    if (typeof isoDate === 'object') {
+        // assume a date object
+        if (!isValidDate(isoDate)) {
+            return '';
+        }
+    }
     // Format the stage labels using Melbourne/Sydney/Canberra time to avoid problems where the date starts
     // at midnight and displays as the previous day in other timezones.
     var date = moment.tz(isoDate, "Australia/Sydney");
