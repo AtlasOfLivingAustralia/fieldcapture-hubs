@@ -83,17 +83,11 @@ function isValidDate(d) {
 
 function convertToSimpleDate(isoDate, includeTime) {
     if (!isoDate) { return ''}
-    var date = isoDate, strDate;
-    if (typeof isoDate === 'string') {
-        date = Date.fromISO(isoDate);
-    }
-    if (!isValidDate(date)) { return '' }
-    strDate = pad(date.getDate(),2) + '-' + pad(date.getMonth() + 1,2) + '-' + date.getFullYear();
-    strDate = pad(date.getDate(),2) + '-' + pad(date.getMonth() + 1,2) + '-' + date.getFullYear();
-    if (includeTime) {
-        strDate = strDate + ' ' + pad(date.getHours(),2) + ':' + pad(date.getMinutes(),2);
-    }
-    return strDate;
+    // Format the stage labels using Melbourne/Sydney/Canberra time to avoid problems where the date starts
+    // at midnight and displays as the previous day in other timezones.
+    var date = moment.tz(isoDate, "Australia/Sydney");
+    var format = includeTime ? "DD-MM-YYYY HH:MM" : "DD-MM-YYYY";
+    return date.format(format);
 }
 
 function convertToIsoDate(date) {
