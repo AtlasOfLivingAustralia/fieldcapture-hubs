@@ -609,6 +609,18 @@ class FCTagLib {
         out << "JSON.parse('${modelJson.encodeAsJavaScript()}')"
     }
 
+    def renderProject = { attrs ->
+        Map project = attrs.project
+        project.sites?.each { site ->
+            site.remove('documents')
+        }
+        project.activities?.each { activity ->
+            activity.documents = new JSONArray(activity.documents?.findAll{it.role != 'photoPoint'})
+        }
+
+        out << fc.modelAsJavascript(model:project)
+    }
+
     /**
      * Remove the context path and params from the url.
      * @param urlString
