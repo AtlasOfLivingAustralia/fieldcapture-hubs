@@ -53,38 +53,49 @@ class SiteService {
         return null
     }
 
-    void addPhotoPointPhotosForSite(Map site, List activities, List projects) {
+    void addPhotoPointPhotosForSites(List<Map> sites, List activities, List projects) {
 
-        List pois = site.poi?.collect{it.poiId}
+        long start = System.currentTimeMillis()
+        List siteIds = sites.collect{it.siteId}
+        List pois = sites.collect{it.poi?it.poi.collect{poi->poi.poiId}:[]}.flatten()
         if (pois) {
 
-            Map documents = documentService.search(poiId: pois)
+
+            Map documents = documentService.search(siteId: siteIds)
+            long end = System.currentTimeMillis()
+println "took "+(end-start)
             if (documents.documents) {
-                Map docsByPOI = documents.documents.groupBy { it.poiId }
-                site.poi.each { poi ->
-                    poi.photos = docsByPOI[poi.poiId]
-                    poi.photos?.each{ photo ->
-                        photo.activity = activities?.find{it.activityId == photo.activityId}
-                        photo.projectId = photo.activity?.projectId ?: photo.projectId
-                        Map project = projects.find{it.projectId == photo.projectId}
-                        if (photo.activity) {
 
-                            if (!project.reports) {
-                                project.reports = reportService.getReportsForProject(photo.projectId)
+                Map docsByPOI = documents.documents.groupBy{it.poiId}
+                sites.each { site->
+
+                    site.poi?.each { poi ->
+                        poi.photos = docsByPOI[poi.poiId]
+                        poi.photos?.each{ photo ->
+                            photo.activity = activities?.find{it.activityId == photo.activityId}
+                            photo.projectId = photo.activity?.projectId ?: photo.projectId
+                            Map project = projects.find{it.projectId == photo.projectId}
+                            if (photo.activity) {
+
+                                if (!project.reports) {
+                                    project.reports = reportService.getReportsForProject(photo.projectId)
+                                }
+                                Map report = reportService.findReportForDate(photo.activity.plannedEndDate, project.reports)
+                                photo.stage = report?report.name:''
                             }
-                            Map report = reportService.findReportForDate(photo.activity.plannedEndDate, project.reports)
-                            photo.stage = report?report.name:''
-                        }
-                        photo.projectName = project?.name?:''
-                        photo.siteName = site.name
-                        photo.poiName = poi.name
+                            photo.projectName = project?.name?:''
+                            photo.siteName = site.name
+                            photo.poiName = poi.name
 
+                        }
+                        poi.photos?.sort{it.dateTaken || ''}
+                        poi.photos = poi.photos?.findAll{it.projectId} // Remove photos not associated with a supplied project
                     }
-                    poi.photos?.sort{it.dateTaken || ''}
-                    poi.photos = poi.photos?.findAll{it.projectId} // Remove photos not associated with a supplied project
                 }
             }
         }
+        long end = System.currentTimeMillis()
+        println "took "+(end-start)
     }
 
     def injectLocationMetadata(List sites) {

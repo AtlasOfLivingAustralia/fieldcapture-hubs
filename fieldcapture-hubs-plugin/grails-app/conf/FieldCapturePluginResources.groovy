@@ -12,6 +12,8 @@ modules = {
         resource url: 'js/pagination.js', plugin:'fieldcapture-plugin'
         resource url: 'css/common.css', plugin: 'fieldcapture-plugin'
         resource url: 'vendor/underscorejs/1.8.3/underscore-min.js', plugin: 'fieldcapture-plugin'
+        resource url:'vendor/momentjs/moment.min.js', plugin: 'fieldcapture-plugin'
+        resource url:'vendor/momentjs/moment-timezone-with-data.min.js', plugin: 'fieldcapture-plugin'
     }
 
     defaultSkin {
@@ -198,7 +200,6 @@ modules = {
         dependsOn 'knockout','attachDocuments','wmd'
         resource url:'js/projects.js', plugin: 'fieldcapture-plugin'
         resource url:'js/sites.js', plugin: 'fieldcapture-plugin'
-        resource url:'js/moment.min.js', plugin: 'fieldcapture-plugin'
     }
 
     jquery_cookie {
