@@ -234,11 +234,11 @@ function ProjectViewModel(project, isUserEditor, organisations) {
     if (!organisations) {
         organisations = [];
     }
-    var organisationsMap = {}, organisationsRMap = {};
-    $.map(organisations, function(org) {
+    var organisationsMap = {};
+    $.each(organisations, function(org) {
         organisationsMap[org.organisationId] = org;
-        organisationsRMap[org.name] = org.organisationId;
     });
+    self.transients = self.transients || {};
 
     self.name = ko.observable(project.name);
     self.aim = ko.observable(project.aim);
@@ -249,7 +249,6 @@ function ProjectViewModel(project, isUserEditor, organisations) {
     self.plannedStartDate = ko.observable(project.plannedStartDate).extend({simpleDate: false});
     self.plannedEndDate = ko.observable(project.plannedEndDate).extend({simpleDate: false});
     self.funding = ko.observable(project.funding).extend({currency:{}});
-
     self.regenerateProjectTimeline = ko.observable(false);
     self.projectDatesChanged = ko.computed(function() {
         return project.plannedStartDate != self.plannedStartDate() ||
@@ -263,22 +262,26 @@ function ProjectViewModel(project, isUserEditor, organisations) {
     self.projectStatus = [{id: 'active', name:'Active'},{id:'completed',name:'Completed'},{id:'deleted', name:'Deleted'}];
 
     self.organisationId = ko.observable(project.organisationId);
-    self.collectoryInstitutionId = ko.computed(function() {
-        var org = self.organisationId() && organisationsMap[self.organisationId()];
-        return org? org.collectoryInstitutionId: "";
-    });
+    self.transients.organisation = ko.observable(organisationsMap[self.organisationId()]);
     self.organisationName = ko.computed(function() {
-        var org = self.organisationId() && organisationsMap[self.organisationId()];
+        var org = self.transients.organisation();
         return org? org.name: project.organisationName;
     });
-    self.orgIdGrantee = ko.observable(project.orgIdGrantee);
-    self.orgIdSponsor = ko.observable(project.orgIdSponsor);
-    self.orgIdSvcProvider = ko.observable(project.orgIdSvcProvider);
 
+    self.orgIdSvcProvider = ko.observable(project.orgIdSvcProvider);
+    self.transients.serviceProviderOrganisation = ko.observable(organisationsMap[self.orgIdSvcProvider()]);
     self.serviceProviderName = ko.computed(function() {
-        var org = self.orgIdSvcProvider() && organisationsMap[self.orgIdSvcProvider()];
+        var org = self.transients.serviceProviderOrganisation();
         return org? org.name: project.serviceProviderName;
     });
+    self.collectoryInstitutionId = ko.computed(function() {
+        var org = self.transients.organisation();
+        return org? org.collectoryInstitutionId: "";
+    });
+
+    self.orgIdGrantee = ko.observable(project.orgIdGrantee);
+    self.orgIdSponsor = ko.observable(project.orgIdSponsor);
+
     self.associatedProgram = ko.observable(); // don't initialise yet - we want the change to trigger dependents
     self.associatedSubProgram = ko.observable(project.associatedSubProgram);
     self.newsAndEvents = ko.observable(project.newsAndEvents).extend({markdown:true});
@@ -306,8 +309,6 @@ function ProjectViewModel(project, isUserEditor, organisations) {
     self.urlWeb = ko.observable(project.urlWeb).extend({url:true});
     self.contractStartDate = ko.observable(project.contractStartDate).extend({simpleDate: false});
     self.contractEndDate = ko.observable(project.contractEndDate).extend({simpleDate: false});
-
-    self.transients = self.transients || {};
     self.transients.programs = [];
     self.transients.subprograms = {};
     self.transients.subprogramsToDisplay = ko.computed(function () {
