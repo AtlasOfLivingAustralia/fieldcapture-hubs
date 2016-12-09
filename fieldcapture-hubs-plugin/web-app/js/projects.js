@@ -765,12 +765,10 @@ Output = function (name, scores, existingTargets, root) {
     });
     this.scores = $.map(scores, function (score, index) {
         var targetValue = 0;
-        $.each(existingTargets, function(j, existingTarget) {
-            if (existingTarget.scoreLabel === score.label) {
-                targetValue = existingTarget.target;
-                return false; // end the loop
-            }
-        });
+        var matchingTarget = _.find(existingTargets, function(target) { return target.scoreId == score.scoreId} );
+        if (matchingTarget) {
+            targetValue = matchingTarget.target;
+        }
         return new OutputTarget(score, name, targetValue, index === 0, root);
     });
     this.isSaving = ko.observable(false);
@@ -792,15 +790,15 @@ Output.prototype.clearSaving = function () {
     $.each(this.scores, function (i, score) { score.isSaving(false) });
 };
 
-OutputTarget = function (target, outputName, value, isFirst, root) {
+OutputTarget = function (score, outputName, value, isFirst, root) {
     var self = this;
     this.outputLabel = outputName;
-    this.scoreName = target.name;
-    this.scoreLabel = target.label;
+    this.scoreLabel = score.label;
     this.target = ko.observable(value).extend({numericString:1});
     this.isSaving = ko.observable(false);
     this.isFirst = isFirst;
-    this.units = target.units;
+    this.units = score.units;
+    this.scoreId = score.scoreId;
     this.target.subscribe(function() {
         if (root.targetsEditable()) {
             self.isSaving(true);
@@ -827,7 +825,7 @@ Outcome.prototype.toJSON = function () {
     delete clone.isSaving;
     return clone;
 };
-function OutputTargets(activities, targets, targetsEditable, targetMetadata, config) {
+function OutputTargets(activities, targets, targetsEditable, scores, config) {
 
     var self = this;
     var defaults = {
@@ -835,80 +833,90 @@ function OutputTargets(activities, targets, targetsEditable, targetMetadata, con
     };
     var options = $.extend(defaults, config);
 
-    self.activitiesByOutputName = {};
+    var activityTypes = _.uniq(_.pluck(activities, 'type'));
 
-    var activityTypes = {};  // this just saves us checking multiple activities of the same type
-
-    // collect the metadata for the unique outputs for the current set of activities
-    $.each(activities, function (i, activity) {
-        if (!activityTypes[activity.type] && targetMetadata[activity.type]) {
-            activityTypes[activity.type] = 1;
-            $.each(targetMetadata[activity.type], function(outputName, scores) {
-                if (!self.activitiesByOutputName[outputName]) {
-                    self.activitiesByOutputName[outputName] = [];
-                }
-                self.activitiesByOutputName[outputName].push(activity.type);
-            });
-        }
-        else {
-            activityTypes[activity.type] = activityTypes[activity.type] + 1;
-        }
+    // Find all scores that are derived from the supplied activities.
+    var relevantScores = _.filter(scores, function(score) {
+        return _.some(score.entityTypes, function(scoreActivity) {
+            return _.contains(activityTypes, scoreActivity);
+        });
     });
 
-    self.findTarget = function(score, outputName) {
-        var foundTarget = null;
-        $.each(self.outputTargets(), function(i, outputAndTargets) {
-            if (outputAndTargets.name == outputName) {
-                $.each(outputAndTargets.scores, function(j, target) {
-                    if (target.scoreLabel == score.label) {
-                        foundTarget = target;
-                        return false;
-                    }
-                });
-            }
+    self.targetsEditable = targetsEditable;
 
+    self.findTargetByScore = function(score) {
+        var target = null;
+        _.find(self.outputTargets(), function(outputTarget) {
+            target = _.find(outputTarget.scores, function(target) {
+                return target.scoreId == score.scoreId;
+            });
+            return target;
         });
-        return foundTarget;
+        return target;
     };
 
-    self.targetsEditable = targetsEditable;
+    self.findOutputTargetByScore = function(score) {
+       return _.find(self.outputTargets(), function(outputTarget) {
+            return _.find(outputTarget.scores, function(target) {
+                return target.scoreId == score.scoreId;
+            });
+        });
+    };
+
+    self.containsAny = function(list1, list2) {
+        return _.some(list1, function(item1) {
+            return _.contains(list2, item1);
+        });
+    };
 
     self.safeToRemove = function(activityType) {
 
         var result = true;
         if (self.onlyActivityOfType(activityType)) { // If there is more than 1 activity of the same type, it's safe to remove the activity
-            if (targetMetadata[activityType]) {
-                $.each(targetMetadata[activityType], function (outputName, scores) {
-                    if (self.activitiesByOutputName[outputName].length == 1) {
-                        $.each(scores, function (i, score) {
-                            var target = self.findTarget(score, outputName);
-                            if (target && target.target() && target.target() != '0') {
-                                result = false;
-                                return false;
-                            }
-                        });
-                    }
-                });
-            }
+            var scoresByActivity = _.filter(scores, function(score) {
+                return _.contains(score.entityTypes, activityType);
+            });
+
+            // Check first if the score has a target, and if so, if any other activities can contribute to this target
+            result = !_.some(scoresByActivity, function(score) {
+                var target = self.findTargetByScore(score);
+                var hasTarget = (target && target.target() && target.target() != '0');
+                if (!hasTarget) {
+                    return false;
+                }
+                var otherActivities = _.reject(score.entityTypes, function(type) { return type == activityType});
+
+                return !self.containsAny(otherActivities, activityTypes);
+            });
         }
         return result;
     };
 
     self.onlyActivityOfType = function(activityType) {
-        return activityTypes[activityType] == 1;
+        var activitiesByType = _.filter(activities, function(activity) { return activity.type == activityType });
+        return activitiesByType && activitiesByType.length == 1;
     };
 
     self.removeTargetsAssociatedWithActivityType = function(activityType) {
-        var targets = self.outputTargets();
-        $.each(targetMetadata[activityType], function(outputName, scores) {
-            if (self.activitiesByOutputName[outputName].length == 1) {
-                $.each(targets, function(i, outputAndTargets) {
-                    if (outputAndTargets.name == outputName) {
-                        targets.splice(i, 1);
-                        return false;
+        var scoresForActivity = _.filter(scores, function(score) {
+            return _.contains(score.entityTypes, activityType);
+        });
+        $.each(scoresForActivity, function(i, score) {
+            var otherActivityTypes = _.filter(score.entityTypes, function (type) {
+                return type != activityType
+            });
+            var otherActivities = _.filter(activities, function (activity) {
+                return _.contains(otherActivityTypes, activity.type);
+            });
+            if (otherActivities.length == 0) {
+                var outputTarget = self.findOutputTargetByScore(score);
+                if (outputTarget) {
+                    outputTarget.scores = _.reject(outputTarget.scores, function(target) { return target.scoreId == score.scoreId });
+                    if (outputTarget.scores.length == 0) {
+                        self.outputTargets(_.reject(self.outputTargets(), function(t) { return t === outputTarget} ));
                     }
+                }
 
-                });
             }
         });
     };
@@ -948,19 +956,12 @@ function OutputTargets(activities, targets, targetsEditable, targetMetadata, con
     };
 
     self.loadOutputTargets = function () {
-        var activityTypes = {},  // this just saves us checking multiple activities of the same type
-            uniqueOutputs = {};  // this ensures each output is unique
-        // collect the metadata for the unique outputs for the current set of activities
-        $.each(activities, function (i, activity) {
-            if (!activityTypes[activity.type] && targetMetadata[activity.type]) {
-                activityTypes[activity.type] = true;
-                $.each(targetMetadata[activity.type], function(outputName, scores) {
-                    if (!uniqueOutputs[outputName]) {
-                        uniqueOutputs[outputName] = true;
-                        self.outputTargets.push(new Output(outputName, scores, targets, self));
-                    }
-                });
-            }
+        var scoresByOutputType = _.groupBy(relevantScores, function(score) {
+            return score.outputType;
+        });
+        _.each(scoresByOutputType, function(scoresForOutputType, outputType) {
+
+            self.outputTargets.push(new Output(outputType, scoresForOutputType, targets, self));
         });
     }();
 

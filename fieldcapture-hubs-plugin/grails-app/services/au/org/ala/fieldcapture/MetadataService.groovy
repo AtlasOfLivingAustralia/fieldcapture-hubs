@@ -274,6 +274,16 @@ class MetadataService {
         })
     }
 
+    List<Map> getScores(boolean includeConfig) {
+        cacheService.get("scores-${includeConfig}", {
+            String url = grailsApplication.config.ecodata.baseUrl + "metadata/scores"
+            if (includeConfig) {
+                url+='?view=config'
+            }
+            webService.getJson(url)
+        })
+    }
+
     def getGeographicFacetConfig() {
         cacheService.get("geographic-facets", {
 
