@@ -17,10 +17,10 @@ class DashboardTagLib {
 
             def target = score.target ? score.target as Double : 0
             // A zero target essentially means not a target.
-            if (target > 0 && score.score.isOutputTarget) {
-                renderTarget(score, target)
+            if (target > 0 && score.isOutputTarget) {
+                renderTarget(score, target, attrs)
             }
-            else if (!score.score.displayType) {
+            else if (!score.displayType) {
                 renderSingleScore(score, attrs)
             }
             else {
@@ -28,7 +28,7 @@ class DashboardTagLib {
             }
         }
         catch (Exception e) {
-            log.warn("Found non-numeric target or result for score: ")
+            log.warn("Found non-numeric target or result for score: "+score.label)
         }
 
     }
@@ -37,7 +37,7 @@ class DashboardTagLib {
 
         def height = 25
 
-        if (score.groupBy || score.aggregationType.name == 'HISTOGRAM') {
+        if (score.displayType) {
 
             height = score.displayType == 'barchart' ? 500 : 300
         }
@@ -114,14 +114,14 @@ class DashboardTagLib {
      * @param score the score being rendered
      * @param target the target value for the score
      */
-    private void renderTarget(score, double target) {
-        def result = score.result ?: 0
+    private void renderTarget(score, double target, attrs) {
+        def result = score.result?.result ?: 0
         def percentComplete = result / target * 100
         percentComplete = Math.min(100, percentComplete)
         percentComplete = Math.max(0, percentComplete)
 
         out << """
-            <strong>${score.score.label}</strong>
+            <strong>${score.label}${helpText(score, attrs)}</strong>
             <div class="progress progress-info active " style="position:relative">
                 <div class="bar" style="width: ${percentComplete}%;"></div>
                 <span class="pull-right progress-label ${percentComplete >= 99 ? 'progress-100':''}" style="position:absolute; top:0; right:0;"> ${g.formatNumber(type:'number',number:result, maxFractionDigits: 2, groupingUsed:true)}/${score.target}</span>
@@ -129,26 +129,19 @@ class DashboardTagLib {
     }
 
     private void renderSingleScore(score, attrs) {
-        switch (score.score.aggregationType.name) {
+        def result = score.result?.result
 
-            case 'COUNT':
-            case 'SUM':
-            case 'AVERAGE':
-
-                def result = score.result as Double ?: 0
-                out << "<div><b>${score.score.label}</b>${helpText(score, attrs)} : ${g.formatNumber(type:'number',number:result, maxFractionDigits: 2, groupingUsed:true)}</div>"
-                break
-            case 'HISTOGRAM':
-                if (score.result.size() <= 1) {
-                    return
-                }
-                def chartData = toArray(score.result)
-                def chartType = score.score.displayType?:'piechart'
-                drawChart(chartType, score.score.label, score.score.label, helpText(score, attrs), [['string', score.score.label], ['number', 'Count']], chartData, attrs)
-                break
-            case 'SET':
-                out << "<div><b>${score.score.label}</b> :${score.result.join(',')}</div>"
-                break
+        if (result instanceof Map) {
+            if (result.size() <= 1) {
+                return
+            }
+            def chartData = toArray(result)
+            def chartType = score.displayType?:'piechart'
+            drawChart(chartType, score.label, score.label, helpText(score, attrs), [['string', score.label], ['number', 'Count']], chartData, attrs)
+        }
+        else {
+            result = result as Double ?: 0
+            out << "<div><b>${score.label}</b>${helpText(score, attrs)} : ${g.formatNumber(type:'number',number:result, maxFractionDigits: 2, groupingUsed:true)}</div>"
         }
     }
 
@@ -161,40 +154,31 @@ class DashboardTagLib {
     }
 
     private def helpText(score, attrs) {
-        if (score.score.description && !attrs.printable) {
-            return fc.iconHelp([title:'']){score.score.description}
+        if (score.description && !attrs.printable) {
+            return fc.iconHelp([title:'']){score.description}
         }
         return ''
     }
 
     private void renderGroupedScore(score, attrs) {
-        if (score.result && score.result.size() == 1) {
-            return
+        def result = score.result
+        if (result && result.result instanceof Map) {
+            if (result.result.size() <= 1) {
+                return
+            }
+            def chartData = toArray(result.result)
+            def chartType = score.displayType?:'piechart'
+            drawChart(chartType, score.label, score.label, helpText(score, attrs), [['string', score.label], ['number', 'Count']], chartData, attrs)
         }
-        switch (score.score.aggregationType.name) {
-            case 'SUM':
-            case 'AVERAGE':
-            case 'COUNT':
-                def chartData = score.groups.collect{[it.group, it.results[0].result]}.findAll{it[1]}.sort{a,b -> a[0].compareTo(b[0])}
-                def chartType = score.score.displayType?:'piechart'
-                drawChart(chartType, score.score.label, score.label?:'', helpText(score, attrs), [['string', score.label?:''], ['number', score.score.label]], chartData, attrs)
-
-                break
-            case 'HISTOGRAM':
-                def chartData = toArray(score.result)
-                def chartType = score.score.displayType?:'piechart'
-                drawChart(chartType, score.score.label, score.score.label, helpText(score, attrs), [['string', score.score.label], ['number', 'Count']], chartData, attrs)
-                break
+        else {
+            if (result && result.groups.size() == 1 && result.groups[0].count == 1) {
+                return
+            }
+            def chartData = result.groups.collect{[it.group, it.results[0].result]}.findAll{it[1]}.sort{a,b -> a[0].compareTo(b[0])}
+            def chartType = score.displayType?:'piechart'
+            drawChart(chartType, score.label, score.label?:'', helpText(score, attrs), [['string', score.label?:''], ['number', score.label]], chartData, attrs)
 
         }
-    }
-
-    private void drawPieChart(label, title, columns, data) {
-        drawChart('piechart', label, title, '', columns, data)
-    }
-
-    private void drawBarChart(label, title, columns, data) {
-        drawChart('barchart', label, title, '', columns, data)
 
     }
 

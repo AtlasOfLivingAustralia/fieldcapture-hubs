@@ -9,9 +9,9 @@
 </div>
 <div class="row-fluid">
     <div class="control-group span5">
-        <label class="control-label">Choose an organisation</label>
-        <select class="input-xlarge" id="organisation"
-                data-bind="options:transients.organisations, optionsText:'name', optionsValue:'organisationId', value:organisationId, optionsCaption: 'Choose...'"></select>
+        <label class="control-label">Search for an organisation</label>
+        <input type="text" class="input-xlarge" id="organisation" placeholder="Search organisations..."
+                data-bind="elasticSearchAutocomplete:{url:fcConfig.organisationSearchUrl, value:'name', label:'name', result:transients.selectOrganisation}"/>
     </div>
     <div class="control-group span6">
         <label class="control-label">Organisation name</label>
@@ -20,9 +20,9 @@
 </div>
 <div class="row-fluid">
     <div class="control-group span5">
-        <label class="control-label">Service provider organisation</label>
-        <select class="input-xlarge" id="serviceProviderOrganisation"
-                data-bind="options:transients.organisations, optionsText:'name', optionsValue:'organisationId', value:orgIdSvcProvider, optionsCaption: 'Choose...'"></select>
+        <label class="control-label">Search for a service provider organisation</label>
+        <input type="text" class="input-xlarge" id="serviceProviderOrganisation" placeholder="Search organisations..."
+                data-bind="elasticSearchAutocomplete:{url:fcConfig.organisationSearchUrl, value:'name', label:'name', result:transients.selectServiceProviderOrganisation}"></input>
     </div>
     <div class="control-group span6">
         <label class="control-label">Service provider organisation name</label>

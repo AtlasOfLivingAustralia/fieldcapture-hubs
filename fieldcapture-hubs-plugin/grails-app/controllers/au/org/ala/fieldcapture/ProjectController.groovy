@@ -68,16 +68,11 @@ class ProjectController {
     }
 
     protected List organisationList(Map project) {
-        List organisations
-        if (userService.userIsAlaOrFcAdmin()) {
-            organisations = metadataService.organisationList().list
+        List organisations = [[name:project.organisationName, organisationId:project.organisationId]]
+        if (project.serviceProviderName) {
+            organisations << [name:project.serviceProviderName, organisationId:project.orgIdSvcProvider]
         }
-        else {
-            organisations = [[name:project.organisationName, organisationId:project.organisationId]]
-            if (project.serviceProviderName) {
-                organisations << [name:project.serviceProviderName, organisationId:project.orgIdSvcProvider]
-            }
-        }
+
         organisations
     }
 
