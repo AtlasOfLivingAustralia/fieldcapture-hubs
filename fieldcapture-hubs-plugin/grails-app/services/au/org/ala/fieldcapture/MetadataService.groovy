@@ -284,6 +284,15 @@ class MetadataService {
         })
     }
 
+    List<Map> getOutputTargetScores() {
+        cacheService.get('output-targets', {
+            List<Map> scores = getScores(false)
+            scores.findAll { it.isOutputTarget }.collect {
+                [scoreId: it.scoreId, label: it.label, entityTypes: it.entityTypes, description: it.description, outputType: it.outputType]
+            }
+        })
+    }
+
     def getGeographicFacetConfig() {
         cacheService.get("geographic-facets", {
 
