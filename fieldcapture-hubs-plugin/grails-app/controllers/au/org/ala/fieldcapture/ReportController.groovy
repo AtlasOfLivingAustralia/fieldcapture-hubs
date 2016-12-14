@@ -34,20 +34,20 @@ class ReportController {
         def scores = results.outputData
 
         def scoresByCategory = scores.groupBy{
-            (it.score.category?:defaultCategory)
+            (it.category?:defaultCategory)
         }
 
         def doubleGroupedScores = [:]
         // Split the scores up into 2 columms for display.
         scoresByCategory.each { category, categoryScores ->
 
-            categoryScores.sort{it.score.outputName}
+            categoryScores.sort{it.outputType}
             def previousOutput = ""
             def runningHeights = categoryScores.collect {
-                def height = DashboardTagLib.estimateHeight(it.score)
-                if (it.score.outputName != previousOutput) {
+                def height = DashboardTagLib.estimateHeight(it)
+                if (it.outputType != previousOutput) {
                     height += 60 // Account for the output name header, padding etc.
-                    previousOutput = it.score.outputName
+                    previousOutput = it.outputType
                 }
                 height
             }
@@ -65,7 +65,7 @@ class ReportController {
             }
 
 
-            def columnsGroupedByOutput = [columns[0].groupBy{it.score.outputName}, columns[1].groupBy{it.score.outputName}]
+            def columnsGroupedByOutput = [columns[0].groupBy{it.outputType}, columns[1].groupBy{it.outputType}]
             doubleGroupedScores.put(category, columnsGroupedByOutput)
         }
         if (scoresByCategory.keySet().contains(defaultCategory)) {

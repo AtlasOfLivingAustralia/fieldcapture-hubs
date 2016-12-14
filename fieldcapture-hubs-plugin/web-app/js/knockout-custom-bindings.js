@@ -220,3 +220,51 @@ $.fn.availableWidth = function() {
   }
 };
 
+ko.bindingHandlers.elasticSearchAutocomplete = {
+  init: function (element, params) {
+    var param = params();
+    var url = ko.utils.unwrapObservable(param.url);
+    var valueProp = ko.utils.unwrapObservable(param.value);
+    var labelProp = ko.utils.unwrapObservable(param.label);
+    var result = param.result;
+
+    var options = {};
+
+    options.source = function(request, response) {
+      $(element).addClass("ac_loading");
+
+      var data = {searchTerm:request.term, offset:0, max:10};
+      var items;
+      $.ajax({
+        url: url,
+        dataType:'json',
+        data: data,
+        success: function(data) {
+          if (data.hits) {
+            var hits = data.hits.hits || [];
+            items = $.map(hits, function (hit) {
+              return {label: hit._source[labelProp], value: hit._source[valueProp], source:hit._source};
+            });
+            response(items);
+          }
+        },
+        error: function() {
+          items = [{label:"Error retrieving values", value:''}];
+          response(items);
+        },
+        complete: function() {
+          $(element).removeClass("ac_loading");
+        }
+      });
+    };
+    options.select = function(event, ui) {
+      result(ui.item);
+      $(this).val(""); // Clear the search field
+    };
+
+    $(element).autocomplete(options);
+
+  }
+};
+
+
