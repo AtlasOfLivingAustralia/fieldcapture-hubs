@@ -938,7 +938,7 @@ var BlogEntryViewModel = function(blogEntry) {
     });
     self.type = ko.observable();
     self.formattedDate = ko.computed(function() {
-        return moment(self.date()).format('Do MMM')
+        return moment(self.date()).format('Do MMM YYYY')
     });
     self.shortContent = ko.computed(function() {
         var content = self.content() || '';
