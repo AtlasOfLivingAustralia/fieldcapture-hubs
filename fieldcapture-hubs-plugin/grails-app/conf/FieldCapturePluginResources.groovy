@@ -122,11 +122,15 @@ modules = {
     }
 
     jquery_bootstrap_datatable {
-        resource url:'js/jquery.dataTables.js', plugin: 'fieldcapture-plugin'
+        resource url:'vendor/datatables/1.10.13/datatables.1.10.13.min.js', plugin: 'fieldcapture-plugin'
         resource url:'js/jquery.dataTables.bootstrap.js', plugin: 'fieldcapture-plugin'
-        resource url:'js/dataTables.tableTools.min.js', plugin: 'fieldcapture-plugin'
+        resource url:'vendor/datatables/buttons/1.2.4/datatables.buttons.min.js'
+        resource url:'vendor/datatables/buttons/1.2.4/buttons.html5.min.js'
+        resource url:'vendor/datatables/buttons/1.2.4/buttons.html5.min.css'
+        resource url:'vendor/pdfmake/0.1.18/pdfmake.min.js'
+        resource url:'vendor/pdfmake/0.1.18/vfs_fonts.js'
+        resource url:'vendor/jszip/2.5.0/jszip.min.js'
         resource url:'css/dataTables.bootstrap.css', plugin: 'fieldcapture-plugin'
-        resource url:'css/dataTables.tableTools.min.css', plugin: 'fieldcapture-plugin'
         resource url:'images/sort_asc.png', plugin: 'fieldcapture-plugin'
         resource url:[dir:'images', file:'sort_asc_disabled.png', plugin: 'fieldcapture-plugin']
         resource url:[dir:'images', file:'sort_both.png', plugin: 'fieldcapture-plugin']
