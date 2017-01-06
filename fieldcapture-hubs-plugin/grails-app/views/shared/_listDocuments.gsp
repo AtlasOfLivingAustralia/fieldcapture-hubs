@@ -32,8 +32,14 @@
             <tbody data-bind="foreach: filteredDocuments">
                 <!-- ko if:(role() == '${filterBy}' || 'all' == '${filterBy}') && role() != '${ignore}' && role() != 'variation' -->
                 <tr data-bind="click: $parent.selectDocument">
-                    <td><img class="media-object" data-bind="attr:{src:iconImgUrl(), alt:contentType, title:name}" alt="document icon"></td>
-
+                    <td>
+                        <!-- ko if:embeddedVideo() -->
+                        <i class="fa fa-file-video-o fa-2x"></i>
+                        <!-- /ko -->
+                        <!-- ko if:!embeddedVideo() -->
+                        <img class="media-object" data-bind="attr:{src:iconImgUrl(), alt:contentType, title:name}" alt="document icon">
+                        <!-- /ko -->
+                    </td>
                     <td>
                          <span data-bind="text:name() || filename()"></span>
                     </td>
@@ -48,9 +54,17 @@
                     </td>
 
                     <td>
+                        <!-- ko if:!embeddedVideo() -->
                         <a data-bind="attr:{href:url}" target="_blank">
                             <i class="fa fa-download"></i>
                         </a>
+                        <!-- /ko -->
+                        <!-- ko if:embeddedVideo() -->
+
+                        <i class="icon-question-sign" data-bind="popover:{content:'Embedded videos are not downloadable.'}"></i>
+
+                        <!-- /ko -->
+
                     </td>
                 </tr>
                 <!-- /ko -->
