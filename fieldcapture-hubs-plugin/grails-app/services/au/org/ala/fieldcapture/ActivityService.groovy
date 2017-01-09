@@ -180,4 +180,19 @@ class ActivityService {
 
     }
 
+    private void duplicateActivity(String projectId, List duplicateStages, Map activityData) {
+        Map result
+        List reports = reportService.getReportsForProject(projectId)
+        duplicateStages.each { String stage ->
+            Map report = reports.find { it.name == stage }
+            if (report && !reportService.isSubmittedOrApproved(report)) {
+                activityData.plannedStartDate = report.fromDate
+                activityData.plannedEndDate = DateUtils.dayBefore(report.toDate)
+                log.info("Creating duplicate activity for stage " + stage + " for project " + projectId)
+                result = activityService.create(activityData)
+            }
+        }
+        result
+    }
+
 }
