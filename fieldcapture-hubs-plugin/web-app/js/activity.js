@@ -155,6 +155,19 @@ var PhotoPointViewModel = function(site, activity, config) {
         ko.applyBindings(model, $(options.newPhotoPointModalSelector)[0]);
     };
 
+    self.updatePhotoPointDocumentIds = function(idMap) {
+        $.each(self.photoPoints(), function(i, photoPoint) {
+            $.each(photoPoint.photos(), function(i, photo) {
+                if (!photo.documentId && photo.clientId) {
+                    console.log("Updating document ID for client ID "+photo.clientId+" to "+idMap[photo.clientId]);
+                    if (idMap[photo.clientId]) {
+                        photo.documentId = idMap[photo.clientId].documentId;
+                    }
+                }
+            });
+        });
+    };
+
     var newPhotoPointPhotoHolder = ko.observableArray();
     newPhotoPointPhotoHolder.subscribe(function(photos) {
         if (!photos[0]) {
@@ -399,9 +412,14 @@ var photoPointPhotos = function(site, photoPoint, activityId, existingPhotos, co
 };
 
 var photoPointPhoto = function(data) {
+    // The purpose of the clientId is to correlate server generated documentIds with new documents created on
+    // the client.  This can prevent duplicate documents from being created if the same model is saved multiple
+    // times without a reload of the page/photo point documents.
+    this.clientId = this.clientId || 0;
     if (!data) {
         data = {};
     }
+    data.clientId = data.documentId || 'new-photo-'+this.clientId++;
     data.role = 'photoPoint';
     var result = new DocumentViewModel(data);
     result.dateTaken = ko.observable(data.dateTaken).extend({simpleDate:false});
