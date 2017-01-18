@@ -837,8 +837,10 @@ var SitesViewModel =  function(sites, map, mapFeatures, isUserEditor) {
 
         var features = $.map(self.displayedSites(), function (obj, i) {
             var f = obj.feature;
-            f.popup = obj.name;
-            f.id = obj.siteId;
+            if (f) {
+                f.popup = obj.name;
+                f.id = obj.siteId;
+            }
             return f;
         });
         map.replaceAllFeatures(features);
