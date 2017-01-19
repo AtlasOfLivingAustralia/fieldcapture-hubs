@@ -34,7 +34,7 @@ class AclFilterFilters {
                         errorMsg = "Unknown accessLevel requested: <code>${accessLevel}</code> from <code>${method}</code>. Must be one of ${roles.join(', ')}"
                         log.error errorMsg
                     }
-
+                    
                     switch (accessLevel) {
                         case 'alaAdmin':
                             if (!userService.userInRole(grailsApplication.config.security.cas.alaAdminRole)) {
@@ -42,27 +42,27 @@ class AclFilterFilters {
                             }
                             break
                         case 'siteAdmin':
-                            if (!(userService.userInRole(grailsApplication.config.security.cas.alaAdminRole) || userService.userInRole(grailsApplication.config.security.cas.adminRole))) {
+                            if (!userService.userIsAlaOrFcAdmin()) {
                                 errorMsg = "Access denied: User does not have <b>admin</b> permission"
                             }
                             break
                         case 'siteReadOnly':
-                            if (!(userService.userInRole(grailsApplication.config.security.cas.alaAdminRole) || userService.userInRole(grailsApplication.config.security.cas.adminRole) || userService.userInRole(grailsApplication.config.security.cas.readOnlyOfficerRole))) {
+                            if (!(userService.userIsAlaOrFcAdmin() || userService.userHasReadOnlyAccess())) {
                                 errorMsg = "Access denied: User does not have <b>admin</b> permission"
                             }
                             break
                         case 'officer':
-                            if (!(userService.userInRole(grailsApplication.config.security.cas.alaAdminRole) || userService.userInRole(grailsApplication.config.security.cas.adminRole) || userService.userInRole(grailsApplication.config.security.cas.officerRole))) {
+                            if (!userService.userIsSiteAdmin()) {
                                 errorMsg = "Access denied: User does not have <b>admin</b> permission"
                             }
                             break
                         case 'caseManager':
-                            if (!projectService.isUserCaseManagerForProject(userId, projectId)) {
+                            if (!(userService.userIsAlaOrFcAdmin() || projectService.isUserCaseManagerForProject(userId, projectId))) {
                                 errorMsg = "Access denied: User does not have <b>grant manager</b> permission ${projectId?'for project':''}"
                             }
                             break
                         case 'admin':
-                            if (!projectService.isUserAdminForProject(userId, projectId)) {
+                            if (!(userService.userIsAlaOrFcAdmin() || projectService.isUserAdminForProject(userId, projectId))) {
                                 errorMsg = "Access denied: User does not have <b>admin</b> permission ${projectId?'for project':''}"
                             }
                             break
