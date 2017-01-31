@@ -288,7 +288,7 @@ class MetadataService {
         cacheService.get('output-targets', {
             List<Map> scores = getScores(false)
             scores.findAll { it.isOutputTarget }.collect {
-                [scoreId: it.scoreId, label: it.label, entityTypes: it.entityTypes, description: it.description, outputType: it.outputType]
+                [scoreId: it.scoreId, label: it.label, entityTypes: it.entityTypes, description: it.description, outputType: it.outputType, externalId: it.externalId, isOutputTarget:it.isOutputTarget]
             }
         })
     }
