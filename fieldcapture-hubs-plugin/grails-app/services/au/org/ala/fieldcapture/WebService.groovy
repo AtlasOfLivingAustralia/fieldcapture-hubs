@@ -344,6 +344,8 @@ class WebService {
             }
             request.setEntity(content)
 
+            Closure resposeHandler =
+
             response.success = {resp, message ->
                 result.status = resp.status
                 result.statusCode = resp.status
@@ -351,10 +353,20 @@ class WebService {
                 result.resp = message
             }
 
-            response.failure = {resp ->
+            response.failure = {resp, message ->
+
                 result.status = resp.status
                 result.statusCode = resp.status
-                result.error = "Error POSTing to ${url}"
+                if (message && message instanceof Map) {
+                    result.putAll message
+                }
+                else if (message) {
+                    result.error = message as String
+                }
+                else {
+                    result.error =  "Error POSTing to ${url}"
+                }
+
             }
         }
         result
