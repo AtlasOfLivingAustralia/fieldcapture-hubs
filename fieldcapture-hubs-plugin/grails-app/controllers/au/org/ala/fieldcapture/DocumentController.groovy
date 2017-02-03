@@ -50,12 +50,16 @@ class DocumentController {
             if(originalFilename){
                 def extension = FilenameUtils.getExtension(originalFilename)?.toLowerCase()
                 if (extension && !grailsApplication.config.upload.extensions.blacklist.contains(extension)){
-                    def result =  webService.postMultipart(url, [document:params.document], f).content as JSON
+                    def result =  webService.postMultipart(url, [document:params.document], f)
 
                     // This is returned to the browswer as a text response due to workaround the warning
                     // displayed by IE8/9 when JSON is returned from an iframe submit.
                     response.setContentType('text/plain;charset=UTF8')
-                    render result.toString();
+                    if (result.content) {
+                        result = result.content
+                    }
+                    result = result as JSON
+                    render result.toString()
                 } else {
                     response.setStatus(SC_BAD_REQUEST)
                     //flag error for extension
