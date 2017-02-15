@@ -314,4 +314,140 @@ ko.bindingHandlers.editDocument = {
         };
         ko.bindingHandlers['template'].update(element, function() {return options;}, allBindings, viewModel, bindingContext);
     }
-}
+};
+
+OutputModel = function(output, context, config) {
+    var self = this;
+    if (!output) {
+        output = {};
+    }
+    var activityId = output.activityId || config.activityId;
+    self.name = output.name;
+    self.outputId = orBlank(output.outputId);
+
+    self.data = {};
+    self.transients = {};
+    var notCompleted = output.outputNotCompleted;
+
+    if (notCompleted === undefined) {
+        notCompleted = config.collapsedByDefault;
+    }
+
+    self.outputNotCompleted = ko.observable(notCompleted);
+    self.transients.optional = config.optional || false;
+    self.transients.questionText = config.optionalQuestionText || 'Not applicable';
+    self.transients.dummy = ko.observable();
+
+    self.downloadDataTemplate = function(listName) {
+        var data = ko.mapping.toJS(self.data[listName](), {ignore:['transients']});
+        var params = {
+            listName:listName,
+            type:self.name,
+            data:JSON.stringify(data)
+        };
+        var url = config.downloadTemplateUrl;
+        $.fileDownload(url, {
+            httpMethod:'POST',
+            data:params
+        });
+
+    };
+    // this will be called when generating a savable model to remove transient properties
+    self.removeBeforeSave = function (jsData) {
+        delete jsData.activityType;
+        delete jsData.transients;
+        return jsData;
+    };
+
+    // this returns a JS object ready for saving
+    self.modelForSaving = function () {
+        // get model as a plain javascript object
+        var jsData = ko.mapping.toJS(self, {'ignore':['transients']});
+        if (self.outputNotCompleted()) {
+            jsData.data = {};
+        }
+
+        // get rid of any transient observables
+        return self.removeBeforeSave(jsData);
+    };
+
+    // this is a version of toJSON that just returns the model as it will be saved
+    // it is used for detecting when the model is modified (in a way that should invoke a save)
+    // the ko.toJSON conversion is preserved so we can use it to view the active model for debugging
+    self.modelAsJSON = function () {
+        return JSON.stringify(self.modelForSaving());
+    };
+
+
+    self.prepop = function() {
+        // How does one do that?
+
+        // call url - answer!
+
+
+
+        // call url or map context.
+
+        var conf = config.model['pre-populate'];
+        if (!conf) {
+            return;
+        }
+        var data = {};
+        _.each(conf, function(item) {
+            var prepopData = context;
+            var mapping = item.mapping;
+
+
+            if (!prepopData) {
+                return;
+            }
+            _.extend(data, self.map(mapping, prepopData));
+        });
+
+        return data;
+    };
+
+
+    self.map = function(mappingList, data) {
+        var result = {};
+
+        _.each(mappingList, function(mapping) {
+
+            // Presence of a nested mapping element indicates a list.
+            if (_.has(mapping, 'mapping')) {
+                result[mapping.target] = [];
+                var selectedData = getNestedValue(data, mapping['source-path']);
+                _.each(selectedData, function(d) {
+                    var nestedResult = self.map(mapping.mapping, d);
+                    if (nestedResult) {
+                        result[mapping.target].push(nestedResult);
+                    }
+
+                });
+            }
+            else {
+                result[mapping.target] = getNestedValue(data, mapping['source-path']);
+            }
+        });
+
+        return result;
+    };
+
+    self.attachDocument = function(target) {
+        var url = config.documentUpdateUrl || fcConfig.documentUpdateUrl;
+        showDocumentAttachInModal(url, new DocumentViewModel({role:'information', stage:config.stage},{activityId:activityId, projectId:config.projectId}), '#attachDocument')
+            .done(function(result) {
+                target(new DocumentViewModel(result))
+            });
+    };
+    self.editDocumentMetadata = function(document) {
+        var url = (config.documentUpdateUrl || fcConfig.documentUpdateUrl) + "/" + document.documentId;
+        showDocumentAttachInModal(url, document, '#attachDocument');
+    };
+    self.deleteDocument = function(document) {
+        document.status('deleted');
+        var url = (config.documentDeleteUrl || fcConfig.documentDeleteUrl)+'/'+document.documentId;
+        $.post(url, {}, function() {});
+
+    };
+};
