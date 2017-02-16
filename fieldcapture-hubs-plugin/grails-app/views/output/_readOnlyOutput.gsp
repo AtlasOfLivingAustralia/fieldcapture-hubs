@@ -21,9 +21,10 @@
 
             var output = <fc:modelAsJavascript model="${output}"/>;
             var config = ${fc.modelAsJavascript(model:activityModel.outputConfig?.find{it.outputName == outputName}, default:'{}')};
+            config.model = ${fc.modelAsJavascript(model:outputModel)};
 
-            window[viewModelInstance] = new window[viewModelName](output, site, config);
-            window[viewModelInstance].loadData(output.data || {}, <fc:modelAsJavascript model="${activity.documents}"/>);
+            window[viewModelInstance] = new window[viewModelName](output, fcConfig.project, config);
+            window[viewModelInstance].loadData(output.data, <fc:modelAsJavascript model="${activity.documents}"/>);
 
             ko.applyBindings(window[viewModelInstance], document.getElementById("ko${blockId}"));
         });

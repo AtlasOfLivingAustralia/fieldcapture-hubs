@@ -18,6 +18,13 @@ class ModelTagLib {
 
     private final static int LAYOUT_COLUMNS = 12 // Bootstrap scaffolding uses a 12 column layout.
 
+    /** Context for view layout (rows, columns etc). */
+    class LayoutRenderContext {
+        String parentView
+        String dataContext
+        int span
+    }
+
     /*---------------------------------------------------*/
     /*------------ HTML for dynamic content -------------*/
     /*---------------------------------------------------*/
@@ -28,12 +35,15 @@ class ModelTagLib {
      * @attrs edit if true the html will support the editing of values
      */
     def modelView = { attrs ->
-        viewModelItems(attrs, out, attrs.model?.viewModel)
+
+        LayoutRenderContext ctx = new LayoutRenderContext(parentView:'', dataContext: 'data', span:LAYOUT_COLUMNS)
+
+        viewModelItems(out, attrs, attrs.model?.viewModel, ctx)
 
         renderDeferredTemplates out
     }
 
-    def viewModelItems(attrs, out, items) {
+    def viewModelItems(out, Map attrs, List items, LayoutRenderContext ctx) {
 
         items?.eachWithIndex { mod, index ->
             switch (mod.type) {
@@ -46,21 +56,42 @@ class ModelTagLib {
                 case 'section':
                     section out, attrs, mod
                 case 'row':
-                    def span = LAYOUT_COLUMNS
-                    row out, attrs, mod, span
-                    break
-                case 'photoPoints':
-                    photoPoints out, attrs, mod, index
+                    row out, attrs, mod, ctx
                     break
                 case 'template':
                     out << g.render(template:mod.source, plugin: 'fieldcapture-plugin')
                     break
+                case 'repeat':
+                    repeatingLayout out, attrs, mod, ctx
+                    break
+                case 'col':
+                    column out, attrs, mod, ctx
+                    break
+                default:
+                    layoutDataItem(out, attrs, mod, ctx)
+                    break
+
+
             }
         }
     }
 
+    def repeatingLayout(out, attrs, model, LayoutRenderContext ctx) {
+
+        String sourceType = getType(attrs, model.source, null)
+        if (sourceType != "list") {
+            throw new Exception("Only model elements with a list data type can be the source for a repeating layout")
+        }
+
+        LayoutRenderContext childContext = new LayoutRenderContext(parentView:'', dataContext: '', span:ctx.span)
+
+        out << """<div class="repeating-section" data-bind="foreach:data.${model.source}">"""
+        viewModelItems(out, attrs, model.items, childContext)
+        out << "</div>"
+    }
+
     /**
-     * Generates an element for display, depending on context. Currently
+     * Generates an element for display, depending on viewContext. Currently
      * @parma attrs the attributes passed to the tag library.  Used to access site id.
      * @param model of the data element
      * @param context the dot notation path to the data
@@ -97,6 +128,9 @@ class ModelTagLib {
         }
         if (model.enabled) {
             renderContext.databindAttrs.add "enable", evalDependency(model.enabled)
+        }
+        if (model.readonly) {
+            renderContext.attributes.add "readonly", "readonly"
         }
 
         switch (model.type) {
@@ -336,7 +370,12 @@ class ModelTagLib {
     }
 
     // row model
-    def row(out, attrs, model, parentSpan) {
+    def row(out, attrs, model, ctx) {
+
+        def span = (ctx.span / model.items.size())
+
+        LayoutRenderContext childCtx = new LayoutRenderContext(parentView: 'row', dataContext: ctx.dataContext, span: span)
+
         def extraClassAttrs = model.class ?: ""
         def databindAttrs = model.visibility ? "data-bind=\"visible:${model.visibility}\"" : ""
 
@@ -344,56 +383,55 @@ class ModelTagLib {
         if (model.align == 'right') {
             out << "<div class=\"pull-right\">\n"
         }
-        items(out, attrs, model, parentSpan, 'row')
+        viewModelItems(out, attrs, model.items, childCtx)
         if (model.align == 'right') {
             out << "</div>\n"
         }
         out << "</div>\n"
     }
 
-    def items(out, attrs, model, parentSpan, context) {
+    def column(out, attrs, model, LayoutRenderContext ctx) {
 
-        def span = context == 'row'? (int)(parentSpan / model.items.size()) : LAYOUT_COLUMNS
+        LayoutRenderContext childCtx = new LayoutRenderContext(parentView: 'col', dataContext: ctx.dataContext, span: LAYOUT_COLUMNS)
 
-        model.items.each { it ->
-            AttributeMap at = new AttributeMap()
-            at.addClass(it.css)
-            // inject computed from data model
+        out << "<div class=\"span${ctx.span}\">\n"
+        viewModelItems(out, attrs, model.items, childCtx)
+        out << "</div>"
+    }
 
-            it.computed = it.computed ?: getComputed(attrs, it.source, '')
-            if (it.type == 'col') {
-                out << "<div class=\"span${span}\">\n"
-                items(out, attrs, it, span, 'col')
-                out << "</div>"
+    def layoutDataItem(out, attrs, model, LayoutRenderContext layoutContext) {
+
+        AttributeMap at = new AttributeMap()
+        at.addClass(model.css)
+        // inject computed from data model
+
+        model.computed = model.computed ?: getComputed(attrs, model.source, '')
+
+        // Wrap data elements in rows to reset the bootstrap indentation on subsequent spans to save the
+        // model definition from needing to do so.
+        def labelAttributes = new AttributeMap()
+        def elementAttributes = new AttributeMap()
+        if (layoutContext.parentView == 'col') {
+            out << "<div class=\"row-fluid\">"
+            labelAttributes.addClass 'span4'
+            if (model.type != "number") {
+                elementAttributes.addClass 'span8'
             }
-            else if (it.type == 'table') {
-                table out, attrs, it
-            } else {
-                // Wrap data elements in rows to reset the bootstrap indentation on subsequent spans to save the
-                // model definition from needing to do so.
-                def labelAttributes = new AttributeMap()
-                def elementAttributes = new AttributeMap()
-                if (context == 'col') {
-                    out << "<div class=\"row-fluid\">"
-                    labelAttributes.addClass 'span4'
-                    if (it.type != "number") {
-                        elementAttributes.addClass 'span8'
-                    }
-                } else {
-                    if (it.type != "number") {
-                        elementAttributes.addClass 'span12'
-                    }
-                }
-
-                at.addSpan("span${span}")
-                out << "<span${at.toString()}>"
-                out << INDENT << dataTag(attrs, it, 'data', attrs.edit, elementAttributes, null, labelAttributes)
-                out << "</span>"
-
-                if (context == 'col') {
-                    out << "</div>"
-                }
+        } else {
+            at.addSpan("span${layoutContext.span}")
+            out << "<span${at.toString()}>"
+            if (model.type != "number") {
+                elementAttributes.addClass 'span12'
             }
+        }
+
+        out << INDENT << dataTag(attrs, model, layoutContext.dataContext, attrs.edit, elementAttributes, null, labelAttributes)
+
+        if (layoutContext.parentView == 'col') {
+            out << "</div>"
+        }
+        else {
+            out << "</span>"
         }
     }
 
@@ -757,10 +795,6 @@ class ModelTagLib {
 
     }
 
-    def photoPoints(out, attrs, model, index) {
-        table out, attrs, model
-    }
-
     def addDeferredTemplate(name) {
         def templates = pageScope.getVariable(DEFERRED_TEMPLATES_KEY);
         if (!templates) {
@@ -792,11 +826,9 @@ class ModelTagLib {
     }
 
     static String getAttribute(attrs, name, context, attribute) {
-        //println "getting ${attribute} for ${name} in ${context}"
         def dataModel = attrs.model.dataModel
         def level = dataModel.find {it.name == context}
         level = level ?: dataModel
-        //println "level = ${level}"
         def target
         if (level.dataType in ['list','matrix', 'photoPoints']) {
             target = level.columns.find {it.name == name}
@@ -805,10 +837,8 @@ class ModelTagLib {
             }
         }
         else {
-            //println "looking for ${name}"
             target = dataModel.find {it.name == name}
         }
-        //println "found ${attribute} = ${target ? target[attribute] : null}"
         return target ? target[attribute] : null
     }
 
