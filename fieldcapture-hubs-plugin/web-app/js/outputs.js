@@ -380,31 +380,40 @@ OutputModel = function(output, context, config) {
 
 
     self.prepop = function() {
-        // How does one do that?
-
-        // call url - answer!
-
-
-
-        // call url or map context.
 
         var conf = config.model['pre-populate'];
         if (!conf) {
             return;
         }
+
         var data = {};
         _.each(conf, function(item) {
-            var prepopData = context;
-            var mapping = item.mapping;
+            var prepopData = self.getPrepopData(item);
+
+            if (prepopData) {
+                var mapping = item.mapping;
 
 
-            if (!prepopData) {
-                return;
+                if (!prepopData) {
+                    return;
+                }
+                _.extend(data, self.map(mapping, prepopData));
             }
-            _.extend(data, self.map(mapping, prepopData));
         });
 
         return data;
+    };
+
+    self.getPrepopData = function(config) {
+        var source = config.source;
+        if (source.hasOwnProperty('context-path')) {
+            if (source['context-path']) {
+                return getNestedValue(context, source['context-path']);
+            }
+            else {
+                return context;
+            }
+        }
     };
 
 
