@@ -28,7 +28,7 @@ module.exports = function (config) {
 
         // list of files / patterns to load in the browser
         files: [
-            'web-app/js/knockout-3.3.0.min.js',
+            'web-app/vendor/knockout/3.4.0/knockout-3.4.0.js',
             'web-app/js/knockout.mapping-latest.js',
             'web-app/js/knockout-dates.js',
             'web-app/wmd/showdown.js',
