@@ -31,7 +31,7 @@ public class EditModelWidgetRenderer implements ModelWidgetRenderer {
     @Override
     void renderTextArea(WidgetRenderContext context) {
         context.databindAttrs.add 'value', context.source
-        context.writer << "<textarea ${context.attributes.toString()} data-bind='${context.databindAttrs.toString()}'></textarea>"
+        context.writer << "<textarea ${context.attributes.toString()} data-bind='${context.databindAttrs.toString()}'${context.validationAttr}></textarea>"
     }
 
     @Override
