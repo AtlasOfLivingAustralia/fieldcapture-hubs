@@ -429,7 +429,7 @@ OutputModel = function(output, context, config) {
     // this returns a JS object ready for saving
     self.modelForSaving = function () {
         // get model as a plain javascript object
-        var jsData = ko.mapping.toJS(self, {'ignore':['transients']});
+        var jsData = ko.mapping.toJS(self, {'ignore':['transients', '$parent', '$index']});
         if (self.outputNotCompleted()) {
             jsData.data = {};
         }
