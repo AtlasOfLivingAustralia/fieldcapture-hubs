@@ -10,7 +10,6 @@ class ModelTagLib {
     static namespace = "md"
 
     private final static INDENT = "    "
-    private final static operators = ['sum':'+', 'times':'*', 'divide':'/']
     private final static String QUOTE = "\"";
     private final static String SPACE = " ";
     private final static String EQUALS = "=";
@@ -200,7 +199,7 @@ class ModelTagLib {
 
     private String renderWithLabel(Map model, AttributeMap labelAttributes, attrs, editable, String dataTag) {
 
-        String result
+        String result = dataTag
         if (model.preLabel) {
             labelAttributes.addClass 'preLabel'
 
