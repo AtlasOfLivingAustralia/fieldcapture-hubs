@@ -268,3 +268,15 @@ ko.bindingHandlers.elasticSearchAutocomplete = {
 };
 
 
+ko.bindingHandlers.expression = {
+
+  update: function(element, valueAccessor, allBindingsAccessor, viewModel, bindingContext) {
+
+    var expressionString = ko.utils.unwrapObservable(valueAccessor());
+    var result = expressionEvaluator.evaluate(expressionString, bindingContext);
+
+    $(element).text(result);
+  }
+
+};
+

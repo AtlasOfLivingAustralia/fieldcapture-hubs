@@ -194,7 +194,13 @@ class ModelTagLib {
             addDeferredTemplate(it)
         }
 
+        result = renderWithLabel(model, labelAttributes, attrs, editable, result)
+        return result
+    }
 
+    private String renderWithLabel(Map model, AttributeMap labelAttributes, attrs, editable, String dataTag) {
+
+        String result
         if (model.preLabel) {
             labelAttributes.addClass 'preLabel'
 
@@ -202,16 +208,34 @@ class ModelTagLib {
                 labelAttributes.addClass 'required'
             }
 
-            result = "<span ${labelAttributes.toString()}><label>${labelText(attrs, model, model.preLabel)}</label></span>" + result
+            String labelPlainText
+            if (model.preLabel instanceof Map) {
+                labelPlainText = "<span data-bind=\"expression:'${model.preLabel.computed}'\"></span>"
+            }
+            else {
+                labelPlainText = model.preLabel
+            }
+            result = "<span ${labelAttributes.toString()}><label>${labelText(attrs, model, labelPlainText)}</label></span>" + dataTag
         }
 
         if (model.postLabel) {
+            String postLabel
             labelAttributes.addClass 'postLabel'
-            result += "<span ${labelAttributes.toString()}>${model.postLabel}</span>"
+            if (model.postLabel instanceof Map) {
+                postLabel = "<span data-bind=\"expression:'\"${model.preLabel.computed}\"'\"></span>"
+            }
+            else {
+                postLabel = model.postLabel
+            }
+            result = dataTag + "<span ${labelAttributes.toString()}>${postLabel}</span>"
         }
 
-        return result
+
+        result
     }
+
+
+
 
     /**
      * Generates the contents of a label, including help text if it is available in the model.
