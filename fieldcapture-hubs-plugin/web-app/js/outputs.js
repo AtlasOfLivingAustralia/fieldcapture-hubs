@@ -316,6 +316,73 @@ ko.bindingHandlers.editDocument = {
     }
 };
 
+expressionEvaluator = function() {
+    function bindVariable(variable, context) {
+        var result;
+        var contextVariable = variable;
+        var specialVariables = ['index', 'parent'];
+        if (specialVariables.indexOf(variable) >= 0) {
+            contextVariable = '$' + variable;
+        }
+        if (context[contextVariable]) {
+            result = ko.utils.unwrapObservable(context[contextVariable]);
+        }
+        else {
+            if (context['$parent']) {
+                result = bindVariable(variable, context['$parent']);
+            }
+        }
+        return result;
+
+    }
+    function bindVariables(variables, context) {
+
+        var boundVariables = {};
+        for (var i = 0; i < variables.length; i++) {
+            boundVariables[variables[i]] = bindVariable(variables[i], context);
+        }
+        return boundVariables;
+    }
+
+    var expressionCache = {};
+
+    function evaluate(expression, context, numberOfDecimalPlaces) {
+
+        var parsedExpression = expressionCache[expression];
+        if (!parsedExpression) {
+            parsedExpression = Parser.parse(expression);
+            expressionCache[expression] = parsedExpression;
+        }
+
+        var variables = parsedExpression.variables();
+        var boundVariables = bindVariables(variables, context);
+
+        if (numberOfDecimalPlaces == undefined) {
+            numberOfDecimalPlaces = 2;
+        }
+
+
+        var result;
+        try {
+            result = parsedExpression.evaluate(boundVariables);
+            if (!isNaN(result)) {
+                result = neat_number(result, numberOfDecimalPlaces);
+            }
+        }
+        catch (e) { // undefined dependencies cause an exception to be thrown.
+            result = ''; // Ignore as this is will happen when the computed is first evaluated against the model before load has been called.
+        }
+
+        return result;
+    }
+
+    return {
+        evaluate:evaluate
+    }
+
+}();
+
+
 OutputModel = function(output, context, config) {
     var self = this;
     if (!output) {
