@@ -52,6 +52,16 @@ public class EditModelWidgetRenderer implements ModelWidgetRenderer {
 
     @Override
     void renderSelectMany(WidgetRenderContext context) {
+
+        if (context.model.readonly) {
+            renderSelectManyAsString(context)
+        }
+        else {
+            renderSelectManyAsCheckboxes(context)
+        }
+    }
+
+    private void renderSelectManyAsCheckboxes(WidgetRenderContext context) {
         context.labelAttributes.addClass 'checkbox-list-label '
         def constraints = 'transients.' + context.model.source + 'Constraints'
         // This complicated binding string is to ensure we have unique ids for checkboxes, even when they are nested
@@ -63,12 +73,18 @@ public class EditModelWidgetRenderer implements ModelWidgetRenderer {
         context.databindAttrs.add 'checked', "\$parent.${context.source}"
         context.databindAttrs.add 'attr', "{'id': ${idBinding}, 'name': ${nameBinding}}"
         context.writer << """
-            <ul class="checkbox-list" data-bind="foreach: ${constraints}">
-                <li>
-                    <label data-bind="attr:{'for': ${idBinding}}"><input type="checkbox" name="${context.source}" data-bind="${context.databindAttrs.toString()}" ${context.validationAttr}/><span data-bind="text:\$data"/></label></span>
-                </li>
-            </ul>
-        """
+                <ul class="checkbox-list" data-bind="foreach: ${constraints}">
+                    <li>
+                        <label data-bind="attr:{'for': ${idBinding}}"><input type="checkbox" name="${context.source}" data-bind="${context.databindAttrs.toString()}" ${context.validationAttr}/><span data-bind="text:\$data"/></label></span>
+                    </li>
+                </ul>
+            """
+    }
+
+    private void renderSelectManyAsString(WidgetRenderContext context) {
+        context.attributes.addClass context.getInputWidth()
+        context.databindAttrs.add 'value', context.source+'().join(", ")'
+        context.writer << "<input ${context.attributes.toString()} data-bind='${context.databindAttrs.toString()}' ${context.validationAttr} type='text' class='input-small'/>"
     }
 
     @Override

@@ -228,8 +228,11 @@ class ModelJSTagLib {
         def edit = attrs.edit as boolean
         def editableRows = viewModelFor(attrs, model.name, '')?.editableRows
         def observable = editableRows ? 'protectedObservable' : 'observable'
-        out << INDENT*2 << "var ${makeRowModelName(attrs.model.modelName, model.name)} = function (data) {\n"
+        out << INDENT*2 << "var ${makeRowModelName(attrs.model.modelName, model.name)} = function (data, parent, index) {\n"
         out << INDENT*3 << "var self = this;\n"
+        out << INDENT*3 << "self.\$parent = parent;\n"
+        out << INDENT*3 << "self.\$index = index;\n"
+
         out << INDENT*3 << "if (!data) data = {};\n"
         out << INDENT*3 << "self.transients = {};\n"
 
@@ -352,14 +355,14 @@ class ModelJSTagLib {
         def rowModelName = makeRowModelName(attrs.model.modelName, model.name)
         def editableRows = viewModelFor(attrs, model.name, '')?.editableRows
         def defaultRows = []
-        model.defaultRows?.each{
-            defaultRows << INDENT*5 + "self.data.${model.name}.push(new ${rowModelName}(${it.toString()}));"
+        model.defaultRows?.eachWithIndex { row, i ->
+            defaultRows << INDENT*5 + "self.data.${model.name}.push(new ${rowModelName}(${row.toString()}, self, i));"
         }
         def insertDefaultModel = defaultRows.join('\n')
 
         // If there are no default rows, insert a single blank row and make it available for editing.
         if (attrs.edit && insertDefaultModel.isEmpty()) {
-            insertDefaultModel = "self.add${model.name}Row();"
+            insertDefaultModel = "self.add${model.name}Row(self, 0);"
         }
 
         out << """
@@ -377,7 +380,7 @@ class ModelJSTagLib {
                     ${insertDefaultModel}
                 } else {
                     \$.each(data, function (i, obj) {
-                        self.data.${model.name}.push(new ${rowModelName}(obj));
+                        self.data.${model.name}.push(new ${rowModelName}(obj, self, i));
                     });
                 }
             };
@@ -389,7 +392,7 @@ class ModelJSTagLib {
         if (attrs.edit) {
             out << """
             self.add${model.name}Row = function () {
-                var newRow = new ${rowModelName}();
+                var newRow = new ${rowModelName}(undefined, self, self.${model.name}rowCount());
                 self.data.${model.name}.push(newRow);
                 ${editableRows ? "newRow.isNew = true; self.edit${model.name}Row(newRow);" : ""}
             };
