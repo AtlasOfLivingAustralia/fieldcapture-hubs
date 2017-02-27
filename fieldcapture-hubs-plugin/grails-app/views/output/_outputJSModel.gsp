@@ -21,15 +21,9 @@
 
         self.loadData = function (data, documents) {
 
-            if (!data) {
-                data = self.prepop() || {};
-            }
+            data = self.loadOrPrepop(data);
             <md:jsLoadModel model="${model}"/>
 
-            // if there is no data in tables then add an empty row for the user to add data
-            if (typeof self.addRow === 'function' && self.rowCount() === 0) {
-                self.addRow();
-            }
             self.transients.dummy.notifySubscribers();
         };
     };

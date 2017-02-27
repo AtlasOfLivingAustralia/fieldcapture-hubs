@@ -28,6 +28,7 @@ module.exports = function (config) {
 
         // list of files / patterns to load in the browser
         files: [
+            'web-app/vendor/underscorejs/1.8.3/underscore.js',
             'web-app/vendor/knockout/3.4.0/knockout-3.4.0.js',
             'web-app/js/knockout.mapping-latest.js',
             'web-app/js/knockout-dates.js',
@@ -43,6 +44,8 @@ module.exports = function (config) {
             'web-app/js/sites.js',
             'web-app/js/speciesModel.js',
             'web-app/js/projectActivity.js',
+            'web-app/js/outputs.js',
+            'test/js/util/**/*.js',
             'test/js/spec/**/*.js'
         ],
 
