@@ -535,7 +535,7 @@ OutputModel = function(output, context, config) {
 
         var result = data || {};
 
-        if (config && config.model) {
+        if (config && !config.disablePrepop && config.model) {
             var conf = config.model['pre-populate'];
 
             if (conf) {
