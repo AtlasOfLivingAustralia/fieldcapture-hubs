@@ -384,7 +384,52 @@ expressionEvaluator = function() {
 
 
 OutputModel = function(output, context, config) {
+
     var self = this;
+
+    self.ListSupport = function(listName, ListItemType) {
+        var list = this;
+        list.addRow = function () {
+            var newItem = new ListItemType(undefined, self, list.rowCount());
+            self.data[listName].push(newItem);
+        };
+        list.removeRow = function (item) {
+            self.data[listName].remove(item);
+        };
+        list.rowCount = function () {
+            return self.data[listName]().length;
+        };
+
+        list.tableDataUploadVisible = ko.observable(false);
+        list.showTableDataUpload = function() {
+            list.tableDataUploadVisible(!list.tableDataUploadVisible());
+        };
+
+        list.templateDownloadUrl = function(type) {
+            return config.excelOutputTemplateUrl + '?listName='+listName+'&type='+output.name;
+        };
+        list.tableDataUploadOptions = {
+
+            url:config.tableDataUploadUrl,
+            done:function(e, data) {
+                if (data.result.error) {
+                    self.uploadFailed(data.result.error);
+                }
+                else {
+                    self['load'+listName](data.result.data, list.appendTableRows());
+                }
+            },
+            fail:function(e, data) {
+                self.uploadFailed(data);
+            },
+            uploadTemplateId: listName+"template-upload",
+            downloadTemplateId: listName+"template-download",
+            formData:{type:output.name, listName:listName}
+        };
+        list.appendTableRows = ko.observable(true);
+    };
+
+
     if (!output) {
         output = {};
     }
@@ -445,35 +490,73 @@ OutputModel = function(output, context, config) {
         return JSON.stringify(self.modelForSaving());
     };
 
+    /** Merge properties from obj2 into obj1 recursively, favouring obj1 unless undefined / missing. */
+    self.merge = function(obj1, obj2, result) {
 
-    self.prepop = function() {
+        var keys = _.union(_.keys(obj1), _.keys(obj2));
+        result = result || {};
 
-        var conf = config.model['pre-populate'];
-        if (!conf) {
-            return;
-        }
+        for (var i=0; i<keys.length; i++) {
 
-        var data = {};
-        _.each(conf, function(item) {
-            var prepopData = self.getPrepopData(item);
-
-            if (prepopData) {
-                var mapping = item.mapping;
-
-
-                if (!prepopData) {
-                    return;
-                }
-                _.extend(data, self.map(mapping, prepopData));
+            var key = keys[i];
+            if (obj2[key] === undefined) {
+                result[key] = obj1[key];
             }
-        });
-
-        return data;
+            else if (obj1[key] === undefined && config.replaceUndefined) {
+                result[key] = obj2[key];
+            }
+            else if (!obj1.hasOwnProperty(key)) {
+                result[key] = obj2[key];
+            }
+            else if (_.isArray(obj1[key]) && _.isArray(obj2[key])) {
+                result[key] = self.merge(obj1[key], obj2[key], []);
+            }
+            else if (_.isObject(obj1[key]) && _.isObject(obj2[key])) {
+                result[key] = self.merge(obj1[key], obj2[key]);
+            }
+            else {
+                result[key] = obj1[key];
+            }
+        }
+        return result;
     };
 
-    self.getPrepopData = function(config) {
-        var source = config.source;
-        if (source.hasOwnProperty('context-path')) {
+    self.prepop = function(conf) {
+        var prepopData = self.getPrepopData(conf);
+        if (prepopData) {
+            var mapping = conf.mapping;
+
+            return self.map(mapping, prepopData);
+        }
+
+    };
+
+    self.loadOrPrepop = function(data) {
+
+        var result = data || {};
+
+        if (config && config.model) {
+            var conf = config.model['pre-populate'];
+
+            if (conf) {
+                _.each(conf, function (item) {
+                    var prepopData = self.prepop(item);
+
+                    if (prepopData && (item.merge || !data)) {
+                        _.extend(result, self.merge(prepopData, result));
+                    }
+
+                });
+            }
+        }
+
+        return result;
+    };
+
+
+    self.getPrepopData = function(conf) {
+        var source = conf.source;
+        if (source && source.hasOwnProperty('context-path')) {
             if (source['context-path']) {
                 return getNestedValue(context, source['context-path']);
             }
@@ -526,4 +609,53 @@ OutputModel = function(output, context, config) {
         $.post(url, {}, function() {});
 
     };
+
+    self.uploadFailed = function(message) {
+        var text = "<span class='label label-important'>Important</span><h4>There was an error uploading your data.</h4>";
+        text += "<p>"+message+"</p>";
+        bootbox.alert(text)
+    };
+};
+
+function initialiseOutputViewModel(outputViewModelName, elementId, activity, output, config) {
+    var viewModelInstance = outputViewModelName + 'Instance';
+
+    window[viewModelInstance] = new window[outputViewModelName](output, fcConfig.project, config);
+    window[viewModelInstance].loadData(output.data, activity.documents);
+
+    // dirtyFlag must be defined after data is loaded
+    window[viewModelInstance].dirtyFlag = ko.simpleDirtyFlag(window[viewModelInstance], false);
+
+    ko.applyBindings(window[viewModelInstance], document.getElementById(elementId));
+
+    // this resets the baseline for detecting changes to the model
+    // - shouldn't be required if everything behaves itself but acts as a backup for
+    //   any binding side-effects
+    // - note that it is not foolproof as applying the bindings happens asynchronously and there
+    //   is no easy way to detect its completion
+    window[viewModelInstance].dirtyFlag.reset();
+
+    // register with the master controller so this model can participate in the save cycle
+    master.register(window[viewModelInstance], window[viewModelInstance].modelForSaving,
+        window[viewModelInstance].dirtyFlag.isDirty, window[viewModelInstance].dirtyFlag.reset);
+
+    // Check for locally saved data for this output - this will happen in the event of a session timeout
+    // for example.
+    var savedData = amplify.store('activity-'+activity.activityId);
+    var savedOutput = null;
+    if (savedData) {
+        var outputData = $.parseJSON(savedData);
+        if (outputData.outputs) {
+            $.each(outputData.outputs, function(i, tmpOutput) {
+                if (tmpOutput.name === output.name) {
+                    if (tmpOutput.data) {
+                        savedOutput = tmpOutput.data;
+                    }
+                }
+            });
+        }
+    }
+    if (savedOutput) {
+        window[viewModelInstance].loadData(savedOutput);
+    }
 };
