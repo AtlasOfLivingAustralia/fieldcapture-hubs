@@ -382,53 +382,39 @@ expressionEvaluator = function() {
 
 }();
 
+OutputListSupport = function(parent, listName, ListItemType) {
+    var self = this;
+    self.listName = listName;
+    self.addRow = function () {
+        var newItem = new ListItemType(undefined, parent, self.rowCount());
+        parent.data[listName].push(newItem);
+    };
+    self.removeRow = function (item) {
+        parent.data[listName].remove(item);
+    };
+    self.rowCount = function () {
+        return parent.data[listName]().length;
+    };
+    self.appendTableRows = ko.observable(true);
+    self.tableDataUploadVisible = ko.observable(false);
+    self.showTableDataUpload = function() {
+        self.tableDataUploadVisible(!self.tableDataUploadVisible());
+    };
+
+    self.templateDownloadUrl = function() {
+        return parent.templateDownloadUrl(listName);
+    };
+    self.downloadTemplateWithData = function() {
+        parent.downloadDataTemplate(listName);
+    };
+    self.tableDataUploadOptions = parent.buildTableOptions(self);
+
+    self.appendTableRows = ko.observable(true);
+};
 
 OutputModel = function(output, context, config) {
 
     var self = this;
-
-    self.ListSupport = function(listName, ListItemType) {
-        var list = this;
-        list.addRow = function () {
-            var newItem = new ListItemType(undefined, self, list.rowCount());
-            self.data[listName].push(newItem);
-        };
-        list.removeRow = function (item) {
-            self.data[listName].remove(item);
-        };
-        list.rowCount = function () {
-            return self.data[listName]().length;
-        };
-
-        list.tableDataUploadVisible = ko.observable(false);
-        list.showTableDataUpload = function() {
-            list.tableDataUploadVisible(!list.tableDataUploadVisible());
-        };
-
-        list.templateDownloadUrl = function(type) {
-            return config.excelOutputTemplateUrl + '?listName='+listName+'&type='+output.name;
-        };
-        list.tableDataUploadOptions = {
-
-            url:config.tableDataUploadUrl,
-            done:function(e, data) {
-                if (data.result.error) {
-                    self.uploadFailed(data.result.error);
-                }
-                else {
-                    self['load'+listName](data.result.data, list.appendTableRows());
-                }
-            },
-            fail:function(e, data) {
-                self.uploadFailed(data);
-            },
-            uploadTemplateId: listName+"template-upload",
-            downloadTemplateId: listName+"template-download",
-            formData:{type:output.name, listName:listName}
-        };
-        list.appendTableRows = ko.observable(true);
-    };
-
 
     if (!output) {
         output = {};
@@ -445,19 +431,24 @@ OutputModel = function(output, context, config) {
         notCompleted = config.collapsedByDefault;
     }
 
+    var toIgnore = {ignore:['transients', '$parent', '$index']};
     self.outputNotCompleted = ko.observable(notCompleted);
     self.transients.optional = config.optional || false;
     self.transients.questionText = config.optionalQuestionText || 'Not applicable';
     self.transients.dummy = ko.observable();
 
+    self.templateDownloadUrl = function(listName) {
+        return config.excelOutputTemplateUrl + '?listName='+listName+'&type='+output.name;
+    };
+
     self.downloadDataTemplate = function(listName) {
-        var data = ko.mapping.toJS(self.data[listName](), {ignore:['transients']});
+        var data = ko.mapping.toJS(self.data[listName](), toIgnore);
         var params = {
             listName:listName,
             type:self.name,
             data:JSON.stringify(data)
         };
-        var url = config.downloadTemplateUrl;
+        var url = config.excelOutputTemplateUrl;
         $.fileDownload(url, {
             httpMethod:'POST',
             data:params
@@ -465,7 +456,7 @@ OutputModel = function(output, context, config) {
 
     };
     // this will be called when generating a savable model to remove transient properties
-    self.removeBeforeSave = function (jsData) {
+    self.removeTransients = function (jsData) {
         delete jsData.activityType;
         delete jsData.transients;
         return jsData;
@@ -474,7 +465,7 @@ OutputModel = function(output, context, config) {
     // this returns a JS object ready for saving
     self.modelForSaving = function () {
         // get model as a plain javascript object
-        var jsData = ko.mapping.toJS(self, {'ignore':['transients', '$parent', '$index']});
+        var jsData = ko.mapping.toJS(self, toIgnore);
         if (self.outputNotCompleted()) {
             jsData.data = {};
         }
@@ -615,6 +606,28 @@ OutputModel = function(output, context, config) {
         text += "<p>"+message+"</p>";
         bootbox.alert(text)
     };
+
+    self.buildTableOptions = function(list) {
+
+        var listName = list.listName;
+        return {
+            url: config.excelDataUploadUrl,
+            done: function (e, data) {
+                if (data.result.error) {
+                    self.uploadFailed(data.result.error);
+                }
+                else {
+                    self['load' + listName](data.result.data, list.appendTableRows());
+                }
+            },
+            fail: function (e, data) {
+                self.uploadFailed(data);
+            },
+            uploadTemplateId: listName + "template-upload",
+            downloadTemplateId: listName + "template-download",
+            formData: {type: output.name, listName: listName}
+        };
+    }
 };
 
 function initialiseOutputViewModel(outputViewModelName, elementId, activity, output, config) {
