@@ -55,9 +55,6 @@ class ModelJSTagLib {
             else if (mod.dataType == 'image') {
                 imageModel(mod, out)
             }
-            else if (mod.dataType == 'photoPoints') {
-                photoPointModel(attrs, mod, out)
-            }
             else if (mod.dataType == 'species') {
                 speciesModel(attrs, mod, out)
             }
@@ -367,11 +364,10 @@ class ModelJSTagLib {
 
         out << """
             self.data.${model.name} = ko.observableArray([]);
-            self.selected${model.name}Row = ko.observable();
+            self.transients.${model.name}Support = new OutputListSupport(self, '${model.name}', ${makeRowModelName(attrs.model.modelName, model.name)});
         """
-        if (model.dataType != 'photoPoints') {
-            out << """
 
+        out << """
             self.load${model.name} = function (data, append) {
                 if (!append) {
                     self.data.${model.name}([]);
@@ -384,63 +380,13 @@ class ModelJSTagLib {
                     });
                 }
             };
-            self.download${model.name}TemplateWithData = function() {
-                self.downloadDataTemplate('${model.name}');
-            }
-"""
-        }
-        if (attrs.edit) {
-            out << """
-            self.add${model.name}Row = function () {
-                var newRow = new ${rowModelName}(undefined, self, self.${model.name}rowCount());
-                self.data.${model.name}.push(newRow);
-                ${editableRows ? "newRow.isNew = true; self.edit${model.name}Row(newRow);" : ""}
-            };
-            self.remove${model.name}Row = function (row) {
-                self.data.${model.name}.remove(row);
-                ${editableRows ? "self.selected${model.name}Row(null);" : ""}
-            };
-            self.${model.name}rowCount = function () {
-                return self.data.${model.name}().length;
-            };
+        """
 
-            self.${model.name}TableDataUploadVisible = ko.observable(false);
-            self.show${model.name}TableDataUpload = function() {
-                self.${model.name}TableDataUploadVisible(!self.${model.name}TableDataUploadVisible());
-            };
+        if (attrs.edit && editableRows) {
 
-            self.templateDownloadUrl = function(type) {
-                return '${createLink(controller: 'proxy', action: 'excelOutputTemplate', params:[listName:model.name, type:attrs.output])}';
-            }
-
-            self.${model.name}TableDataUploadOptions = {
-                    url:'${createLink([controller: 'activity', action: 'ajaxUpload'])}',
-                    done:function(e, data) {
-                        if (data.result.error) {
-                            self.uploadFailed(data.result.error);
-                        }
-                        else {
-                            self.load${model.name}(data.result.data, self.appendTableRows());
-                        }
-                    },
-                    fail:function(e, data) {
-                        var message = 'Please contact MERIT support and attach your spreadsheet to help us resolve the problem';
-                        self.uploadFailed(data);
-
-                    },
-                    uploadTemplateId: "${model.name}template-upload",
-                    downloadTemplateId: "${model.name}template-download",
-                    formData:{type:'${attrs.output}', listName:'${model.name}'}
-            };
-            self.appendTableRows = ko.observable(true);
-            self.uploadFailed = function(message) {
-                        var text = "<span class='label label-important'>Important</span><h4>There was an error uploading your data.</h4>";
-                        text += "<p>"+message+"</p>";
-                        bootbox.alert(text)
-            };
-"""
-            if (editableRows) {
                 out << """
+            self.selected${model.name}Row = ko.observable();
+
             self.${model.name}templateToUse = function (row) {
                 return self.selected${model.name}Row() === row ? '${model.name}editTmpl' : '${model.name}viewTmpl';
             };
@@ -470,7 +416,7 @@ class ModelJSTagLib {
                 return self.selected${model.name}Row() != null;
             };
 """
-            }
+
         }
     }
 
@@ -506,12 +452,6 @@ class ModelJSTagLib {
     def imageModel(model, out) {
         out << INDENT*4 << "self.data.${model.name}=ko.observableArray([]);\n"
         populateImageList(model, out)
-    }
-
-    def photoPointModel(attrs, model, out) {
-        listViewModel(attrs, model, out)
-
-        out << g.render(template:"/output/photoPointTemplate", plugin:'fieldcapture-plugin', model:[model:model]);
     }
 
     def speciesModel(attrs, model, out) {

@@ -703,11 +703,11 @@ class ModelTagLib {
         if (model.editableRows) {
                 out << INDENT*5 << "<td>\n"
                 out << INDENT*6 << "<button class='btn btn-mini' data-bind='click:\$root.edit${model.source}Row, enable:!\$root.${model.source}Editing()' title='edit'><i class='icon-edit'></i> Edit</button>\n"
-                out << INDENT*6 << "<button class='btn btn-mini' data-bind='click:\$root.remove${model.source}Row, enable:!\$root.${model.source}Editing()' title='remove'><i class='icon-trash'></i> Remove</button>\n"
+                out << INDENT*6 << "<button class='btn btn-mini' data-bind='click:\$root.transients.${model.source}Support.removeRow, enable:!\$root.${model.source}Editing()' title='remove'><i class='icon-trash'></i> Remove</button>\n"
                 out << INDENT*5 << "</td>\n"
         } else {
             if (edit && model.source) {
-                out << INDENT*5 << "<td><i data-bind='click:\$root.remove${model.source}Row' class='icon-remove'></i></td>\n"
+                out << INDENT*5 << "<td><i data-bind='click:\$root.transients.${model.source}Support.removeRow' class='icon-remove'></i></td>\n"
             }
         }
         out << INDENT*4 << "</tr></script>\n"
@@ -769,7 +769,7 @@ class ModelTagLib {
         if (attrs.edit && model.userAddedRows) {
 
             out << INDENT*4 << """<tr><td colspan="${colCount}" style="text-align:left;">
-                        <button type="button" class="btn btn-small" data-bind="click:add${model.source}Row"""
+                        <button type="button" class="btn btn-small" data-bind="click:transients.${model.source}Support.addRow()"""
             if (model.editableRows) {
                 out << ", enable:!\$root.${model.source}Editing()"
             }
@@ -777,11 +777,11 @@ class ModelTagLib {
                         <i class="icon-plus"></i> Add a row</button>"""
             if (!attrs.disableTableUpload) {
                 out << """
-                <button type="button" class="btn btn-small" data-bind="click:show${model.source}TableDataUpload"><i class="icon-upload"></i> Upload data for this table</button>
+                <button type="button" class="btn btn-small" data-bind="click:transients.${model.source}Support.showTableDataUpload"><i class="icon-upload"></i> Upload data for this table</button>
 
 
                     </td></tr>\n"""
-                out << """<tr data-bind="visible:${model.source}TableDataUploadVisible"><td colspan="${colCount}">"""
+                out << """<tr data-bind="visible:transients.${model.source}Support.tableDataUploadVisible"><td colspan="${colCount}">"""
                 if (containsSpecies) {
                     out << """
                 <div class="text-error text-left">
@@ -789,17 +789,17 @@ class ModelTagLib {
                 </div>"""
                 }
                 out << """<div class="text-left" style="margin:5px">
-                    <a data-bind="attr:{'href':templateDownloadUrl('${model.source}')}" target="${model.source}TemplateDownload" class="btn">Step 1 - Download template (.xlsx)</a>
+                    <a data-bind="attr:{'href':transients.${model.source}Support.templateDownloadUrl()}" target="${model.source}TemplateDownload" class="btn">Step 1 - Download template (.xlsx)</a>
                 </div>
 
                 <div class="text-left" style="margin:5px;">
-                    <input type="checkbox" data-bind="checked:appendTableRows" style="margin-right:5px">Append uploaded data to table (unticking this checkbox will result in all table rows being replaced)
+                    <input type="checkbox" data-bind="checked:transients.${model.source}Support.appendTableRows" style="margin-right:5px">Append uploaded data to table (unticking this checkbox will result in all table rows being replaced)
                 </div>
 
                 <div class="btn fileinput-button" style="margin-left:5px">
                         <input id="${
                     model.source
-                }TableDataUpload" type="file" name="data" data-bind="fileUploadNoImage:${model.source}TableDataUploadOptions">
+                }TableDataUpload" type="file" name="data" data-bind="fileUploadNoImage:transients.${model.source}Support.tableDataUploadOptions">
                         Step 2 - Upload populated template
                 </div>"""
             }
@@ -810,7 +810,7 @@ class ModelTagLib {
         else if (!model.edit && !attrs.printable) {
             out << """<tr><td colspan="${colCount}">
             <div class="text-left" style="margin:5px">
-                <a data-bind="click:download${model.source}TemplateWithData" class="btn"><i class="fa fa-download"></i> Download the data from this table (.xlsx)</a>
+                <a data-bind="click:transients.${model.source}Support.downloadTemplateWithData" class="btn"><i class="fa fa-download"></i> Download the data from this table (.xlsx)</a>
             </div>
             </tr>"""
         }

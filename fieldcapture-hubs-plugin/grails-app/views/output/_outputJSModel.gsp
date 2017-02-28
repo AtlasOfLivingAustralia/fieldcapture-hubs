@@ -5,8 +5,7 @@
 
     window["${outputNameAsIdentifer + 'ViewModel'}"] = function (output, context, config) {
         var self = this;
-        var parent = new OutputModel(output, context, config);
-        _.extend(self, parent);
+        OutputModel.apply(self, [output, context, config]);
 
         // add declarations for dynamic data
         <md:jsViewModel model="${model}"  output="${outputName}"  edit="${edit}" printable="${printable?:''}"/>
@@ -15,7 +14,7 @@
         self.removeBeforeSave = function (jsData) {
 
             <md:jsRemoveBeforeSave model="${model}"/>
-            return parent.removeBeforeSave(jsData);
+            return self.removeTransients(jsData);
         };
 
 
