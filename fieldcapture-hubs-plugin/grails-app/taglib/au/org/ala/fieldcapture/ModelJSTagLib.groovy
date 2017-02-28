@@ -353,13 +353,13 @@ class ModelJSTagLib {
         def editableRows = viewModelFor(attrs, model.name, '')?.editableRows
         def defaultRows = []
         model.defaultRows?.eachWithIndex { row, i ->
-            defaultRows << INDENT*5 + "self.data.${model.name}.push(new ${rowModelName}(${row.toString()}, self, i));"
+            defaultRows << INDENT*5 + "self.data.${model.name}.push(new ${rowModelName}(${row.toString()}, self, $i));"
         }
         def insertDefaultModel = defaultRows.join('\n')
 
         // If there are no default rows, insert a single blank row and make it available for editing.
         if (attrs.edit && insertDefaultModel.isEmpty()) {
-            insertDefaultModel = "self.add${model.name}Row(self, 0);"
+            insertDefaultModel = "self.transients.${model.name}Support.addRow(self, 0);"
         }
 
         out << """
