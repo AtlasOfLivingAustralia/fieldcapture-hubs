@@ -769,7 +769,7 @@ class ModelTagLib {
         if (attrs.edit && model.userAddedRows) {
 
             out << INDENT*4 << """<tr><td colspan="${colCount}" style="text-align:left;">
-                        <button type="button" class="btn btn-small" data-bind="click:transients.${model.source}Support.addRow()"""
+                        <button type="button" class="btn btn-small" data-bind="click:transients.${model.source}Support.addRow"""
             if (model.editableRows) {
                 out << ", enable:!\$root.${model.source}Editing()"
             }
