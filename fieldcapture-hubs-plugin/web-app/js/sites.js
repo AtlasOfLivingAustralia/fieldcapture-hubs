@@ -474,7 +474,7 @@ var PidLocation = function (l) {
     }
 };
 
-function SiteViewModelWithMapIntegration (siteData) {
+function SiteViewModelWithMapIntegration (siteData, projectId) {
     var self = this;
     SiteViewModel.apply(self, [siteData]);
 
@@ -706,7 +706,7 @@ function SiteViewModelWithMapIntegration (siteData) {
                     updating = false;
                 }, 500);
             }
-        }
+        };
         setCurrentShapeCallback(self.shapeDrawn);
         self.extent.subscribe(function(newExtent) {
             clearAndRedraw();
@@ -734,10 +734,23 @@ function SiteViewModelWithMapIntegration (siteData) {
         return validateSiteExtent;
     };
 
+    self.newActivity = function() {
+        var context = '',
+            siteId = self.siteId,
+            returnTo = '?returnTo=' + encodeURIComponent(document.location.href);
+        if (projectId) {
+            context += '&projectId=' + projectId;
+        }
+        if (siteId) {
+            context += '&siteId=' + siteId;
+        }
+        document.location.href = fcConfig.activityCreateUrl + returnTo + context;
+    };
+
 };
 
 
-var SitesViewModel =  function(sites, map, mapFeatures, isUserEditor) {
+var SitesViewModel =  function(sites, map, mapFeatures, isUserEditor, projectId) {
 
     var self = this;
     // sites
@@ -942,6 +955,9 @@ var SitesViewModel =  function(sites, map, mapFeatures, isUserEditor) {
     };
     this.viewSite = function (site) {
         var url = fcConfig.siteViewUrl + '/' + site.siteId + '?returnTo=' + encodeURIComponent(fcConfig.returnTo);
+        if (projectId) {
+            url += '&projectId='+projectId;
+        }
         document.location.href = url;
     };
     this.addSite = function () {
