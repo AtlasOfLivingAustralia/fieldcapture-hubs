@@ -28,7 +28,11 @@ function ActivityViewModel (act, site, project, metaModel, themes) {
     };
     self.goToSite = function () {
         if (self.siteId()) {
-            document.location.href = fcConfig.siteViewUrl + self.siteId();
+            var url = fcConfig.siteViewUrl + self.siteId();
+            if (self.projectId) {
+                url += '?projectId='+self.projectId;
+            }
+            document.location.href = url;
         }
     };
     if (metaModel.supportsPhotoPoints) {
