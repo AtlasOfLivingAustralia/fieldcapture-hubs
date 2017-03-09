@@ -280,3 +280,34 @@ ko.bindingHandlers.expression = {
 
 };
 
+ko.bindingHandlers.showModal = {
+  init: function (element, valueAccessor) {
+    $(element).modal({ backdrop: 'static', keyboard: true, show: false });
+  },
+  update: function (element, valueAccessor) {
+    var value = valueAccessor();
+    if (ko.utils.unwrapObservable(value)) {
+      $(element).modal('show');
+    }
+    else {
+      $(element).modal('hide');
+    }
+  }
+};
+
+ko.extenders.withPrevious = function (target) {
+  // Define new properties for previous value and whether it's changed
+  target.previous = ko.observable();
+  target.changed = ko.computed(function () { return target() !== target.previous(); });
+  target.revert = function () {
+    target(target.previous());
+  };
+
+  // Subscribe to observable to update previous, before change.
+  target.subscribe(function (v) {
+    target.previous(v);
+  }, null, 'beforeChange');
+
+  // Return modified observable
+  return target;
+};
