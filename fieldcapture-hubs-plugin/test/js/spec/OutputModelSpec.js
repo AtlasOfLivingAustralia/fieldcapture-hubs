@@ -134,7 +134,7 @@ describe("OutputModel Spec", function () {
             surveyResultsFlora:[{
                 health:'good',
                 plotId:'2'
-            }]
+            }, {}]
         };
 
         var model = new Flora_Survey_Details_ViewModel({name:"Flora Survey Details"}, context, config);
@@ -169,6 +169,6 @@ describe("OutputModel Spec", function () {
         var result = model.merge(data, context);
 
         expect(result.notes).toEqual('test 2');
-        expect(result.surveyResultsFlora).toEqual([{health:'fair', plotId:'1'}, context.surveyResultsFlora[1]]);
+        expect(result.surveyResultsFlora).toEqual([{health:'fair', plotId:'1'}]);
     });
 });
