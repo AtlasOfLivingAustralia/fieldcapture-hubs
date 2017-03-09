@@ -500,6 +500,9 @@ OutputModel = function(output, context, config) {
                 result[key] = obj2[key];
             }
             else if (_.isArray(obj1[key]) && _.isArray(obj2[key])) {
+                if (obj2[key].length > obj1[key].length) {
+                    obj2[key].splice(obj1[key].length-1, obj2[key].length-obj1[key].length); // Delete extra array elements from obj2.
+                }
                 result[key] = self.merge(obj1[key], obj2[key], []);
             }
             else if (_.isObject(obj1[key]) && _.isObject(obj2[key])) {
