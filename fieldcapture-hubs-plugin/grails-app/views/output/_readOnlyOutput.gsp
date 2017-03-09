@@ -23,6 +23,7 @@
             var config = ${fc.modelAsJavascript(model:activityModel.outputConfig?.find{it.outputName == outputName}, default:'{}')};
             config.model = ${fc.modelAsJavascript(model:outputModel)};
             config.excelOutputTemplateUrl = fcConfig.excelOutputTemplateUrl;
+            config.disablePrepop = true;
 
             window[viewModelInstance] = new window[viewModelName](output, fcConfig.project, config);
             window[viewModelInstance].loadData(output.data, <fc:modelAsJavascript model="${activity.documents}"/>);
