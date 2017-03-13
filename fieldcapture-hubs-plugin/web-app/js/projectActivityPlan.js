@@ -493,7 +493,7 @@ function PlanViewModel(activities, reports, outputTargets, targetMetadata, proje
         $('#projectDatesForm').validationEngine();
     };
     var defaultReportStage = self.currentProjectStage;
-    if (defaultReportStage == 'unknown' && self.stages) {
+    if (defaultReportStage == 'unknown' && self.stages && self.stages.length > 0) {
         defaultReportStage = self.stages[self.stages.length-1].label;
     }
     self.configureProjectReport = function() {
