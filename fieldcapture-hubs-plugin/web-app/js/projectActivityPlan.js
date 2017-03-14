@@ -397,11 +397,12 @@ function PlanViewModel(activities, reports, outputTargets, targetMetadata, proje
     var defaults = {
         updateProjectDatesUrl:fcConfig.updateProjectDatesUrl,
         projectUpdateUrl:fcConfig.projectUpdateUrl,
-        activityDeleteUrl:fcConfig.activityDeleteUrl
+        activityDeleteUrl:fcConfig.activityDeleteUrl,
+        showEmptyStages: project.associatedProgram != 'Green Army'
     };
     var config = _.defaults(options, defaults);
     var self = this;
-    var showEmptyStages = project.associatedProgram != 'Green Army';
+
     this.userIsCaseManager = ko.observable(userIsGrantManager);
     this.planStatus = ko.observable(project.planStatus || 'not approved');
     this.isApproved = ko.computed(function () {
@@ -425,7 +426,7 @@ function PlanViewModel(activities, reports, outputTargets, targetMetadata, proje
         // group activities by stage
         $.each(reports, function (index, stageReport) {
             if (stageReport.fromDate < project.plannedEndDate && stageReport.toDate > project.plannedStartDate) {
-                var stage = new PlanStage(stageReport, unallocatedActivities, self, stageReport.name === self.currentProjectStage, project,today, config.rejectionCategories, showEmptyStages, userIsEditor);
+                var stage = new PlanStage(stageReport, unallocatedActivities, self, stageReport.name === self.currentProjectStage, project,today, config.rejectionCategories, config.showEmptyStages, userIsEditor);
                 stages.push(stage);
 
                 // Remove any activities that have been allocated to the stage.
@@ -451,12 +452,12 @@ function PlanViewModel(activities, reports, outputTargets, targetMetadata, proje
     self.newActivity = function () {
         var context = '',
             projectId = project.projectId,
-            siteId = "",
             returnTo = '?returnTo=' + encodeURIComponent(document.location.href);
         if (projectId) {
-            context = '&projectId=' + projectId;
-        } else if (siteId) {
-            context = '&siteId=' + siteId;
+            context += '&projectId=' + projectId;
+        }
+        if (config.defaultSiteId) {
+            context += '&siteId=' + config.defaultSiteId;
         }
         document.location.href = fcConfig.activityCreateUrl + returnTo + context;
     };
