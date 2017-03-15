@@ -395,13 +395,7 @@ var PlanStage = function (stage, activities, planViewModel, isCurrentStage, proj
 function ProjectActivitiesTabViewModel(activities, reports, outputTargets, targetMetadata, project, programModel, today, options, userIsEditor, userIsGrantManager) {
 
     var self = this;
-    _.extend(self, new PlanViewModel(activities, reports, outputTargets, targetMetadata, project, programModel, today, options, userIsEditor, userIsGrantManager));
-
-    self.canEditOutputTargets = ko.computed(function() {
-
-        return userIsEditor && self.planStatus() === 'not approved';
-    });
-
+    _.extend(self, new PlanViewModel(activities, reports, outputTargets, targetMetadata, project, today, options, userIsEditor, userIsGrantManager));
     var minProjectStart = '2013-01-01T13:00:00Z', canModifyProjectStart = false;
     $.each(programModel.programs, function(i, program) {
         if (project.associatedProgram == program.name) {
@@ -697,9 +691,24 @@ function ProjectActivitiesTabViewModel(activities, reports, outputTargets, targe
         $('#declaration').modal('show');
     };
 
+    self.saveOutputTargets = function() {
+        var result;
+        if (self.canEditOutputTargets()) {
+            if ($('#outputTargetsContainer').validationEngine('validate')) {
+                return outputTargetHelper.saveOutputTargets();
+
+            } else {
+                // clear the saving indicator when validation fails
+                $.each(self.outputTargets(), function (i, target) {
+                    target.clearSaving();
+                });
+            }
+        }
+    };
+
 };
 
-function PlanViewModel(activities, reports, outputTargets, targetMetadata, project, programModel, today, options, userIsEditor, userIsGrantManager) {
+function PlanViewModel(activities, reports, outputTargets, targetMetadata, project, today, options, userIsEditor, userIsGrantManager) {
 
     var defaults = {
         updateProjectDatesUrl:fcConfig.updateProjectDatesUrl,
@@ -722,6 +731,8 @@ function PlanViewModel(activities, reports, outputTargets, targetMetadata, proje
 
     this.currentDate = ko.observable(new Date().toISOStringNoMillis()); // mechanism for testing behaviour at different dates
     this.currentProjectStage = findStageFromDate(reports,this.currentDate());
+
+
     this.loadActivities = function (activities) {
         var stages = [];
         var unallocatedActivities = _.clone(activities);  // Activities are removed from this array when added to a stage.
@@ -744,7 +755,14 @@ function PlanViewModel(activities, reports, outputTargets, targetMetadata, proje
 
         return stages;
     };
-    self.stages = self.loadActivities(activities);
+
+    // This exists to allow the full activity set to be used to do output target checks when activities are deleted
+    // but to only display a subset of activities (e.g. those relevant to a particular site).
+    var displayedActivities = activities;
+    if (config.activityDisplayFilter) {
+        displayedActivities = _.filter(activities, config.activityDisplayFilter);
+    }
+    self.stages = self.loadActivities(displayedActivities);
     self.currentStageReadyForApproval = ko.computed(function () {
         var currPlanStage = $.grep(self.stages, function(stage) {
             return stage.label === self.currentProjectStage;
@@ -813,22 +831,12 @@ function PlanViewModel(activities, reports, outputTargets, targetMetadata, proje
         }
     };
 
+    self.canEditOutputTargets = ko.computed(function() {
+        return userIsEditor && self.planStatus() === 'not approved';
+    });
+
     var outputTargetHelper = new OutputTargets(activities, outputTargets, self.canEditOutputTargets, targetMetadata, config);
     $.extend(self, outputTargetHelper);
-    self.saveOutputTargets = function() {
-        var result;
-        if (self.canEditOutputTargets()) {
-            if ($('#outputTargetsContainer').validationEngine('validate')) {
-                return outputTargetHelper.saveOutputTargets();
-
-            } else {
-                // clear the saving indicator when validation fails
-                $.each(self.outputTargets(), function (i, target) {
-                    target.clearSaving();
-                });
-            }
-        }
-    };
 
     self.deleteActivity = function (activity) {
         // confirm first
