@@ -465,7 +465,7 @@ function PlanViewModel(activities, reports, outputTargets, targetMetadata, proje
     self.descriptionExpanded = ko.observable(false);
     self.toggleDescriptions = function() {
         self.descriptionExpanded(!self.descriptionExpanded());
-        adjustTruncations();
+        self.adjustTruncations();
     };
 
     var minProjectStart = '2013-01-01T13:00:00Z', canModifyProjectStart = false;
@@ -857,4 +857,57 @@ function PlanViewModel(activities, reports, outputTargets, targetMetadata, proje
             }
         });
     };
+
+    self.adjustTruncations = function() {
+        function truncate (cellWidth, originalTextWidth, originalText) {
+            var fractionThatFits = cellWidth/originalTextWidth,
+                truncationPoint = Math.floor(originalText.length * fractionThatFits) - 4;
+            return originalText.substr(0,truncationPoint) + '..';
+        }
+        $('.truncate').each( function () {
+            var $span = $(this),
+                text = $span.html(),
+                textWidth = $span.textWidth(),
+                textLength = text.length,
+                original = $span.data('truncation');
+            // store original values if first time in
+            if (original === undefined) {
+                original = {
+                    text: text,
+                    textWidth: textWidth,
+                    textLength: textLength
+                };
+                $span.data('truncation',original);
+            }
+            if (!self.descriptionExpanded()) {
+                var cellWidth = $span.parent().width(),
+                    isTruncated = original.text !== text;
+
+                if (cellWidth > 0 && textWidth > cellWidth) {
+                    $span.attr('title',original.text);
+                    $span.html(truncate(cellWidth, original.textWidth, original.text));
+                } else if (isTruncated && cellWidth > textWidth + 4) {
+                    // check whether the text can be fully expanded
+                    if (original.textWidth < cellWidth) {
+                        $span.html(original.text);
+                        $span.removeAttr('title');
+                    } else {
+                        $span.html(truncate(cellWidth, original.textWidth, original.text));
+                    }
+                }
+            }
+            else {
+                $span.html(original.text);
+                $span.removeAttr('title');
+            }
+        });
+    };
+
+    var timer;
+    $(window).resize(function () {
+        if(timer) {
+            clearTimeout(timer);
+        }
+        timer = setTimeout(self.adjustTruncations, 50);
+    });
 };
