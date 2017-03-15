@@ -392,81 +392,15 @@ var PlanStage = function (stage, activities, planViewModel, isCurrentStage, proj
     };
 };
 
-function PlanViewModel(activities, reports, outputTargets, targetMetadata, project, programModel, today, options, userIsEditor, userIsGrantManager) {
+function ProjectActivitiesTabViewModel(activities, reports, outputTargets, targetMetadata, project, programModel, today, options, userIsEditor, userIsGrantManager) {
 
-    var defaults = {
-        updateProjectDatesUrl:fcConfig.updateProjectDatesUrl,
-        projectUpdateUrl:fcConfig.projectUpdateUrl,
-        activityDeleteUrl:fcConfig.activityDeleteUrl,
-        showEmptyStages: project.associatedProgram != 'Green Army'
-    };
-    var config = _.defaults(options, defaults);
     var self = this;
+    _.extend(self, new PlanViewModel(activities, reports, outputTargets, targetMetadata, project, programModel, today, options, userIsEditor, userIsGrantManager));
 
-    this.userIsCaseManager = ko.observable(userIsGrantManager);
-    this.planStatus = ko.observable(project.planStatus || 'not approved');
-    this.isApproved = ko.computed(function () {
-        return (self.planStatus() === 'approved');
-    });
-
-    this.isPlanEditable = ko.computed(function() {
-        return self.planStatus()==='not approved'
-    });
-    this.canEditOutputTargets = ko.computed(function() {
+    self.canEditOutputTargets = ko.computed(function() {
 
         return userIsEditor && self.planStatus() === 'not approved';
     });
-    //this.currentDate = ko.observable("2014-02-03T00:00:00Z"); // mechanism for testing behaviour at different dates
-    this.currentDate = ko.observable(new Date().toISOStringNoMillis()); // mechanism for testing behaviour at different dates
-    this.currentProjectStage = findStageFromDate(reports,this.currentDate());
-    this.loadActivities = function (activities) {
-        var stages = [];
-        var unallocatedActivities = _.clone(activities);  // Activities are removed from this array when added to a stage.
-
-        // group activities by stage
-        $.each(reports, function (index, stageReport) {
-            if (stageReport.fromDate < project.plannedEndDate && stageReport.toDate > project.plannedStartDate) {
-                var stage = new PlanStage(stageReport, unallocatedActivities, self, stageReport.name === self.currentProjectStage, project,today, config.rejectionCategories, config.showEmptyStages, userIsEditor);
-                stages.push(stage);
-
-                // Remove any activities that have been allocated to the stage.
-                unallocatedActivities = _.reject(unallocatedActivities, function(activity) {
-                    var activityAllocatedToStage = _.find(stage.activities, function(stageActivity) {
-                        return stageActivity.activityId == activity.activityId;
-                    });
-                    return activityAllocatedToStage;
-                });
-            }
-        });
-
-        return stages;
-    };
-    self.stages = self.loadActivities(activities);
-    self.currentStageReadyForApproval = ko.computed(function () {
-        var currPlanStage = $.grep(self.stages, function(stage) {
-            return stage.label === self.currentProjectStage;
-        });
-        return currPlanStage.length > 0 ? currPlanStage[0].readyForApproval() : false;
-    });
-    self.progressOptions = ['planned','started','finished','deferred','cancelled'];
-    self.newActivity = function () {
-        var context = '',
-            projectId = project.projectId,
-            returnTo = '?returnTo=' + encodeURIComponent(document.location.href);
-        if (projectId) {
-            context += '&projectId=' + projectId;
-        }
-        if (config.defaultSiteId) {
-            context += '&siteId=' + config.defaultSiteId;
-        }
-        document.location.href = fcConfig.activityCreateUrl + returnTo + context;
-    };
-
-    self.descriptionExpanded = ko.observable(false);
-    self.toggleDescriptions = function() {
-        self.descriptionExpanded(!self.descriptionExpanded());
-        adjustTruncations();
-    };
 
     var minProjectStart = '2013-01-01T13:00:00Z', canModifyProjectStart = false;
     $.each(programModel.programs, function(i, program) {
@@ -483,6 +417,7 @@ function PlanViewModel(activities, reports, outputTargets, targetMetadata, proje
         }
     });
 
+    // Project date changes by user.
     this.canModifyProjectStart = canModifyProjectStart;
 
     self.plannedStartDate = ko.observable(project.plannedStartDate).extend({simpleDate:false});
@@ -493,86 +428,6 @@ function PlanViewModel(activities, reports, outputTargets, targetMetadata, proje
         $('#changeProjectDates').modal({backdrop:'static'});
         $('#projectDatesForm').validationEngine();
     };
-    var defaultReportStage = self.currentProjectStage;
-    if (defaultReportStage == 'unknown' && self.stages && self.stages.length > 0) {
-        defaultReportStage = self.stages[self.stages.length-1].label;
-    }
-    self.configureProjectReport = function() {
-        $('#projectReportOptions').modal({backdrop:'static'});
-    };
-    self.reportFromStage = ko.observable(defaultReportStage);
-    self.reportToStage = ko.observable(defaultReportStage);
-    self.projectReportSections = [
-        {value:'Images', text:'Images', default:true},
-        {value:'Activity status summary', text:'Activity status summary', default:true},
-        {value:'Supporting documents', text:'Supporting documents', default:true},
-        {value:'Project outcomes', text:'Project outcomes', default:true},
-        {value:'Progress against output targets', text: 'Progress against output targets', default:true},
-        {value:'Progress of outputs without targets', text:'Progress of outputs without targets', default:false},
-        {value:'Stage report', text:'Stage report', help:'Displays the most recent ‘Progress, Outcomes and Learning’ activity for the period selected. If you have selected the Progress against activities option below, this will already include the ‘Progress, Outcomes and Learning’ activity.', default:false },
-        {value:'Project risks', text:'Project risks', default:true},
-        {value:'Project risks changes', text:'Project risks changes', help:'Displays all risks created or modified in the reporting period selected.', default:false},
-        {value:'Progress against activities', text:'Progress against activities', help:'Includes all activity reporting data for the selected stage(s).  This will only display started or finished activities.', default:true}];
-
-    self.reportIncludedSections = ko.observableArray();
-    for (var i=0; i<self.projectReportSections.length; i++) {
-        if (self.projectReportSections[i].default) {
-            self.reportIncludedSections.push(self.projectReportSections[i].value);
-        }
-    }
-    self.disabledSection = function(section) {
-        return section.value == 'Stage report' && self.reportIncludedSections.indexOf('Progress against activities') >= 0;
-    };
-    self.reportIncludedSections.subscribe(function() {
-        if (self.reportIncludedSections.indexOf('Progress against activities') >= 0) {
-            if (self.reportIncludedSections.indexOf('Stage report') >= 0) {
-                self.reportIncludedSections.splice(self.reportIncludedSections.indexOf('Stage report'), 1);
-            }
-        }
-    });
-
-
-    self.reportableStages = ko.computed(function() {
-        var stages = [];
-        $.each(self.stages || [], function(i, stage) {
-            stages.push(stage.label);
-        });
-        return stages;
-    });
-    self.reportableToStages = ko.computed(function() {
-        var stages = [];
-        var started = false;
-        $.each(self.stages || [], function(i, stage) {
-            if (stage.label == self.reportFromStage()) {
-                started = true;
-            }
-            if (started) {
-                stages.push(stage.label);
-            }
-
-        });
-        return stages;
-    });
-    self.generateProjectReport = function(url) {
-
-        var url = url + '?fromStage='+self.reportFromStage()+'&toStage='+self.reportToStage();
-        for (var i=0; i<self.reportIncludedSections().length; i++) {
-            url+='&sections='+self.reportIncludedSections()[i];
-        }
-        window.open(url,'project-report');
-        $('#projectReportOptions').modal('hide');
-    };
-    self.generateProjectReportHTML = function() {
-        self.generateProjectReport(fcConfig.projectReportUrl);
-    };
-    self.generateProjectReportPDF = function() {
-        self.generateProjectReport(fcConfig.projectReportPDFUrl);
-    };
-
-    self.cancelGenerateReport = function() {
-        $('#projectReportOptions').modal('hide');
-    };
-
 
     self.plannedStartDate.subscribeChanged(function(oldStartDate, newStartDate) {
 
@@ -630,6 +485,89 @@ function PlanViewModel(activities, reports, outputTargets, targetMetadata, proje
         $('#changeProjectDates').modal('hide');
     };
 
+
+
+    // Project reports
+    var defaultReportStage = self.currentProjectStage;
+    if (defaultReportStage == 'unknown' && self.stages && self.stages.length > 0) {
+        defaultReportStage = self.stages[self.stages.length-1].label;
+    }
+    self.configureProjectReport = function() {
+        $('#projectReportOptions').modal({backdrop:'static'});
+    };
+    self.reportFromStage = ko.observable(defaultReportStage);
+    self.reportToStage = ko.observable(defaultReportStage);
+    self.projectReportSections = [
+        {value:'Images', text:'Images', default:true},
+        {value:'Activity status summary', text:'Activity status summary', default:true},
+        {value:'Supporting documents', text:'Supporting documents', default:true},
+        {value:'Project outcomes', text:'Project outcomes', default:true},
+        {value:'Progress against output targets', text: 'Progress against output targets', default:true},
+        {value:'Progress of outputs without targets', text:'Progress of outputs without targets', default:false},
+        {value:'Stage report', text:'Stage report', help:'Displays the most recent ‘Progress, Outcomes and Learning’ activity for the period selected. If you have selected the Progress against activities option below, this will already include the ‘Progress, Outcomes and Learning’ activity.', default:false },
+        {value:'Project risks', text:'Project risks', default:true},
+        {value:'Project risks changes', text:'Project risks changes', help:'Displays all risks created or modified in the reporting period selected.', default:false},
+        {value:'Progress against activities', text:'Progress against activities', help:'Includes all activity reporting data for the selected stage(s).  This will only display started or finished activities.', default:true}];
+
+    self.reportIncludedSections = ko.observableArray();
+    for (var i=0; i<self.projectReportSections.length; i++) {
+        if (self.projectReportSections[i].default) {
+            self.reportIncludedSections.push(self.projectReportSections[i].value);
+        }
+    }
+    self.disabledSection = function(section) {
+        return section.value == 'Stage report' && self.reportIncludedSections.indexOf('Progress against activities') >= 0;
+    };
+    self.reportIncludedSections.subscribe(function() {
+        if (self.reportIncludedSections.indexOf('Progress against activities') >= 0) {
+            if (self.reportIncludedSections.indexOf('Stage report') >= 0) {
+                self.reportIncludedSections.splice(self.reportIncludedSections.indexOf('Stage report'), 1);
+            }
+        }
+    });
+
+    self.reportableStages = ko.computed(function() {
+        var stages = [];
+        $.each(self.stages || [], function(i, stage) {
+            stages.push(stage.label);
+        });
+        return stages;
+    });
+    self.reportableToStages = ko.computed(function() {
+        var stages = [];
+        var started = false;
+        $.each(self.stages || [], function(i, stage) {
+            if (stage.label == self.reportFromStage()) {
+                started = true;
+            }
+            if (started) {
+                stages.push(stage.label);
+            }
+
+        });
+        return stages;
+    });
+    self.generateProjectReport = function(url) {
+
+        var url = url + '?fromStage='+self.reportFromStage()+'&toStage='+self.reportToStage();
+        for (var i=0; i<self.reportIncludedSections().length; i++) {
+            url+='&sections='+self.reportIncludedSections()[i];
+        }
+        window.open(url,'project-report');
+        $('#projectReportOptions').modal('hide');
+    };
+    self.generateProjectReportHTML = function() {
+        self.generateProjectReport(fcConfig.projectReportUrl);
+    };
+    self.generateProjectReportPDF = function() {
+        self.generateProjectReport(fcConfig.projectReportPDFUrl);
+    };
+
+    self.cancelGenerateReport = function() {
+        $('#projectReportOptions').modal('hide');
+    };
+
+    // MERI plan and stage report status changes
     // Project status manipulations
     // ----------------------------
     // This has been refactored to update project status on specific actions (rather than subscribing
@@ -759,6 +697,80 @@ function PlanViewModel(activities, reports, outputTargets, targetMetadata, proje
         $('#declaration').modal('show');
     };
 
+};
+
+function PlanViewModel(activities, reports, outputTargets, targetMetadata, project, programModel, today, options, userIsEditor, userIsGrantManager) {
+
+    var defaults = {
+        updateProjectDatesUrl:fcConfig.updateProjectDatesUrl,
+        projectUpdateUrl:fcConfig.projectUpdateUrl,
+        activityDeleteUrl:fcConfig.activityDeleteUrl,
+        showEmptyStages: project.associatedProgram != 'Green Army'
+    };
+    var config = _.defaults(options, defaults);
+    var self = this;
+
+    this.userIsCaseManager = ko.observable(userIsGrantManager);
+    this.planStatus = ko.observable(project.planStatus || 'not approved');
+    this.isApproved = ko.computed(function () {
+        return (self.planStatus() === 'approved');
+    });
+
+    this.isPlanEditable = ko.computed(function() {
+        return self.planStatus()==='not approved'
+    });
+
+    this.currentDate = ko.observable(new Date().toISOStringNoMillis()); // mechanism for testing behaviour at different dates
+    this.currentProjectStage = findStageFromDate(reports,this.currentDate());
+    this.loadActivities = function (activities) {
+        var stages = [];
+        var unallocatedActivities = _.clone(activities);  // Activities are removed from this array when added to a stage.
+
+        // group activities by stage
+        $.each(reports, function (index, stageReport) {
+            if (stageReport.fromDate < project.plannedEndDate && stageReport.toDate > project.plannedStartDate) {
+                var stage = new PlanStage(stageReport, unallocatedActivities, self, stageReport.name === self.currentProjectStage, project,today, config.rejectionCategories, config.showEmptyStages, userIsEditor);
+                stages.push(stage);
+
+                // Remove any activities that have been allocated to the stage.
+                unallocatedActivities = _.reject(unallocatedActivities, function(activity) {
+                    var activityAllocatedToStage = _.find(stage.activities, function(stageActivity) {
+                        return stageActivity.activityId == activity.activityId;
+                    });
+                    return activityAllocatedToStage;
+                });
+            }
+        });
+
+        return stages;
+    };
+    self.stages = self.loadActivities(activities);
+    self.currentStageReadyForApproval = ko.computed(function () {
+        var currPlanStage = $.grep(self.stages, function(stage) {
+            return stage.label === self.currentProjectStage;
+        });
+        return currPlanStage.length > 0 ? currPlanStage[0].readyForApproval() : false;
+    });
+    self.progressOptions = ['planned','started','finished','deferred','cancelled'];
+    self.newActivity = function () {
+        var context = '',
+            projectId = project.projectId,
+            returnTo = '?returnTo=' + encodeURIComponent(document.location.href);
+        if (projectId) {
+            context += '&projectId=' + projectId;
+        }
+        if (config.defaultSiteId) {
+            context += '&siteId=' + config.defaultSiteId;
+        }
+        document.location.href = fcConfig.activityCreateUrl + returnTo + context;
+    };
+
+    self.descriptionExpanded = ko.observable(false);
+    self.toggleDescriptions = function() {
+        self.descriptionExpanded(!self.descriptionExpanded());
+        self.adjustTruncations();
+    };
+
     this.getGanttData = function () {
         var values = [],
             previousStage = '',
@@ -857,4 +869,57 @@ function PlanViewModel(activities, reports, outputTargets, targetMetadata, proje
             }
         });
     };
+
+    self.adjustTruncations = function() {
+        function truncate (cellWidth, originalTextWidth, originalText) {
+            var fractionThatFits = cellWidth/originalTextWidth,
+                truncationPoint = Math.floor(originalText.length * fractionThatFits) - 4;
+            return originalText.substr(0,truncationPoint) + '..';
+        }
+        $('.truncate').each( function () {
+            var $span = $(this),
+                text = $span.html(),
+                textWidth = $span.textWidth(),
+                textLength = text.length,
+                original = $span.data('truncation');
+            // store original values if first time in
+            if (original === undefined) {
+                original = {
+                    text: text,
+                    textWidth: textWidth,
+                    textLength: textLength
+                };
+                $span.data('truncation',original);
+            }
+            if (!self.descriptionExpanded()) {
+                var cellWidth = $span.parent().width(),
+                    isTruncated = original.text !== text;
+
+                if (cellWidth > 0 && textWidth > cellWidth) {
+                    $span.attr('title',original.text);
+                    $span.html(truncate(cellWidth, original.textWidth, original.text));
+                } else if (isTruncated && cellWidth > textWidth + 4) {
+                    // check whether the text can be fully expanded
+                    if (original.textWidth < cellWidth) {
+                        $span.html(original.text);
+                        $span.removeAttr('title');
+                    } else {
+                        $span.html(truncate(cellWidth, original.textWidth, original.text));
+                    }
+                }
+            }
+            else {
+                $span.html(original.text);
+                $span.removeAttr('title');
+            }
+        });
+    };
+
+    var timer;
+    $(window).resize(function () {
+        if(timer) {
+            clearTimeout(timer);
+        }
+        timer = setTimeout(self.adjustTruncations, 50);
+    });
 };
