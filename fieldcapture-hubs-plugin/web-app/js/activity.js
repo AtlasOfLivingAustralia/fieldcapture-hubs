@@ -485,7 +485,7 @@ function sortActivities(activities) {
     });
 }
 
-var ActivityNavigationViewModel = function(projectId, activityId, config) {
+var ActivityNavigationViewModel = function(projectId, activityId, siteId, config) {
     var self = this;
     self.activities = ko.observableArray();
 
@@ -524,6 +524,17 @@ var ActivityNavigationViewModel = function(projectId, activityId, config) {
     self.previousActivity = function() {
         return self.activities()[currentActivityIndex()-1] || {};
     };
+    self.returnText = ko.pureComputed(function() {
+        if (config.navContext == 'project') {
+            return 'Return to project';
+        }
+        else if (config.navContext == 'site') {
+            return 'Return to site';
+        }
+        else {
+            return 'Return';
+        }
+    });
 
     self.navigateUrl = ko.computed(function() {
         if (self.selectedActivity()) {
@@ -552,7 +563,11 @@ var ActivityNavigationViewModel = function(projectId, activityId, config) {
 
     });
 
-    $.get(config.navigationUrl).done(function (activities) {
+    var navActivitiesUrl = config.navigationUrl;
+    if (config.navContext == 'site' && siteId) {
+        navActivitiesUrl += '?siteId='+siteId;
+    }
+    $.get(navActivitiesUrl).done(function (activities) {
         sortActivities(activities);
         self.activities(activities);
     });
