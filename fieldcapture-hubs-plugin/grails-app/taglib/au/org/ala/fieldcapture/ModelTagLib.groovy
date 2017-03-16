@@ -10,13 +10,19 @@ class ModelTagLib {
     static namespace = "md"
 
     private final static INDENT = "    "
-    private final static operators = ['sum':'+', 'times':'*', 'divide':'/']
     private final static String QUOTE = "\"";
     private final static String SPACE = " ";
     private final static String EQUALS = "=";
     private final static String DEFERRED_TEMPLATES_KEY = "deferredTemplates"
 
     private final static int LAYOUT_COLUMNS = 12 // Bootstrap scaffolding uses a 12 column layout.
+
+    /** Context for view layout (rows, columns etc). */
+    class LayoutRenderContext {
+        String parentView
+        String dataContext
+        int span
+    }
 
     /*---------------------------------------------------*/
     /*------------ HTML for dynamic content -------------*/
@@ -28,12 +34,15 @@ class ModelTagLib {
      * @attrs edit if true the html will support the editing of values
      */
     def modelView = { attrs ->
-        viewModelItems(attrs, out, attrs.model?.viewModel)
+
+        LayoutRenderContext ctx = new LayoutRenderContext(parentView:'', dataContext: 'data', span:LAYOUT_COLUMNS)
+
+        viewModelItems(out, attrs, attrs.model?.viewModel, ctx)
 
         renderDeferredTemplates out
     }
 
-    def viewModelItems(attrs, out, items) {
+    def viewModelItems(out, Map attrs, List items, LayoutRenderContext ctx) {
 
         items?.eachWithIndex { mod, index ->
             switch (mod.type) {
@@ -46,21 +55,42 @@ class ModelTagLib {
                 case 'section':
                     section out, attrs, mod
                 case 'row':
-                    def span = LAYOUT_COLUMNS
-                    row out, attrs, mod, span
-                    break
-                case 'photoPoints':
-                    photoPoints out, attrs, mod, index
+                    row out, attrs, mod, ctx
                     break
                 case 'template':
                     out << g.render(template:mod.source, plugin: 'fieldcapture-plugin')
                     break
+                case 'repeat':
+                    repeatingLayout out, attrs, mod, ctx
+                    break
+                case 'col':
+                    column out, attrs, mod, ctx
+                    break
+                default:
+                    layoutDataItem(out, attrs, mod, ctx)
+                    break
+
+
             }
         }
     }
 
+    def repeatingLayout(out, attrs, model, LayoutRenderContext ctx) {
+
+        String sourceType = getType(attrs, model.source, null)
+        if (sourceType != "list") {
+            throw new Exception("Only model elements with a list data type can be the source for a repeating layout")
+        }
+
+        LayoutRenderContext childContext = new LayoutRenderContext(parentView:'', dataContext: '', span:ctx.span)
+
+        out << """<div class="repeating-section" data-bind="foreach:data.${model.source}">"""
+        viewModelItems(out, attrs, model.items, childContext)
+        out << "</div>"
+    }
+
     /**
-     * Generates an element for display, depending on context. Currently
+     * Generates an element for display, depending on viewContext. Currently
      * @parma attrs the attributes passed to the tag library.  Used to access site id.
      * @param model of the data element
      * @param context the dot notation path to the data
@@ -97,6 +127,9 @@ class ModelTagLib {
         }
         if (model.enabled) {
             renderContext.databindAttrs.add "enable", evalDependency(model.enabled)
+        }
+        if (model.readonly) {
+            renderContext.attributes.add "readonly", "readonly"
         }
 
         switch (model.type) {
@@ -160,7 +193,13 @@ class ModelTagLib {
             addDeferredTemplate(it)
         }
 
+        result = renderWithLabel(model, labelAttributes, attrs, editable, result)
+        return result
+    }
 
+    private String renderWithLabel(Map model, AttributeMap labelAttributes, attrs, editable, String dataTag) {
+
+        String result = dataTag
         if (model.preLabel) {
             labelAttributes.addClass 'preLabel'
 
@@ -168,16 +207,34 @@ class ModelTagLib {
                 labelAttributes.addClass 'required'
             }
 
-            result = "<span ${labelAttributes.toString()}><label>${labelText(attrs, model, model.preLabel)}</label></span>" + result
+            String labelPlainText
+            if (model.preLabel instanceof Map) {
+                labelPlainText = "<span data-bind=\"expression:'${model.preLabel.computed}'\"></span>"
+            }
+            else {
+                labelPlainText = model.preLabel
+            }
+            result = "<span ${labelAttributes.toString()}><label>${labelText(attrs, model, labelPlainText)}</label></span>" + dataTag
         }
 
         if (model.postLabel) {
+            String postLabel
             labelAttributes.addClass 'postLabel'
-            result += "<span ${labelAttributes.toString()}>${model.postLabel}</span>"
+            if (model.postLabel instanceof Map) {
+                postLabel = "<span data-bind=\"expression:'\"${model.preLabel.computed}\"'\"></span>"
+            }
+            else {
+                postLabel = model.postLabel
+            }
+            result = dataTag + "<span ${labelAttributes.toString()}>${postLabel}</span>"
         }
 
-        return result
+
+        result
     }
+
+
+
 
     /**
      * Generates the contents of a label, including help text if it is available in the model.
@@ -336,7 +393,12 @@ class ModelTagLib {
     }
 
     // row model
-    def row(out, attrs, model, parentSpan) {
+    def row(out, attrs, model, ctx) {
+
+        def span = (ctx.span / model.items.size())
+
+        LayoutRenderContext childCtx = new LayoutRenderContext(parentView: 'row', dataContext: ctx.dataContext, span: span)
+
         def extraClassAttrs = model.class ?: ""
         def databindAttrs = model.visibility ? "data-bind=\"visible:${model.visibility}\"" : ""
 
@@ -344,56 +406,55 @@ class ModelTagLib {
         if (model.align == 'right') {
             out << "<div class=\"pull-right\">\n"
         }
-        items(out, attrs, model, parentSpan, 'row')
+        viewModelItems(out, attrs, model.items, childCtx)
         if (model.align == 'right') {
             out << "</div>\n"
         }
         out << "</div>\n"
     }
 
-    def items(out, attrs, model, parentSpan, context) {
+    def column(out, attrs, model, LayoutRenderContext ctx) {
 
-        def span = context == 'row'? (int)(parentSpan / model.items.size()) : LAYOUT_COLUMNS
+        LayoutRenderContext childCtx = new LayoutRenderContext(parentView: 'col', dataContext: ctx.dataContext, span: LAYOUT_COLUMNS)
 
-        model.items.each { it ->
-            AttributeMap at = new AttributeMap()
-            at.addClass(it.css)
-            // inject computed from data model
+        out << "<div class=\"span${ctx.span}\">\n"
+        viewModelItems(out, attrs, model.items, childCtx)
+        out << "</div>"
+    }
 
-            it.computed = it.computed ?: getComputed(attrs, it.source, '')
-            if (it.type == 'col') {
-                out << "<div class=\"span${span}\">\n"
-                items(out, attrs, it, span, 'col')
-                out << "</div>"
+    def layoutDataItem(out, attrs, model, LayoutRenderContext layoutContext) {
+
+        AttributeMap at = new AttributeMap()
+        at.addClass(model.css)
+        // inject computed from data model
+
+        model.computed = model.computed ?: getComputed(attrs, model.source, '')
+
+        // Wrap data elements in rows to reset the bootstrap indentation on subsequent spans to save the
+        // model definition from needing to do so.
+        def labelAttributes = new AttributeMap()
+        def elementAttributes = new AttributeMap()
+        if (layoutContext.parentView == 'col') {
+            out << "<div class=\"row-fluid\">"
+            labelAttributes.addClass 'span4'
+            if (model.type != "number") {
+                elementAttributes.addClass 'span8'
             }
-            else if (it.type == 'table') {
-                table out, attrs, it
-            } else {
-                // Wrap data elements in rows to reset the bootstrap indentation on subsequent spans to save the
-                // model definition from needing to do so.
-                def labelAttributes = new AttributeMap()
-                def elementAttributes = new AttributeMap()
-                if (context == 'col') {
-                    out << "<div class=\"row-fluid\">"
-                    labelAttributes.addClass 'span4'
-                    if (it.type != "number") {
-                        elementAttributes.addClass 'span8'
-                    }
-                } else {
-                    if (it.type != "number") {
-                        elementAttributes.addClass 'span12'
-                    }
-                }
-
-                at.addSpan("span${span}")
-                out << "<span${at.toString()}>"
-                out << INDENT << dataTag(attrs, it, 'data', attrs.edit, elementAttributes, null, labelAttributes)
-                out << "</span>"
-
-                if (context == 'col') {
-                    out << "</div>"
-                }
+        } else {
+            at.addSpan("span${layoutContext.span}")
+            out << "<span${at.toString()}>"
+            if (model.type != "number") {
+                elementAttributes.addClass 'span12'
             }
+        }
+
+        out << INDENT << dataTag(attrs, model, layoutContext.dataContext, attrs.edit, elementAttributes, null, labelAttributes)
+
+        if (layoutContext.parentView == 'col') {
+            out << "</div>"
+        }
+        else {
+            out << "</span>"
         }
     }
 
@@ -642,11 +703,11 @@ class ModelTagLib {
         if (model.editableRows) {
                 out << INDENT*5 << "<td>\n"
                 out << INDENT*6 << "<button class='btn btn-mini' data-bind='click:\$root.edit${model.source}Row, enable:!\$root.${model.source}Editing()' title='edit'><i class='icon-edit'></i> Edit</button>\n"
-                out << INDENT*6 << "<button class='btn btn-mini' data-bind='click:\$root.remove${model.source}Row, enable:!\$root.${model.source}Editing()' title='remove'><i class='icon-trash'></i> Remove</button>\n"
+                out << INDENT*6 << "<button class='btn btn-mini' data-bind='click:\$root.transients.${model.source}Support.removeRow, enable:!\$root.${model.source}Editing()' title='remove'><i class='icon-trash'></i> Remove</button>\n"
                 out << INDENT*5 << "</td>\n"
         } else {
             if (edit && model.source) {
-                out << INDENT*5 << "<td><i data-bind='click:\$root.remove${model.source}Row' class='icon-remove'></i></td>\n"
+                out << INDENT*5 << "<td><i data-bind='click:\$root.transients.${model.source}Support.removeRow' class='icon-remove'></i></td>\n"
             }
         }
         out << INDENT*4 << "</tr></script>\n"
@@ -708,7 +769,7 @@ class ModelTagLib {
         if (attrs.edit && model.userAddedRows) {
 
             out << INDENT*4 << """<tr><td colspan="${colCount}" style="text-align:left;">
-                        <button type="button" class="btn btn-small" data-bind="click:add${model.source}Row"""
+                        <button type="button" class="btn btn-small" data-bind="click:transients.${model.source}Support.addRow"""
             if (model.editableRows) {
                 out << ", enable:!\$root.${model.source}Editing()"
             }
@@ -716,11 +777,11 @@ class ModelTagLib {
                         <i class="icon-plus"></i> Add a row</button>"""
             if (!attrs.disableTableUpload) {
                 out << """
-                <button type="button" class="btn btn-small" data-bind="click:show${model.source}TableDataUpload"><i class="icon-upload"></i> Upload data for this table</button>
+                <button type="button" class="btn btn-small" data-bind="click:transients.${model.source}Support.showTableDataUpload"><i class="icon-upload"></i> Upload data for this table</button>
 
 
                     </td></tr>\n"""
-                out << """<tr data-bind="visible:${model.source}TableDataUploadVisible"><td colspan="${colCount}">"""
+                out << """<tr data-bind="visible:transients.${model.source}Support.tableDataUploadVisible"><td colspan="${colCount}">"""
                 if (containsSpecies) {
                     out << """
                 <div class="text-error text-left">
@@ -728,17 +789,17 @@ class ModelTagLib {
                 </div>"""
                 }
                 out << """<div class="text-left" style="margin:5px">
-                    <a data-bind="attr:{'href':templateDownloadUrl('${model.source}')}" target="${model.source}TemplateDownload" class="btn">Step 1 - Download template (.xlsx)</a>
+                    <a data-bind="attr:{'href':transients.${model.source}Support.templateDownloadUrl()}" target="${model.source}TemplateDownload" class="btn">Step 1 - Download template (.xlsx)</a>
                 </div>
 
                 <div class="text-left" style="margin:5px;">
-                    <input type="checkbox" data-bind="checked:appendTableRows" style="margin-right:5px">Append uploaded data to table (unticking this checkbox will result in all table rows being replaced)
+                    <input type="checkbox" data-bind="checked:transients.${model.source}Support.appendTableRows" style="margin-right:5px">Append uploaded data to table (unticking this checkbox will result in all table rows being replaced)
                 </div>
 
                 <div class="btn fileinput-button" style="margin-left:5px">
                         <input id="${
                     model.source
-                }TableDataUpload" type="file" name="data" data-bind="fileUploadNoImage:${model.source}TableDataUploadOptions">
+                }TableDataUpload" type="file" name="data" data-bind="fileUploadNoImage:transients.${model.source}Support.tableDataUploadOptions">
                         Step 2 - Upload populated template
                 </div>"""
             }
@@ -749,16 +810,12 @@ class ModelTagLib {
         else if (!model.edit && !attrs.printable) {
             out << """<tr><td colspan="${colCount}">
             <div class="text-left" style="margin:5px">
-                <a data-bind="click:download${model.source}TemplateWithData" class="btn"><i class="fa fa-download"></i> Download the data from this table (.xlsx)</a>
+                <a data-bind="click:transients.${model.source}Support.downloadTemplateWithData" class="btn"><i class="fa fa-download"></i> Download the data from this table (.xlsx)</a>
             </div>
             </tr>"""
         }
         out << INDENT*4 << "</tfoot>\n"
 
-    }
-
-    def photoPoints(out, attrs, model, index) {
-        table out, attrs, model
     }
 
     def addDeferredTemplate(name) {
@@ -792,11 +849,9 @@ class ModelTagLib {
     }
 
     static String getAttribute(attrs, name, context, attribute) {
-        //println "getting ${attribute} for ${name} in ${context}"
         def dataModel = attrs.model.dataModel
         def level = dataModel.find {it.name == context}
         level = level ?: dataModel
-        //println "level = ${level}"
         def target
         if (level.dataType in ['list','matrix', 'photoPoints']) {
             target = level.columns.find {it.name == name}
@@ -805,10 +860,8 @@ class ModelTagLib {
             }
         }
         else {
-            //println "looking for ${name}"
             target = dataModel.find {it.name == name}
         }
-        //println "found ${attribute} = ${target ? target[attribute] : null}"
         return target ? target[attribute] : null
     }
 

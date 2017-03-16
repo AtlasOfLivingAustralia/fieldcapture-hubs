@@ -184,9 +184,10 @@ modules = {
     activity {
         defaultBundle 'application'
         dependsOn 'knockout'
+        resource url:'vendor/expr-eval/1.0/parser.js', plugin: 'fieldcapture-plugin'
         resource url:'js/outputs.js', plugin: 'fieldcapture-plugin'
-        resource url:'js/parser.js', plugin: 'fieldcapture-plugin'
         resource url:'js/activity.js', plugin: 'fieldcapture-plugin'
+        resource url:'js/projectActivityPlan.js', plugin: 'fieldcapture-plugin'
     }
 
     jqueryGantt {

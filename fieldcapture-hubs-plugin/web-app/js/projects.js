@@ -749,7 +749,7 @@ Output = function (name, scores, existingTargets, root) {
     this.outcomeTarget = ko.observable(function () {
         // find any existing outcome value for this output
         var outcomeValue = "";
-        $.each(existingTargets, function (j, existingTarget) {
+        $.each(existingTargets || [], function (j, existingTarget) {
             if (existingTarget.outcomeTarget && existingTarget.outputLabel === self.name) {
                 outcomeValue = existingTarget.outcomeTarget;
                 return false; // end the loop

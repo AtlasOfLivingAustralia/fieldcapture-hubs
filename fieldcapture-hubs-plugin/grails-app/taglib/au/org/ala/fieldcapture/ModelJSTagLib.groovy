@@ -5,10 +5,12 @@ class ModelJSTagLib {
     static namespace = "md"
 
     private final static INDENT = "    "
-    private final static operators = ['sum':'+', 'times':'*', 'divide':'/','difference':'-']
+
     private final static String QUOTE = "\"";
     private final static String SPACE = " ";
     private final static String EQUALS = "=";
+
+    private ComputedValueRenderer computedValueRenderer = new ComputedValueRenderer()
 
     /*------------ JAVASCRIPT for dynamic content -------------*/
 
@@ -39,7 +41,7 @@ class ModelJSTagLib {
                 matrixViewModel(attrs, mod, out)
             }
             else if (mod.computed) {
-                computedViewModel(out, attrs, mod, 'self.data', 'self.data')
+                computedValueRenderer.computedViewModel(out, attrs, mod, 'self.data', 'self.data')
             }
             else if (mod.dataType == 'text') {
                 textViewModel(mod, out)
@@ -52,9 +54,6 @@ class ModelJSTagLib {
             }
             else if (mod.dataType == 'image') {
                 imageModel(mod, out)
-            }
-            else if (mod.dataType == 'photoPoints') {
-                photoPointModel(attrs, mod, out)
             }
             else if (mod.dataType == 'species') {
                 speciesModel(attrs, mod, out)
@@ -130,8 +129,8 @@ class ModelJSTagLib {
         attrs.model?.viewModel?.each({
             if (it.dataType == 'tableWithEditableRows' || it.type == 'photoPoints' || it.type == 'table') {
                 out << INDENT*4 << "delete jsData.selected${it.source}Row;\n"
-                out << INDENT*4 << "delete jsData.${it.source}TableDataUploadOptions\n"
-                out << INDENT*4 << "delete jsData.${it.source}TableDataUploadVisible\n"
+                out << INDENT*4 << "delete jsData.${it.source}TableDataUploadOptions;\n"
+                out << INDENT*4 << "delete jsData.${it.source}TableDataUploadVisible;\n"
 
             }
 
@@ -145,139 +144,7 @@ class ModelJSTagLib {
         })
     }
 
-    def computedViewModel(out, attrs, model, propertyContext, dependantContext) {
-        computedViewModel(out, attrs, model, propertyContext, dependantContext, null)
-    }
-    def computedViewModel(out, attrs, model, propertyContext, dependantContext, parentModel) {
-        out << "\n" << INDENT*3 << "${propertyContext}.${model.name} = ko.computed(function () {\n"
-        if (model.computed.dependents == "all") {
-            out <<
-                    """                var total = 0, value;
-                \$.each(${dependantContext}.${parentModel.source}(), function(i, obj) {
-                    value = obj[name]();
-                    if (isNaN(value)) {
-                        total = total + (value ? 1 : 0)
-                    } else {
-                        total = total + Number(value);
-                    }
-                });
-                return total;
-"""
-        }
-        else if (model.computed.operation == 'percent') {
-            if (model.computed.dependents?.size() > 1) {
-                def dividend = model.computed.dependents[0]
-                def divisor = model.computed.dependents[1]
-                def rounding = model.computed.rounding ?: 2
-                if (divisor == "#rowCount") {
-                    divisor = "${dependantContext}.${parentModel.source}().length"
-                }
-                out <<
-                        """                percent = self.${dividend}() * 100 / ${divisor};
-                return neat_number(percent, ${rounding});
-"""
-            }
-        }
-        else if (model.computed.operation == 'difference') {
-            out << INDENT*4 << "return ${dependantContext}.${model.computed.dependents[0]}() - ${dependantContext}.${model.computed.dependents[1]}();\n"
-        }
-        else if (model.computed.operation == "lookup") {
-            computedByNumberRangeLookupFunction out, attrs, model, "self.${model.computed.dependents[0]}"
-        }
-        else if (model.computed.operation == 'count') {
-            out << INDENT*4 << "return ${dependantContext}.${model.computed.dependents.source}().length;\n"
-        }
-        else if (model.computed.expression) {
-            out << "var expression = Parser.parse('${model.computed.expression}');\n"
-            out << "var variables = {};\n";
-            for(int i=0; i < model.computed.dependents.source.size(); i++) {
-                out << "variables['${model.computed.dependents.source[i]}'] = Number(${dependantContext}.${model.computed.dependents.source[i]}());\n"
-            }
-            out << "return expression.evaluate(variables);\n"
-        }
-        else if (model.computed.dependents.fromList) {
-            out << INDENT*4 << "var total = 0;\n"
-            if (model.computed.operation == 'average') {
-                out << INDENT*4 << "var count = 0;\n"
-            }
-            out << INDENT*4 << "for(var i = 0; i < ${dependantContext}.${model.computed.dependents.fromList}().length; i++) {\n"
-            out << INDENT*5 << "var value = ${dependantContext}.${model.computed.dependents.fromList}()[i].${model.computed.dependents.source}();\n"
-            if (model.computed.operation != 'average') {
-                out << INDENT*6 << "total = total ${operators[model.computed.operation]} Number(value); \n"
-                out << INDENT*4 << "}\n"
-                out << INDENT*4 << "return total;\n"
-            }
-            else {
-                out << INDENT*6 << "if (!isNaN(parseFloat(value))) {\n"
-                out << INDENT*8 << "total = total + Number(value);\n"
-                out << INDENT*8 << "count++;\n"
-                out << INDENT*6 << "}\n"
-                out << INDENT*4 << "}\n"
-                out << INDENT*4 << "return count > 0 ? total/count : 0;\n"
-            }
-        }
-        else if (model.computed.dependents.fromMatrix) {
-            out << INDENT*4 << "var total = 0;\n"
-            if (model.computed.operation == 'average') {
-                out << INDENT*4 << "var count = 0;\n"
-            }
-            out << INDENT*4 << "var grid = ${dependantContext}.${model.computed.dependents.fromMatrix};\n"
-            // iterate columns and get value from model.computed.dependents.row
-            out << INDENT*4 << "\$.each(grid, function (i,obj) {\n"
-            if (model.computed.operation != 'average') {
-                out << INDENT*5 << "total = total ${operators[model.computed.operation]} Number(obj.${model.computed.dependents.row}());\n"
-                out << INDENT*4 << "});\n"
-                out << INDENT*4 << "return total;\n"
-            }
-            else {
-                out << INDENT*6 << "var value = obj.${model.computed.dependents.row}();\n"
-                out << INDENT*6 << "if (!isNaN(parseFloat(value))) {\n"
-                out << INDENT*8 << "total = total + Number(value);\n"
-                out << INDENT*8 << "count++;\n"
-                out << INDENT*6 << "}\n"
-                out << INDENT*4 << "});\n"
-                out << INDENT*4 << "return count > 0 ? total/count : 0;\n"
-            }
-        }
 
-        else if (model.computed.dependents.from) {
-            out << """
-                var total = 0, dummyDependency = self.transients.dummy();
-                \$.each(${dependantContext}.${model.computed.dependents.from}(), function (i, obj) {
-                    total += obj.${model.computed.dependents.source}();
-                });
-                return total;
-"""
-        }
-        else if (model.computed.operation == 'sum') {
-            out << "var total = 0;"
-            if (model.computed.dependents.source.size() == 1) {
-                out << "total += Number(${dependantContext}.${model.computed.dependents.source[0]}());\n"
-            } else {
-                for(int i=0; i < model.computed.dependents.source.size(); i++) {
-                    out << "total += Number(${dependantContext}.${model.computed.dependents.source[i]}());\n"
-                }
-            }
-            out << INDENT*4 << "return total;"
-        }
-
-        out << INDENT*3 << "});\n"
-    }
-
-    def computedByNumberRangeLookupFunction(out, attrs, model, source) {
-        def lookupMap = findInDataModel(attrs, model.computed.lookupMap)
-        out <<
-                """                var x = Number(${source}());
-                if (isNaN(x)) { return '' }
-"""
-        lookupMap.map.each {
-            if (it.inputMin == it.inputMax) {
-                out << INDENT*4 << "if (x === ${it.inputMin}) { return ${it.output} }\n"
-            } else {
-                out << INDENT*4 << "if (x > ${it.inputMin} && x <= ${it.inputMax}) { return ${it.output} }\n"
-            }
-        }
-    }
 
     def makeRowModelName(String output, String name) {
         String outputName = output.replaceAll(/\W/, '')
@@ -331,7 +198,7 @@ class ModelJSTagLib {
         out << INDENT*5 << "that.push(column);\n"
         model.rows.eachWithIndex { row, rowIdx ->
             if (row.computed) {
-                computedObservable(row, 'column', 'that[i]', out)
+                computedValueRenderer.computedObservable(row, 'column', 'that[i]', out)
             }
         }
 
@@ -358,8 +225,11 @@ class ModelJSTagLib {
         def edit = attrs.edit as boolean
         def editableRows = viewModelFor(attrs, model.name, '')?.editableRows
         def observable = editableRows ? 'protectedObservable' : 'observable'
-        out << INDENT*2 << "var ${makeRowModelName(attrs.model.modelName, model.name)} = function (data) {\n"
+        out << INDENT*2 << "var ${makeRowModelName(attrs.model.modelName, model.name)} = function (data, parent, index) {\n"
         out << INDENT*3 << "var self = this;\n"
+        out << INDENT*3 << "self.\$parent = parent;\n"
+        out << INDENT*3 << "self.\$index = index;\n"
+
         out << INDENT*3 << "if (!data) data = {};\n"
         out << INDENT*3 << "self.transients = {};\n"
 
@@ -396,7 +266,7 @@ class ModelJSTagLib {
             if (col.computed) {
                 switch (col.dataType) {
                     case 'number':
-                        computedObservable(col, 'self', 'self', out)
+                        computedValueRenderer.computedObservable(col, 'self', 'self', out)
                         break;
                 }
             }
@@ -453,7 +323,7 @@ class ModelJSTagLib {
             var self = this;
 """
         model.columnTotals.rows.each { row ->
-            computedViewModel(out, attrs, row, 'this', "context.data", model.columnTotals)
+            computedValueRenderer.computedViewModel(out, attrs, row, 'this', "context.data", model.columnTotals)
         }
         out << """
         };
@@ -478,56 +348,26 @@ class ModelJSTagLib {
         out << "\n" << INDENT*3 << "self.data.${model.name} = ko.observable();\n"
     }
 
-    def computedObservable(model, propertyContext, dependantContext, out) {
-        out << INDENT*5 << "${propertyContext}.${model.name} = ko.computed(function () {\n"
-        // must be at least one dependant
-        def numbers = []
-        def checkNumberness = []
-        model.computed.dependents.each {
-            def ref = it
-            def path = dependantContext
-            if (ref.startsWith('$')) {
-                ref = ref[1..-1]
-                path = "self.data"
-            }
-            numbers << "Number(${path}.${ref}())"
-            checkNumberness << "isNaN(Number(${path}.${ref}()))"
-        }
-        out << INDENT*6 << "if (" + checkNumberness.join(' || ') + ") { return 0; }\n"
-        if (model.computed.operation == 'divide') {
-            // can't divide by zero
-            out << INDENT*6 << "if (${numbers[-1]} === 0) { return 0; }\n"
-        }
-        def expression = numbers.join(" ${operators[model.computed.operation]} ")
-        if (model.computed.rounding) {
-            expression = "neat_number(${expression},${model.computed.rounding})"
-        }
-        out << INDENT*6 << "return " + expression + ";\n"
-
-        out << INDENT*5 << "});\n"
-    }
-
     def listViewModel(attrs, model, out) {
         def rowModelName = makeRowModelName(attrs.model.modelName, model.name)
         def editableRows = viewModelFor(attrs, model.name, '')?.editableRows
         def defaultRows = []
-        model.defaultRows?.each{
-            defaultRows << INDENT*5 + "self.data.${model.name}.push(new ${rowModelName}(${it.toString()}));"
+        model.defaultRows?.eachWithIndex { row, i ->
+            defaultRows << INDENT*5 + "self.data.${model.name}.push(new ${rowModelName}(${row.toString()}, self, $i));"
         }
         def insertDefaultModel = defaultRows.join('\n')
 
         // If there are no default rows, insert a single blank row and make it available for editing.
         if (attrs.edit && insertDefaultModel.isEmpty()) {
-            insertDefaultModel = "self.add${model.name}Row();"
+            insertDefaultModel = "self.transients.${model.name}Support.addRow(self, 0);"
         }
 
         out << """
             self.data.${model.name} = ko.observableArray([]);
-            self.selected${model.name}Row = ko.observable();
+            self.transients.${model.name}Support = new OutputListSupport(self, '${model.name}', ${makeRowModelName(attrs.model.modelName, model.name)});
         """
-        if (model.dataType != 'photoPoints') {
-            out << """
 
+        out << """
             self.load${model.name} = function (data, append) {
                 if (!append) {
                     self.data.${model.name}([]);
@@ -536,67 +376,17 @@ class ModelJSTagLib {
                     ${insertDefaultModel}
                 } else {
                     \$.each(data, function (i, obj) {
-                        self.data.${model.name}.push(new ${rowModelName}(obj));
+                        self.data.${model.name}.push(new ${rowModelName}(obj, self, i));
                     });
                 }
             };
-            self.download${model.name}TemplateWithData = function() {
-                self.downloadDataTemplate('${model.name}');
-            }
-"""
-        }
-        if (attrs.edit) {
-            out << """
-            self.add${model.name}Row = function () {
-                var newRow = new ${rowModelName}();
-                self.data.${model.name}.push(newRow);
-                ${editableRows ? "newRow.isNew = true; self.edit${model.name}Row(newRow);" : ""}
-            };
-            self.remove${model.name}Row = function (row) {
-                self.data.${model.name}.remove(row);
-                ${editableRows ? "self.selected${model.name}Row(null);" : ""}
-            };
-            self.${model.name}rowCount = function () {
-                return self.data.${model.name}().length;
-            };
+        """
 
-            self.${model.name}TableDataUploadVisible = ko.observable(false);
-            self.show${model.name}TableDataUpload = function() {
-                self.${model.name}TableDataUploadVisible(!self.${model.name}TableDataUploadVisible());
-            };
+        if (attrs.edit && editableRows) {
 
-            self.templateDownloadUrl = function(type) {
-                return '${createLink(controller: 'proxy', action: 'excelOutputTemplate', params:[listName:model.name, type:attrs.output])}';
-            }
-
-            self.${model.name}TableDataUploadOptions = {
-                    url:'${createLink([controller: 'activity', action: 'ajaxUpload'])}',
-                    done:function(e, data) {
-                        if (data.result.error) {
-                            self.uploadFailed(data.result.error);
-                        }
-                        else {
-                            self.load${model.name}(data.result.data, self.appendTableRows());
-                        }
-                    },
-                    fail:function(e, data) {
-                        var message = 'Please contact MERIT support and attach your spreadsheet to help us resolve the problem';
-                        self.uploadFailed(data);
-
-                    },
-                    uploadTemplateId: "${model.name}template-upload",
-                    downloadTemplateId: "${model.name}template-download",
-                    formData:{type:'${attrs.output}', listName:'${model.name}'}
-            };
-            self.appendTableRows = ko.observable(true);
-            self.uploadFailed = function(message) {
-                        var text = "<span class='label label-important'>Important</span><h4>There was an error uploading your data.</h4>";
-                        text += "<p>"+message+"</p>";
-                        bootbox.alert(text)
-            };
-"""
-            if (editableRows) {
                 out << """
+            self.selected${model.name}Row = ko.observable();
+
             self.${model.name}templateToUse = function (row) {
                 return self.selected${model.name}Row() === row ? '${model.name}editTmpl' : '${model.name}viewTmpl';
             };
@@ -626,7 +416,7 @@ class ModelJSTagLib {
                 return self.selected${model.name}Row() != null;
             };
 """
-            }
+
         }
     }
 
@@ -664,12 +454,6 @@ class ModelJSTagLib {
         populateImageList(model, out)
     }
 
-    def photoPointModel(attrs, model, out) {
-        listViewModel(attrs, model, out)
-
-        out << g.render(template:"/output/photoPointTemplate", plugin:'fieldcapture-plugin', model:[model:model]);
-    }
-
     def speciesModel(attrs, model, out) {
         def printable = attrs.printable ? attrs.printable : ''
         out << INDENT*3 << "self.data.${model.name} = new SpeciesViewModel({}, speciesLists, {printable:'${printable}'});\n"
@@ -689,12 +473,6 @@ class ModelJSTagLib {
         // todo: this needs to use context to do a hierarchy search
         def x = viewModel.find { it.name == name }
         return viewModel.find { it.source == name }
-    }
-
-    def findInDataModel(attrs, name) {
-        def dataModel = attrs.model.dataModel
-        // todo: just search top level for now
-        dataModel.find {it.name == name}
     }
 
 }
