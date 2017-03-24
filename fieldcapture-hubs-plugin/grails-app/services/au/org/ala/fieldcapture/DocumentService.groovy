@@ -1,12 +1,16 @@
 package au.org.ala.fieldcapture
 
 import grails.converters.JSON
+import org.springframework.cache.annotation.Cacheable
+
 import static org.apache.http.HttpStatus.*;
 
 /**
  * Proxies to the ecodata DocumentController/DocumentService.
  */
 class DocumentService {
+    private static final String HELP_DOCUMENTS_CACHE_REGION = 'homePageDocuments'
+
     public String ROLE_LOGO = "logo"
 
     def webService, grailsApplication
@@ -27,6 +31,7 @@ class DocumentService {
         updateDocument(doc)
     }
 
+    @Cacheable(DocumentService.HELP_DOCUMENTS_CACHE_REGION)
     def findAllHelpResources() {
         def url = "${grailsApplication.config.ecodata.baseUrl}document/search"
         def result = webService.doPost(url, [role:'helpResource'])
