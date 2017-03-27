@@ -126,7 +126,7 @@ var SpeciesViewModel = function(data, speciesLists, options) {
     self.list = ko.computed(function() {
         if (self.transients.availableLists.length) {
             // Only supporting a single species list per activity at the moment.
-            return self.transients.availableLists[0].listId;
+            return self.transients.availableLists[0];
         }
         return '';
     });

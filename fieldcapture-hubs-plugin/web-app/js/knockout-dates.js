@@ -658,7 +658,7 @@ ko.bindingHandlers.autocomplete = {
             }
             var data = {q:request.term};
             if (list) {
-                $.extend(data, {druid: list});
+                $.extend(data, {listId: list});
             }
             $.ajax({
                 url: url,
