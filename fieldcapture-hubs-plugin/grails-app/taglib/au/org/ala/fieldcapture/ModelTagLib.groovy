@@ -698,7 +698,15 @@ class ModelTagLib {
         model.columns.eachWithIndex { col, i ->
             col.type = col.type ?: getType(attrs, col.source, model.source)
             def colEdit = edit && !col.readOnly
-            out << INDENT*5 << "<td>" << dataTag(attrs, col, '', colEdit) << "</td>" << "\n"
+            String data = dataTag(attrs, col, '', colEdit)
+            out << INDENT*5 << "<td>"
+            if (col.type == 'boolean') {
+                out << "<label style=\"table-checkbox-label\">" << data << "</label>"
+            }
+            else {
+                out << data
+            }
+            out << "</td>" << "\n"
         }
         if (model.editableRows) {
                 out << INDENT*5 << "<td>\n"
@@ -725,7 +733,15 @@ class ModelTagLib {
             col.type = col.type ?: getType(attrs, col.source, model.source)
             // inject computed from data model
             col.computed = col.computed ?: getComputed(attrs, col.source, model.source)
-            out << INDENT*5 << "<td>" << dataTag(attrs, col, '', edit, null, bindAttrs, null) << "</td>" << "\n"
+            String data = dataTag(attrs, col, '', edit, null, bindAttrs, null)
+            out << INDENT*5 << "<td>"
+            if (col.type == 'boolean') {
+                out << "<label style=\"table-checkbox-label\">" << data << "</label>"
+            }
+            else {
+                out << data
+            }
+            out << data << "</td>" << "\n"
         }
         out << INDENT*5 << "<td>\n"
         out << INDENT*6 << "<a class='btn btn-success btn-mini' data-bind='click:\$root.accept${model.source}' href='#' title='save'>Update</a>\n"

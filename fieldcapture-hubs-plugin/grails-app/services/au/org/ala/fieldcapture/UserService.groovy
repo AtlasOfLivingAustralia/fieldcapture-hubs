@@ -1,11 +1,18 @@
 package au.org.ala.fieldcapture
 
 import au.org.ala.web.CASRoles
+import org.springframework.cache.annotation.CacheEvict
+import org.springframework.cache.annotation.Cacheable
 
 import javax.annotation.PostConstruct
 
 class UserService {
-   def grailsApplication, authService, webService, roleService, projectService, organisationService
+
+    private static final String USER_PROFILE_CACHE_REGION = 'userProfileCache'
+    private static final String USER_ORGANISATIONS_CACHE_KEY_EXPRESSION = '#userId+"_organisations"'
+
+    def grailsApplication, authService, webService, roleService, projectService, organisationService
+
     def auditBaseUrl = ""
 
     @PostConstruct
@@ -63,6 +70,7 @@ class UserService {
         webService.getJson(url)
     }
 
+    @Cacheable(value=UserService.USER_PROFILE_CACHE_REGION, key=UserService.USER_ORGANISATIONS_CACHE_KEY_EXPRESSION)
     def getOrganisationsForUserId(userId) {
         def url = grailsApplication.config.ecodata.baseUrl + "permissions/getOrganisationsForUserId/${userId}"
         webService.getJson(url)
@@ -140,6 +148,7 @@ class UserService {
         webService.getJson(url)
     }
 
+    @CacheEvict(value=UserService.USER_PROFILE_CACHE_REGION, key=UserService.USER_ORGANISATIONS_CACHE_KEY_EXPRESSION)
     def addUserAsRoleToOrganisation(String userId, String organisationId, String role) {
         Map result = checkRoles(userId, role)
         if (result.error) {
@@ -154,6 +163,7 @@ class UserService {
         webService.getJson(url)
     }
 
+    @CacheEvict(value=UserService.USER_PROFILE_CACHE_REGION, key=UserService.USER_ORGANISATIONS_CACHE_KEY_EXPRESSION)
     def removeUserWithRoleFromOrganisation(String userId, String organisationId, String role) {
         def url = grailsApplication.config.ecodata.baseUrl + "permissions/removeUserWithRoleFromOrganisation?organisationId=${organisationId}&userId=${userId}&role=${role}"
         webService.getJson(url)
