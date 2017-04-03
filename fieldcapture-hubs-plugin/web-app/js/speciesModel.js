@@ -3,27 +3,27 @@
  * Manages the species data type in the output model.
  * Allows species information to be searched for and displayed.
  */
-var SpeciesViewModel = function(data, speciesLists, options) {
+var SpeciesViewModel = function(data, options) {
 
     var self = this;
 
     self.guid = ko.observable();
     self.name = ko.observable();
+    self.scientificName = ko.observable();
+    self.commonName = ko.observable();
+
     self.listId = ko.observable();
     self.transients = {};
     self.transients.speciesInformation = ko.observable();
-    self.transients.availableLists = speciesLists;
     self.transients.editing = ko.observable(false);
     self.transients.textFieldValue = ko.observable();
     self.transients.bioProfileUrl =  ko.computed(function (){
         return  fcConfig.bieUrl + '/species/' + self.guid();
     });
 
-    self.speciesSelected = function(event, data) {
-        if (!data.listId) {
-            data.listId = self.listId();
-        }
+    self.transients.speciesSearchUrl = options.speciesSearchUrl+'&dataFieldName='+options.dataFieldName;
 
+    self.speciesSelected = function(event, data) {
         self.loadData(data);
         self.transients.editing(!data.name);
     };
@@ -34,59 +34,13 @@ var SpeciesViewModel = function(data, speciesLists, options) {
         }
     };
 
-    self.listName = function(listId) {
-        if (listId == 'Atlas of Living Australia') {
-            return listId;
-        }
-        var name = '';
-        $.each(self.transients.availableLists, function(i, val) {
-            if (val.listId === listId) {
-                name = val.listName;
-                return false;
-            }
-        });
-        return name;
-    };
-
-    self.renderItem = function(row) {
-
-        var term = self.transients.textFieldValue();
-
-        var result = '';
-        if (!row.listId) {
-            row.listId = 'Atlas of Living Australia';
-        }
-        if (row.listId !== 'unmatched' && row.listId !== 'error-unmatched' && self.renderItem.lastHeader !== row.listId) {
-            result+='<div style="background:grey;color:white; padding-left:5px;"> '+self.listName(row.listId)+'</div>';
-        }
-        // We are keeping track of list headers so we only render each one once.
-        self.renderItem.lastHeader = row.listId ? row.listId : 'Atlas of Living Australia';
-        result+='<a class="speciesAutocompleteRow">';
-        if (row.listId && row.listId === 'unmatched') {
-            result += '<i>Unlisted or unknown species</i>';
-        }
-        else if (row.listId && row.listId === 'error-unmatched') {
-            result += '<i>Offline</i><div>Species:<b>'+row.name+'</b></div>';
-        }
-        else {
-
-            var commonNameMatches = row.commonNameMatches !== undefined ? row.commonNameMatches : "";
-
-            result += (row.scientificNameMatches && row.scientificNameMatches.length>0) ? row.scientificNameMatches[0] : commonNameMatches ;
-            if (row.name != result && row.rankString) {
-                result = result + "<div class='autoLine2'>" + row.rankString + ": " + row.name + "</div>";
-            } else if (row.rankString) {
-                result = result + "<div class='autoLine2'>" + row.rankString + "</div>";
-            }
-        }
-        result += '</a>';
-        return result;
-    };
     self.loadData = function(data) {
         if (!data) data = {};
-        self['guid'](orBlank(data.guid));
-        self['name'](orBlank(data.name));
-        self['listId'](orBlank(data.listId));
+        self.guid(orBlank(data.guid));
+        self.name(orBlank(data.name));
+        self.listId(orBlank(data.listId));
+        self.scientificName(orBlank(data.scientificName));
+        self.commonName(orBlank(data.commonName));
 
         self.transients.textFieldValue(self.name());
         if (self.guid() && !options.printable) {
@@ -114,22 +68,10 @@ var SpeciesViewModel = function(data, speciesLists, options) {
             });
         }
         else {
-            if (self.listId() === 'unmatched') {
-                self.transients.speciesInformation("This species was unable to be matched in the Atlas of Living Australia.");
-            }
-            else {
-                self.transients.speciesInformation("No profile information is available.");
-            }
+            self.transients.speciesInformation("No profile information is available.");
         }
 
     };
-    self.list = ko.computed(function() {
-        if (self.transients.availableLists.length) {
-            // Only supporting a single species list per activity at the moment.
-            return self.transients.availableLists[0];
-        }
-        return '';
-    });
 
     if (data) {
         self.loadData(data);

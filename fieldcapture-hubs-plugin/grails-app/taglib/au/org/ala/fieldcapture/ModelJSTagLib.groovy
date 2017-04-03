@@ -56,7 +56,7 @@ class ModelJSTagLib {
                 imageModel(mod, out)
             }
             else if (mod.dataType == 'species') {
-                speciesModel(attrs, mod, out)
+                speciesModel('data.', mod.name, '{}', attrs.printable, out)
             }
             else if (mod.dataType == 'date') {
                 dateViewModel(mod, out)
@@ -225,7 +225,7 @@ class ModelJSTagLib {
         def edit = attrs.edit as boolean
         def editableRows = viewModelFor(attrs, model.name, '')?.editableRows
         def observable = editableRows ? 'protectedObservable' : 'observable'
-        out << INDENT*2 << "var ${makeRowModelName(attrs.model.modelName, model.name)} = function (data, parent, index) {\n"
+        out << INDENT*2 << "var ${makeRowModelName(attrs.model.modelName, model.name)} = function (data, parent, index, config) {\n"
         out << INDENT*3 << "var self = this;\n"
         out << INDENT*3 << "self.\$parent = parent;\n"
         out << INDENT*3 << "self.\$index = index;\n"
@@ -302,7 +302,7 @@ class ModelJSTagLib {
                         break;
                     case 'species':
                         def printable = attrs.printable ? attrs.printable : ''
-                        out << INDENT*3 << "this.${col.name} =  new SpeciesViewModel(data['${col.name}'], speciesLists, {printable:'${printable}'});\n"
+                        speciesModel('', col.name, "data['${col.name}']", printable, out)
                         break
                     case 'stringList':
                         out << INDENT*3 << "this.${col.name}=ko.observableArray(orEmptyArray(data['${col.name}']));\n";
@@ -353,7 +353,7 @@ class ModelJSTagLib {
         def editableRows = viewModelFor(attrs, model.name, '')?.editableRows
         def defaultRows = []
         model.defaultRows?.eachWithIndex { row, i ->
-            defaultRows << INDENT*5 + "self.data.${model.name}.push(new ${rowModelName}(${row.toString()}, self, $i));"
+            defaultRows << INDENT*5 + "self.data.${model.name}.push(new ${rowModelName}(${row.toString()}, self, $i, config));"
         }
         def insertDefaultModel = defaultRows.join('\n')
 
@@ -364,7 +364,7 @@ class ModelJSTagLib {
 
         out << """
             self.data.${model.name} = ko.observableArray([]);
-            self.transients.${model.name}Support = new OutputListSupport(self, '${model.name}', ${makeRowModelName(attrs.model.modelName, model.name)});
+            self.transients.${model.name}Support = new OutputListSupport(self, '${model.name}', ${makeRowModelName(attrs.model.modelName, model.name)}, config);
         """
 
         out << """
@@ -376,7 +376,7 @@ class ModelJSTagLib {
                     ${insertDefaultModel}
                 } else {
                     \$.each(data, function (i, obj) {
-                        self.data.${model.name}.push(new ${rowModelName}(obj, self, i));
+                        self.data.${model.name}.push(new ${rowModelName}(obj, self, i, config));
                     });
                 }
             };
@@ -454,9 +454,9 @@ class ModelJSTagLib {
         populateImageList(model, out)
     }
 
-    def speciesModel(attrs, model, out) {
-        def printable = attrs.printable ? attrs.printable : ''
-        out << INDENT*3 << "self.data.${model.name} = new SpeciesViewModel({}, speciesLists, {printable:'${printable}'});\n"
+    def speciesModel(String targetContext, String target, String data, printable, out) {
+        out << INDENT*3 << "var ${target}Config = _.extend(config, {printable:'${printable?:''}', dataFieldName:'${target}' });\n"
+        out << INDENT*3 << "self.${targetContext}${target} = new SpeciesViewModel(${data}, ${target}Config);\n"
     }
 
     def modelConstraints(model, out) {

@@ -642,13 +642,55 @@ ko.bindingHandlers.fusedAutocomplete = {
     }
 };
 
-ko.bindingHandlers.autocomplete = {
-    init: function (element, params) {
+ko.bindingHandlers.speciesAutocomplete = {
+    init: function (element, params, allBindings, viewModel, bindingContext) {
         var param = params();
         var url = ko.utils.unwrapObservable(param.url);
         var list = ko.utils.unwrapObservable(param.listId);
         var valueCallback = ko.utils.unwrapObservable(param.valueChangeCallback)
         var options = {};
+
+        var lastHeader;
+
+        function rowTitle(listId) {
+            if (listId == 'unmatched' || listId == 'error-unmatched') {
+                return '';
+            }
+            if (!listId) {
+                return 'Atlas of Living Australia';
+            }
+            return 'Species List';
+        }
+        var renderItem = function(row) {
+
+            var result = '';
+            var title = rowTitle(row.listId);
+            if (title && lastHeader !== title) {
+                result+='<div style="background:grey;color:white; padding-left:5px;"> '+title+'</div>';
+            }
+            // We are keeping track of list headers so we only render each one once.
+            lastHeader = title;
+            result+='<a class="speciesAutocompleteRow">';
+            if (row.listId && row.listId === 'unmatched') {
+                result += '<i>Unlisted or unknown species</i>';
+            }
+            else if (row.listId && row.listId === 'error-unmatched') {
+                result += '<i>Offline</i><div>Species:<b>'+row.name+'</b></div>';
+            }
+            else {
+
+                var commonNameMatches = row.commonNameMatches !== undefined ? row.commonNameMatches : "";
+
+                result += (row.scientificNameMatches && row.scientificNameMatches.length>0) ? row.scientificNameMatches[0] : commonNameMatches ;
+                if (row.name != result && row.rankString) {
+                    result = result + "<div class='autoLine2'>" + row.rankString + ": " + row.name + "</div>";
+                } else if (row.rankString) {
+                    result = result + "<div class='autoLine2'>" + row.rankString + "</div>";
+                }
+            }
+            result += '</a>';
+            return result;
+        };
 
         options.source = function(request, response) {
             $(element).addClass("ac_loading");
@@ -689,11 +731,10 @@ ko.bindingHandlers.autocomplete = {
             ko.utils.unwrapObservable(param.result)(event, ui.item.source);
         };
 
-        var render = ko.utils.unwrapObservable(param.render);
-        if (render && $(element).autocomplete(options).data("ui-autocomplete")) {
+        if ($(element).autocomplete(options).data("ui-autocomplete")) {
 
             $(element).autocomplete(options).data("ui-autocomplete")._renderItem = function(ul, item) {
-                var result = $('<li></li>').html(render(item.source));
+                var result = $('<li></li>').html(renderItem(item.source));
                 return result.appendTo(ul);
 
             };
