@@ -382,11 +382,11 @@ expressionEvaluator = function() {
 
 }();
 
-OutputListSupport = function(parent, listName, ListItemType) {
+OutputListSupport = function(parent, listName, ListItemType, config) {
     var self = this;
     self.listName = listName;
     self.addRow = function () {
-        var newItem = new ListItemType(undefined, parent, self.rowCount());
+        var newItem = new ListItemType(undefined, parent, self.rowCount(), config);
         parent.data[listName].push(newItem);
     };
     self.removeRow = function (item) {
