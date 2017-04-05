@@ -227,7 +227,7 @@ class ModelJSTagLib {
         def observable = editableRows ? 'protectedObservable' : 'observable'
         out << INDENT*2 << "var ${makeRowModelName(attrs.model.modelName, model.name)} = function (data, parent, index, config) {\n"
         out << INDENT*3 << "var self = this;\n"
-        out << INDENT*3 << "self.\$parent = parent;\n"
+        out << INDENT*3 << "self.\$parent = parent.data ? parent.data : parent;\n"
         out << INDENT*3 << "self.\$index = index;\n"
 
         out << INDENT*3 << "if (!data) data = {};\n"
@@ -461,9 +461,24 @@ class ModelJSTagLib {
 
     def modelConstraints(model, out) {
         if (model.constraints) {
+            if (model.constraints instanceof List) {
+                def stringifiedOptions = "["+ model.constraints.join(",")+"]"
+                out << INDENT*3 << "self.transients.${model.name}Constraints = ${stringifiedOptions};\n"
+            }
+            else if (model.constraints.type == 'computed') {
+                out << INDENT*3 << "self.transients.${model.name}Constraints = ko.pureComputed(function() {\n"
+                model.constraints.options.each {
+                    out << INDENT*4 << "if (expressionEvaluator.evaluateBoolean('${it.expression}', self)) {\n"
+                    out << INDENT*5 << "return [${it.constraints.join(',')}];\n"
+                    out << INDENT*4 << "}\n"
+                }
+                if (model.constraints.defaults) {
+                    out << INDENT*4 << "return [${model.constraints.defaults(',')}];\n"
+                }
+                out << INDENT*3 << "});\n"
 
-            def stringifiedOptions = "["+ model.constraints.join(",")+"]"
-            out << INDENT*3 << "self.transients.${model.name}Constraints = ${stringifiedOptions};\n"
+            }
+
         }
     }
 

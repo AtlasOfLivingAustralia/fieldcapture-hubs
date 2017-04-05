@@ -311,3 +311,24 @@ ko.extenders.withPrevious = function (target) {
   // Return modified observable
   return target;
 };
+
+// Dummy binding as a placeholder for the preprocessor which does all the work.
+ko.bindingHandlers.constraint = {
+  init:function(element, valueAccessor, allBindingsAccessor, viewModel, bindingContext) {
+  },
+  update:function() {
+  }
+};
+
+ko.bindingHandlers.constraint.preprocess = function(value, name, addBindingCallback) {
+
+  var params = value.substring(1, value.length-1).split(':');
+
+  if (!params.length == 2) {
+    throw "The constraint binding requires a binding:expression value"
+  }
+
+  addBindingCallback(params[0], "expressionEvaluator.evaluateBoolean('"+params[1]+"', $data)");
+
+  return undefined;
+};
