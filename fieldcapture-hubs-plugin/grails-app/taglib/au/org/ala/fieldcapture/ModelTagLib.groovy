@@ -102,6 +102,7 @@ class ModelTagLib {
     def dataTag(attrs, model, context, editable, elementAttributes, databindAttrs, labelAttributes) {
         ModelWidgetRenderer renderer
 
+
         def validate = validationAttribute(attrs, model, editable)
 
         if (attrs.printable) {
@@ -121,6 +122,15 @@ class ModelTagLib {
         }
 
         def renderContext = new WidgetRenderContext(model, context, validate, databindAttrs, elementAttributes, labelAttributes, g, attrs)
+
+        // The data model item we are rendering the view for.
+        Map source = getAttribute(attrs.model.dataModel, model.source)
+        if (source?.behaviour) {
+            source.behaviour.each { constraint ->
+                println constraint
+                renderContext.databindAttrs.add "constraint", "{${constraint.type}:${constraint.condition}}"
+            }
+        }
 
         if (model.visibility) {
             renderContext.databindAttrs.add "visible", evalDependency(model.visibility)
