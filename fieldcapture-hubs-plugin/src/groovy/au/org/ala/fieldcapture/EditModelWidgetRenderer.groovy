@@ -47,7 +47,7 @@ public class EditModelWidgetRenderer implements ModelWidgetRenderer {
         // to select from.
         context.databindAttrs.add 'options', 'transients.' + context.model.source + 'Constraints'
         context.databindAttrs.add 'optionsCaption', '"Please select"'
-        context.writer <<  "<select${context.attributes.toString()} data-bind='${context.databindAttrs.toString()}'${context.validationAttr}></select>"
+        context.writer <<  "<select${context.attributes.toString()} class=\"select\" data-bind='${context.databindAttrs.toString()}'${context.validationAttr}></select>"
     }
 
     @Override
@@ -151,5 +151,10 @@ public class EditModelWidgetRenderer implements ModelWidgetRenderer {
         context.writer << """</div>"""
 
 
+    }
+
+    @Override
+    void renderSpeciesSelect(WidgetRenderContext context) {
+        context.writer << """<span data-bind="with:${context.source}" class="input-append"><select data-bind="speciesSelect2:\$data" class="input-xlarge select2"></select><span class="add-on"><a href="#" data-bind="popover: {title: name, content: transients.speciesInformation}"><i class="icon-info-sign"></i></a></span>"""
     }
 }

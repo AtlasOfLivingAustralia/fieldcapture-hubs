@@ -191,6 +191,9 @@ class ModelTagLib {
             case 'document':
                 renderer.renderDocument(renderContext)
                 break
+            case 'speciesSelect':
+                renderer.renderSpeciesSelect(renderContext)
+                break
             default:
                 log.warn("Unhandled widget type: ${model.type}")
                 break
