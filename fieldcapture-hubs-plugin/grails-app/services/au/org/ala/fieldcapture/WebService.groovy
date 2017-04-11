@@ -105,7 +105,7 @@ class WebService {
             response.outputStream << conn.inputStream
         }
         else {
-            resp.error = conn.inputStream.text
+            resp.error = conn.inputStream?.text ?: 'An error occurred'
         }
         return resp
     }

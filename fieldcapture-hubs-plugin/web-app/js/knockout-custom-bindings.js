@@ -332,3 +332,35 @@ ko.bindingHandlers.constraint.preprocess = function(value, name, addBindingCallb
 
   return undefined;
 };
+
+ko.bindingHandlers.speciesSelect2 = {
+  init: function (element, valueAccessor) {
+
+    var model = valueAccessor();
+
+    var select2AwareFormatter = function(data, container, delegate, queryTerm) {
+      if (data.text) {
+        return data.text;
+      }
+      return delegate(data, queryTerm || '');
+    };
+
+    $.fn.select2.amd.require(['select2/species'], function(SpeciesAdapter) {
+      var queryHolder = {};
+      $(element).select2({
+        dataAdapter: SpeciesAdapter,
+        placeholder:{id:-1, text:'Please select...'},
+        templateResult: function(data, container) { return select2AwareFormatter(data, container, model.formatSpeciesListItem, queryHolder.queryTerm); },
+        templateSelection: function(data, container) { return select2AwareFormatter(data, container, model.formatSelectedSpecies); },
+        dropdownAutoWidth: true,
+        model:model,
+        queryHolder: queryHolder // Allow the query term to be shared between renders and the data source.
+      });
+
+      $(element).on("select2:select", function(ev) {
+        model.loadData(ev.params.data);
+      });
+    });
+  },
+  update: function (element, valueAccessor) {}
+};
