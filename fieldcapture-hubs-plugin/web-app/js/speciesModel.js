@@ -250,7 +250,7 @@ var SpeciesViewModel = function(data, options) {
 
     self.formatSpeciesListItem = speciesFormatters.multiLineSpeciesFormatter;
     self.formatSelectedSpecies = speciesFormatters.singleLineSpeciesFormatter;
-    self.engine = function() {speciesSearchEngines.get(self.listId() || 'dr7394', true)};
+    self.engine = function() {return speciesSearchEngines.get(self.listId() || 'dr7394', true)};
     self.id = function() {
         return speciesSearchEngines.speciesId({guid:self.guid(), name:self.name()});
     }
@@ -264,7 +264,7 @@ $.fn.select2.amd.define('select2/species', [
         this.$element = $element;
         this.queryHolder = options.get('queryHolder');
         this.model = options.get("model");
-        this.engine = model.engine();
+        this.engine = this.model.engine();
         SpeciesAdapter.__super__.constructor.call(this, $element, options);
     }
 
