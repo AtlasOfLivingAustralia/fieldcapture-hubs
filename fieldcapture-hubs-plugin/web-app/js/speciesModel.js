@@ -250,7 +250,7 @@ var SpeciesViewModel = function(data, options) {
 
     self.formatSpeciesListItem = speciesFormatters.multiLineSpeciesFormatter;
     self.formatSelectedSpecies = speciesFormatters.singleLineSpeciesFormatter;
-    self.engine = speciesSearchEngines.get(self.listId() || 'dr7394', true);
+    self.engine = function() {speciesSearchEngines.get(self.listId() || 'dr7394', true)};
     self.id = function() {
         return speciesSearchEngines.speciesId({guid:self.guid(), name:self.name()});
     }
@@ -264,6 +264,7 @@ $.fn.select2.amd.define('select2/species', [
         this.$element = $element;
         this.queryHolder = options.get('queryHolder');
         this.model = options.get("model");
+        this.engine = model.engine();
         SpeciesAdapter.__super__.constructor.call(this, $element, options);
     }
 
@@ -274,7 +275,7 @@ $.fn.select2.amd.define('select2/species', [
         self.queryHolder.queryTerm = params.term;
         var noLocalResults = false;
         if (params.term) {
-            self.model.engine.search(
+            self.engine.search(
                 params.term, function (resultArr) {
                     if (resultArr.length > 0) {
                         callback({results: [{text: "Species List", children: resultArr}]});
@@ -295,7 +296,7 @@ $.fn.select2.amd.define('select2/species', [
                 });
         }
         else {
-            callback({results: [{text: "Species List", children: self.model.engine.all()}]});
+            callback({results: [{text: "Species List", children: self.engine.all()}]});
         }
     };
 

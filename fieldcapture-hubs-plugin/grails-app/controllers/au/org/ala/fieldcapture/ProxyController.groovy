@@ -25,11 +25,7 @@ class ProxyController {
     }
 
     def speciesItemsForList() {
-        response.setContentType("application/json")
-        String list = getClass().getResource("/list.json").text
-        render list
-
-        //render webService.get("${grailsApplication.config.lists.baseURL}/ws/speciesListItems/${params.druid}?includeKVP=true", false)
+        render webService.get("${grailsApplication.config.lists.baseURL}/ws/speciesListItems/${params.druid}?includeKVP=true", false)
     }
 
     def intersect(){
