@@ -334,27 +334,25 @@ ko.bindingHandlers.constraint.preprocess = function(value, name, addBindingCallb
 };
 
 ko.bindingHandlers.speciesSelect2 = {
+  select2AwareFormatter: function(data, container, delegate) {
+    if (data.text) {
+      return data.text;
+    }
+    return delegate(data);
+  },
   init: function (element, valueAccessor) {
 
+    var self = ko.bindingHandlers.speciesSelect2;
     var model = valueAccessor();
 
-    var select2AwareFormatter = function(data, container, delegate, queryTerm) {
-      if (data.text) {
-        return data.text;
-      }
-      return delegate(data, queryTerm || '');
-    };
-
     $.fn.select2.amd.require(['select2/species'], function(SpeciesAdapter) {
-      var queryHolder = {};
       $(element).select2({
         dataAdapter: SpeciesAdapter,
         placeholder:{id:-1, text:'Please select...'},
-        templateResult: function(data, container) { return select2AwareFormatter(data, container, model.formatSpeciesListItem, queryHolder.queryTerm); },
-        templateSelection: function(data, container) { return select2AwareFormatter(data, container, model.formatSelectedSpecies); },
+        templateResult: function(data, container) { return self.select2AwareFormatter(data, container, model.formatSearchResult); },
+        templateSelection: function(data, container) { return self.select2AwareFormatter(data, container, model.formatSelectedSpecies); },
         dropdownAutoWidth: true,
-        model:model,
-        queryHolder: queryHolder // Allow the query term to be shared between renders and the data source.
+        model:model
       });
 
       $(element).on("select2:select", function(ev) {

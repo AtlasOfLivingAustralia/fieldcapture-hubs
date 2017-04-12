@@ -42,15 +42,15 @@ var speciesFormatters = function() {
             return species.name;
         }
     };
-    var multiLineSpeciesFormatter = function(species, queryTerm) {
+    var multiLineSpeciesFormatter = function(species, queryTerm, config) {
 
         if (!species) return '';
 
         var result;
         if (species.scientificName && species.commonName) {
             result = $("<div/>");
-            if (species.lsid) {
-                result.append($('<span/>').append($('<img style="width:75px; height:75px;">').attr('src', 'http://devt.ala.org.au:8087/fieldcapture/species/speciesImage?id='+encodeURIComponent(species.lsid))));
+            if (species.id) {
+                result.append($('<span/>').append($('<img style="width:75px; height:75px;">').attr('src', config.speciesImageUrl+'?id='+encodeURIComponent(species.id))));
             }
             result.append($('<div style="display:inline-block; padding-left:10px;"></div>').append($("<i></i>").append(markMatch(species.scientificName, queryTerm))).append($("<br/>")).append(markMatch(species.commonName, queryTerm)));
 
@@ -72,7 +72,7 @@ var speciesFormatters = function() {
 
 
 
-var speciesSearchEngines = function(config) {
+var speciesSearchEngines = function() {
 
     var speciesId = function (species) {
         if (species.guid || species.lsid) {
@@ -108,15 +108,15 @@ var speciesSearchEngines = function(config) {
         return listId || '' + alaFallback;
     }
 
-    function get(listId, alaFallback) {
+    function get(listId, alaFallback, config) {
         var engine = engines[engineKey(listId, alaFallback)];
         if (!engine) {
-            engine = define(listId, alaFallback);
+            engine = define(listId, alaFallback, config);
         }
         return engine;
     };
 
-    function define(listId, alaFallback) {
+    function define(listId, alaFallback, config) {
         var options = {
             datumTokenizer: speciesTokenizer,
             queryTokenizer: Bloodhound.tokenizers.nonword,
@@ -148,7 +148,7 @@ var speciesSearchEngines = function(config) {
         get:get,
         speciesId:speciesId
     };
-}(fcConfig || {});
+}();
 
 
 /**
@@ -248,11 +248,47 @@ var SpeciesViewModel = function(data, options) {
         }
     };
 
-    self.formatSpeciesListItem = speciesFormatters.multiLineSpeciesFormatter;
+    var speciesConfig = _.find(options.speciesConfig.surveyConfig.speciesFields || [], function(conf) {
+        return conf.output == options.outputName && conf.dataFieldName == options.dataFieldName;
+    });
+    if (!speciesConfig) {
+        speciesConfig = options.speciesConfig.defaultSpeciesConfig;
+    }
+    else {
+        speciesConfig = speciesConfig.config;
+    }
+
+
+
+    self.formatSearchResult = function(species) {
+        return speciesFormatters.multiLineSpeciesFormatter(species, self.transients.currentSearchTerm || '', options);
+    };
     self.formatSelectedSpecies = speciesFormatters.singleLineSpeciesFormatter;
-    self.engine = function() {return speciesSearchEngines.get(self.listId() || 'dr7394', true)};
+    var listId = speciesConfig.speciesLists && speciesConfig.speciesLists.length > 0 ? speciesConfig.speciesLists[0].dataResourceUid : '';
+    self.transients.engine = speciesSearchEngines.get(listId, speciesConfig.useAla || true, options);
     self.id = function() {
         return speciesSearchEngines.speciesId({guid:self.guid(), name:self.name()});
+    };
+
+    self.search = function(term, callback) {
+        self.transients.currentSearchTerm = term;
+        var suppliedResults = false;
+        if (term) {
+            self.transients.engine.search(term, function (resultArr) {
+                    if (resultArr.length > 0) {
+                        callback({results: [{text: "Species List", children: resultArr}]}, false);
+                        suppliedResults = true;
+                    }
+                },
+                function (resultArr) {
+                    var results = {results: [{text: "Atlas of Living Australia", children: resultArr}]};
+                    callback(results, suppliedResults);
+                });
+        }
+        else {
+            var results = self.transients.engine.all();
+            callback({results: [{text: "Species List", children: results}]});
+        }
     }
 };
 
@@ -261,10 +297,7 @@ $.fn.select2.amd.define('select2/species', [
     'select2/utils'
 ], function (BaseAdapter, Utils) {
     function SpeciesAdapter($element, options) {
-        this.$element = $element;
-        this.queryHolder = options.get('queryHolder');
         this.model = options.get("model");
-        this.engine = this.model.engine();
         SpeciesAdapter.__super__.constructor.call(this, $element, options);
     }
 
@@ -272,32 +305,18 @@ $.fn.select2.amd.define('select2/species', [
 
     SpeciesAdapter.prototype.query = function (params, callback) {
         var self = this;
-        self.queryHolder.queryTerm = params.term;
-        var noLocalResults = false;
-        if (params.term) {
-            self.engine.search(
-                params.term, function (resultArr) {
-                    if (resultArr.length > 0) {
-                        callback({results: [{text: "Species List", children: resultArr}]});
-                    }
-                    else {
-                        noLocalResults = true;
-                    }
 
-                },
-                function (resultArr) {
-                    var results = {results: [{text: "Atlas of Living Australia", children: resultArr}]};
-                    if (noLocalResults) {
-                        callback(results);
-                    }
-                    else {
-                        self.trigger("results:append", {data: results, query: params});
-                    }
-                });
-        }
-        else {
-            callback({results: [{text: "Species List", children: self.engine.all()}]});
-        }
+        self.model.search(
+            params.term, function (results, append) {
+                if (!append) {
+                    callback(results);
+                }
+                else {
+                    self.trigger("results:append", {data: results, query: params});
+                }
+            }
+        );
+
     };
 
     SpeciesAdapter.prototype.current = function (callback) {
