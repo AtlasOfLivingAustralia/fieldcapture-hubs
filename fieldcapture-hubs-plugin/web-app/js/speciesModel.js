@@ -168,7 +168,7 @@ var SpeciesViewModel = function(data, options) {
     self.transients.editing = ko.observable(false);
     self.transients.textFieldValue = ko.observable();
     self.transients.bioProfileUrl =  ko.computed(function (){
-        return  fcConfig.bieUrl + '/species/' + self.guid();
+        return options.bieUrl + '/species/' + self.guid();
     });
 
     self.transients.speciesSearchUrl = options.speciesSearchUrl+'&dataFieldName='+options.dataFieldName;
@@ -208,7 +208,7 @@ var SpeciesViewModel = function(data, options) {
 
             var profileUrl = fcConfig.bieUrl + '/species/' + encodeURIComponent(self.guid());
             $.ajax({
-                url: fcConfig.speciesProfileUrl+'?id=' + encodeURIComponent(self.guid()),
+                url: options.speciesProfileUrl+'?id=' + encodeURIComponent(self.guid()),
                 dataType: 'json',
                 success: function (data) {
                     var profileInfo = '<a href="'+profileUrl+'" target="_blank">';
@@ -248,19 +248,32 @@ var SpeciesViewModel = function(data, options) {
         }
     };
 
-    var speciesConfig = _.find(options.speciesConfig.surveyConfig.speciesFields || [], function(conf) {
-        return conf.output == options.outputName && conf.dataFieldName == options.dataFieldName;
-    });
-    if (!speciesConfig) {
-        speciesConfig = options.speciesConfig.defaultSpeciesConfig;
-    }
-    else {
-        speciesConfig = speciesConfig.config;
-    }
 
-    if (options.showImages == undefined) {
-        options.showImages = true;
-    }
+    self.findSpeciesConfig = function(options) {
+        var speciesConfig;
+        if (options.speciesConfig) {
+            if (options.speciesConfig.surveyConfig) {
+                speciesConfig = _.find(options.speciesConfig.surveyConfig.speciesFields || [], function (conf) {
+                    return conf.output == options.outputName && conf.dataFieldName == options.dataFieldName;
+                });
+                if (speciesConfig) {
+                    speciesConfig = speciesConfig.config;
+                }
+
+                if (!speciesConfig) {
+                    speciesConfig = options.speciesConfig.defaultSpeciesConfig;
+                }
+            }
+        }
+        if (!speciesConfig) {
+            speciesConfig = {
+                showImages: true,
+            }
+        }
+        return speciesConfig;
+    };
+
+    var speciesConfig = self.findSpeciesConfig(options);
 
     self.formatSearchResult = function(species) {
         return speciesFormatters.multiLineSpeciesFormatter(species, self.transients.currentSearchTerm || '', options);
