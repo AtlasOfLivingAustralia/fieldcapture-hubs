@@ -352,7 +352,8 @@ ko.bindingHandlers.speciesSelect2 = {
         templateResult: function(data, container) { return self.select2AwareFormatter(data, container, model.formatSearchResult); },
         templateSelection: function(data, container) { return self.select2AwareFormatter(data, container, model.formatSelectedSpecies); },
         dropdownAutoWidth: true,
-        model:model
+        model:model,
+        ajax:{} // We want infinite scroll and this is how to get it.
       });
 
       $(element).on("select2:select", function(ev) {

@@ -1,32 +1,6 @@
 
 
 var speciesFormatters = function() {
-    function markMatch (text, term) {
-        // Find where the match is
-        var match = text.toUpperCase().indexOf(term.toUpperCase());
-
-        var $result = $('<span></span>');
-
-        // If there is no match, move on
-        if (match < 0) {
-            return $result.text(text);
-        }
-
-        // Put in whatever text is before the match
-        $result.text(text.substring(0, match));
-
-        // Mark the match
-        var $match = $('<span class="select2-rendered__match"></span>');
-        $match.text(text.substring(match, match + term.length));
-
-        // Append the matching text
-        $result.append($match);
-
-        // Put in whatever is after the match
-        $result.append(text.substring(match + term.length));
-
-        return $result;
-    }
 
     var singleLineSpeciesFormatter = function(species) {
         if (species.id == -1) {
@@ -42,28 +16,39 @@ var speciesFormatters = function() {
             return species.name;
         }
     };
+
+    function image(species, config) {
+
+        var imageUrl = config.noImageUrl;
+        if (species.guid || species.lsid) {
+            imageUrl = config.speciesImageUrl + '?id=' + encodeURIComponent(species.guid || species.lsid);
+        }
+        return $('<div class="species-image-holder"/>').css('background-image', 'url('+imageUrl+')').append();
+    }
+
+    function scientificName(species) {
+        var scientificName = species.scientificNameMatches && species.scientificNameMatches.length > 0 ? species.scientificNameMatches[0] : species.scientificName;
+        return $('<div class="scientific-name"></div>').html(scientificName || '');
+    }
+
+    function commonName(species) {
+        var commonName = species.commonNameMatches && species.commonNameMatches.length > 0 ? species.commonNameMatches[0] : species.commonName;
+        return $('<div class="common-name"></div>').html(commonName || species.name);
+    }
     var multiLineSpeciesFormatter = function(species, queryTerm, config) {
 
         if (!species) return '';
 
-        var result;
-        if (species.scientificName && species.commonName) {
-            result = $("<div/>");
-            if (species.id) {
-                result.append($('<span/>').append($('<img style="width:75px; height:75px;">').attr('src', config.speciesImageUrl+'?id='+encodeURIComponent(species.id))));
-            }
-            result.append($('<div style="display:inline-block; padding-left:10px;"></div>').append($("<i></i>").append(markMatch(species.scientificName, queryTerm))).append($("<br/>")).append(markMatch(species.commonName, queryTerm)));
-
+        var result = $("<div class='species-result'/>");;
+        if (config.showImages) {
+            result.append(image(species, config));
         }
-        else if (species.scientificName) {
-            result = $("<i></i>").append(markMatch(species.scientificName, queryTerm));
-        }
-        else {
-            result = markMatch(species.name, queryTerm);
-        }
+        result.append($('<div class="name-holder"/>').append(scientificName(species)).append(commonName(species)));
 
         return result;
     };
+
+
     return {
         singleLineSpeciesFormatter:singleLineSpeciesFormatter,
         multiLineSpeciesFormatter:multiLineSpeciesFormatter
@@ -89,10 +74,13 @@ var speciesSearchEngines = function() {
         if (species.commonName) {
             result = result.concat(species.commonName.split(/\W+/));
         }
+        if (species.name) {
+            result = result.concat(species.name.split(/\W+/));
+        }
         return result;
     };
 
-    var select2Transformer = function (speciesArray) {
+    var select2ListTransformer = function (speciesArray) {
         if (!speciesArray) {
             return [];
         }
@@ -100,6 +88,19 @@ var speciesSearchEngines = function() {
             speciesArray[i].id = speciesId(speciesArray[i]);
         }
         return speciesArray;
+    };
+
+    var select2AlaTransformer = function(alaResults) {
+        var speciesArray = alaResults.autoCompleteList;
+        if (!speciesArray) {
+            return [];
+        }
+        for (var i in speciesArray) {
+            speciesArray[i].id = speciesArray[i].guid;
+            speciesArray[i].scientificName = speciesArray[i].name;
+        }
+        return speciesArray;
+
     };
 
     var engines = {};
@@ -126,18 +127,14 @@ var speciesSearchEngines = function() {
             options.prefetch = {
                 url: config.speciesListUrl + '?druid='+listId+'&includeKvp=true',
                 cache: false,
-                transform: function (results) {
-                    return select2Transformer(results);
-                }
+                transform: select2ListTransformer
             };
         }
         if (alaFallback) {
             options.remote = {
                 url: config.searchBieUrl + '?q=%',
                 wildcard: '%',
-                transform: function (results) {
-                    return select2Transformer(results.autoCompleteList);
-                }
+                transform: select2AlaTransformer
             };
         }
 
@@ -167,6 +164,7 @@ var SpeciesViewModel = function(data, options) {
     self.listId = ko.observable();
     self.transients = {};
     self.transients.speciesInformation = ko.observable();
+    self.transients.speciesTitle = ko.observable();
     self.transients.editing = ko.observable(false);
     self.transients.textFieldValue = ko.observable();
     self.transients.bioProfileUrl =  ko.computed(function (){
@@ -204,6 +202,7 @@ var SpeciesViewModel = function(data, options) {
         self.scientificName(orBlank(data.scientificName));
         self.commonName(orBlank(data.commonName));
 
+        self.transients.speciesTitle = speciesFormatters.multiLineSpeciesFormatter(self.toJS(), '', {showImage: false});
         self.transients.textFieldValue(self.name());
         if (self.guid() && !options.printable) {
 
@@ -228,6 +227,7 @@ var SpeciesViewModel = function(data, options) {
                     console.log(error);
                 }
             });
+
         }
         else {
             self.transients.speciesInformation("No profile information is available.");
@@ -258,7 +258,9 @@ var SpeciesViewModel = function(data, options) {
         speciesConfig = speciesConfig.config;
     }
 
-
+    if (options.showImages == undefined) {
+        options.showImages = true;
+    }
 
     self.formatSearchResult = function(species) {
         return speciesFormatters.multiLineSpeciesFormatter(species, self.transients.currentSearchTerm || '', options);
@@ -270,13 +272,46 @@ var SpeciesViewModel = function(data, options) {
         return speciesSearchEngines.speciesId({guid:self.guid(), name:self.name()});
     };
 
-    self.search = function(term, callback) {
+    function markMatch (text, term) {
+        if (!text) {
+            return '';
+        }
+        // Find where the match is
+        var match = text.toUpperCase().indexOf(term.toUpperCase());
+
+        // If there is no match, move on
+        if (match < 0) {
+            return text;
+        }
+
+        // Put in whatever text is before the match
+        var result = text.substring(0, match);
+
+        // Mark the match
+        result += '<b>' + text.substring(match, match + term.length) + '</b>';
+
+        // Put in whatever is after the match
+        result += text.substring(match + term.length);
+
+        return result;
+    }
+
+
+    self.search = function(params, callback) {
+        var term = params.term;
         self.transients.currentSearchTerm = term;
         var suppliedResults = false;
         if (term) {
             self.transients.engine.search(term, function (resultArr) {
                     if (resultArr.length > 0) {
+
+                        for (var i in resultArr) {
+                            resultArr[i].scientificNameMatches = [markMatch(resultArr[i].scientificName, term)];
+                            resultArr[i].commonNameMatches = [markMatch(resultArr[i].commonName || resultArr[i].name, term)];
+                        }
+
                         callback({results: [{text: "Species List", children: resultArr}]}, false);
+
                         suppliedResults = true;
                     }
                 },
@@ -286,8 +321,16 @@ var SpeciesViewModel = function(data, options) {
                 });
         }
         else {
-            var results = self.transients.engine.all();
-            callback({results: [{text: "Species List", children: results}]});
+            var list = self.transients.engine.all();
+            if (list.length > 0) {
+                var pageLength = 10;
+                var offset = (params.page || 0) * pageLength;
+                var end = Math.min(offset+pageLength, list.length);
+                var page = list.slice(offset, end);
+                var results = offset > 0 ? page : [{text: "Species List", children: page}];
+
+                callback({results: results, pagination: {more: end < list.length }});
+            }
         }
     }
 };
@@ -307,7 +350,7 @@ $.fn.select2.amd.define('select2/species', [
         var self = this;
 
         self.model.search(
-            params.term, function (results, append) {
+            params, function (results, append) {
                 if (!append) {
                     callback(results);
                 }
