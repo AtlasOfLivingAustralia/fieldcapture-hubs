@@ -356,9 +356,6 @@ ko.bindingHandlers.speciesSelect2 = {
         ajax:{} // We want infinite scroll and this is how to get it.
       });
 
-      $(element).on("select2:select", function(ev) {
-        model.loadData(ev.params.data);
-      });
     });
   },
   update: function (element, valueAccessor) {}

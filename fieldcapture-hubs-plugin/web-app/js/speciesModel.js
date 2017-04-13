@@ -373,13 +373,13 @@ var SpeciesViewModel = function(data, options) {
 $.fn.select2.amd.define('select2/species', [
     'select2/data/ajax',
     'select2/utils'
-], function (BaseAdapter, Utils) {
+], function (AjaxAdapter, Utils) {
     function SpeciesAdapter($element, options) {
         this.model = options.get("model");
         SpeciesAdapter.__super__.constructor.call(this, $element, options);
     }
 
-    Utils.Extend(SpeciesAdapter, BaseAdapter);
+    Utils.Extend(SpeciesAdapter, AjaxAdapter);
 
     SpeciesAdapter.prototype.query = function (params, callback) {
         var self = this;
@@ -404,6 +404,11 @@ $.fn.select2.amd.define('select2/species', [
             data = {id: -1, text: "Please select..."}
         }
         callback([data]);
+    };
+
+    SpeciesAdapter.prototype.select = function(data) {
+        this.model.loadData(data);
+        AjaxAdapter.__super__.select.call(this, data);
     };
 
     return SpeciesAdapter;
