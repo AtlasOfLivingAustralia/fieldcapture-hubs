@@ -109,28 +109,28 @@ var speciesSearchEngines = function() {
         return listId || '' + alaFallback;
     }
 
-    function get(listId, alaFallback, config) {
-        var engine = engines[engineKey(listId, alaFallback)];
+    function get(config) {
+        var engine = engines[engineKey(config.listId, config.useAla)];
         if (!engine) {
-            engine = define(listId, alaFallback, config);
+            engine = define(config);
         }
         return engine;
     };
 
-    function define(listId, alaFallback, config) {
+    function define(config) {
         var options = {
             datumTokenizer: speciesTokenizer,
             queryTokenizer: Bloodhound.tokenizers.nonword,
             identify: speciesId
         };
-        if (listId) {
+        if (config.listId) {
             options.prefetch = {
-                url: config.speciesListUrl + '?druid='+listId+'&includeKvp=true',
+                url: config.speciesListUrl + '?druid='+config.listId+'&includeKvp=true',
                 cache: false,
                 transform: select2ListTransformer
             };
         }
-        if (alaFallback) {
+        if (config.useAla) {
             options.remote = {
                 url: config.searchBieUrl + '?q=%',
                 wildcard: '%',
@@ -266,21 +266,30 @@ var SpeciesViewModel = function(data, options) {
             }
         }
         if (!speciesConfig) {
-            speciesConfig = {
-                showImages: true,
-            }
+            speciesConfig = {};
         }
+        speciesConfig.listId = speciesConfig && speciesConfig.speciesLists && speciesConfig.speciesLists.length > 0 ? speciesConfig.speciesLists[0].dataResourceUid : '';
+
+        var defaults = {
+            showImages: true,
+            useAla:true,
+            allowUnmatched: true,
+            unmatchedTermlength: 5
+        };
+
+        _.defaults(speciesConfig, defaults);
+        _.defaults(speciesConfig, options);
         return speciesConfig;
     };
 
     var speciesConfig = self.findSpeciesConfig(options);
 
     self.formatSearchResult = function(species) {
-        return speciesFormatters.multiLineSpeciesFormatter(species, self.transients.currentSearchTerm || '', options);
+        return speciesFormatters.multiLineSpeciesFormatter(species, self.transients.currentSearchTerm || '', speciesConfig);
     };
     self.formatSelectedSpecies = speciesFormatters.singleLineSpeciesFormatter;
-    var listId = speciesConfig.speciesLists && speciesConfig.speciesLists.length > 0 ? speciesConfig.speciesLists[0].dataResourceUid : '';
-    self.transients.engine = speciesSearchEngines.get(listId, speciesConfig.useAla || true, options);
+
+    self.transients.engine = speciesSearchEngines.get(speciesConfig);
     self.id = function() {
         return speciesSearchEngines.speciesId({guid:self.guid(), name:self.name()});
     };
@@ -315,22 +324,35 @@ var SpeciesViewModel = function(data, options) {
         self.transients.currentSearchTerm = term;
         var suppliedResults = false;
         if (term) {
-            self.transients.engine.search(term, function (resultArr) {
+            self.transients.engine.search(term,
+                function (resultArr) {
+                    var results = [];
                     if (resultArr.length > 0) {
 
                         for (var i in resultArr) {
                             resultArr[i].scientificNameMatches = [markMatch(resultArr[i].scientificName, term)];
                             resultArr[i].commonNameMatches = [markMatch(resultArr[i].commonName || resultArr[i].name, term)];
                         }
-
-                        callback({results: [{text: "Species List", children: resultArr}]}, false);
-
+                        results.push({text: "Species List", children: resultArr});
                         suppliedResults = true;
                     }
+                    if (!speciesConfig.useAla && speciesConfig.allowUnmatched && term.length >= speciesConfig.unmatchedTermlength) {
+                        results.push({text: "Missing or unidentified species", children: [{id:name, name:term, listId:"unmatched"}]});
+                    }
+                    if (results.length > 0) {
+                        callback({results: results}, false);
+                    }
+
                 },
                 function (resultArr) {
-                    var results = {results: [{text: "Atlas of Living Australia", children: resultArr}]};
-                    callback(results, suppliedResults);
+                    var results = [];
+                    if (resultArr.length > 0) {
+                        results.push({text: "Atlas of Living Australia", children: resultArr});
+                    }
+                    if (speciesConfig.allowUnmatched && term.length >= speciesConfig.unmatchedTermlength) {
+                        results.push({text: "Missing or unidentified species", children: [{id:name, name:term, listId:"unmatched"}]});
+                    }
+                    callback({results:results}, suppliedResults);
                 });
         }
         else {
