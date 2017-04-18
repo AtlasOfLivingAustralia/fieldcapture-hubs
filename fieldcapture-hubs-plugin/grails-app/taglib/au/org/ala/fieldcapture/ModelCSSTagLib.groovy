@@ -40,17 +40,23 @@ class ModelCSSTagLib {
         if (!model.disableHeaderWrap) {
             out << INDENT*2 << "table.${tableClass} th {white-space:normal;}\n"
         }
+
+        if (model.fixedWidth) {
+            out << INDENT*2 << "table.${tableClass}  {table-layout:fixed;}\n"
+        }
+
         model.columns.eachWithIndex { col, i ->
 
             def width = col.width ? "width:${col.width};" : ""
             def textAlign = model.type == 'grid' ? '' : getTextAlign(attrs, col, model.source)
             if (width || textAlign) {
-                out << INDENT*2 << "table.${tableClass} tbody td:nth-child(${i+1}) {${width}${textAlign}}\n"
-                // If a width has been supplied, make sure an embedded select element doesn't override it.
-//                if (width) {
-//                    out << INDENT*2 << "table.${tableClass} tbody td:nth-child(${i+1})\n"
-//                }
-                //out << INDENT*2 << "table.${tableClass} th:nth-child(${i+1}) {${width}${textAlign}}\n"
+                if (model.fixedWidth) {
+                    out << INDENT*2 << "table.${tableClass} thead th:nth-child(${i+1}) {${width}}\n"
+                    out << INDENT*2 << "table.${tableClass} td:nth-child(${i+1}) {${textAlign}}\n"
+                }
+                else {
+                    out << INDENT*2 << "table.${tableClass} td:nth-child(${i+1}) {${width}${textAlign}}\n"
+                }
             }
         }
         // add extra column for editing buttons
@@ -60,14 +66,17 @@ class ModelCSSTagLib {
                 out << INDENT*2 << "table.${tableClass} td:last-child {width:5%;min-width:70px;text-align:center;}\n"
             } else {
                 // add column for delete buttons
-                out << INDENT*2 << "table.${tableClass} td:last-child {width:4%;text-align:center;}\n"
+                out << INDENT*2 << "table.${tableClass} th:last-child {width:1em;text-align:center;}\n"
             }
         }
 
+
         out << INDENT*2 << "table.${tableClass} textarea {width:100%; box-sizing:border-box; }\n"
 
+        out << INDENT*2 << "table.${tableClass} .select {width:100%; box-sizing:border-box; }\n"
         out << INDENT*2 << "table.${tableClass} .select2 {width:100% !important; box-sizing:border-box; }\n"
         out << INDENT*2 << "table.${tableClass} .species-select2 {width:90% !important; min-width:200px; box-sizing:border-box; }\n"
+        out << INDENT*2 << "table.${tableClass} .select2-container .select2-selection--single {height:initial;}\n"
 
         out << INDENT << "</style>"
     }

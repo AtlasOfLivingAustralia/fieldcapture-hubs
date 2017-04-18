@@ -167,7 +167,7 @@ public class EditModelWidgetRenderer implements ModelWidgetRenderer {
     @Override
     void renderSpeciesSelect(WidgetRenderContext context) {
         context.writer << """<span data-bind="with:${context.source}" class="input-append species-select2" style="width:100%; min-width: 200px;">
-                                <select data-bind="speciesSelect2:\$data" class="select2"${context.validationAttr} style="width:90%"></select>
+                                <select data-bind="speciesSelect2:\$data" ${context.validationAttr} style="width:90%"></select>
                                 <span class="add-on">
                                     <a data-bind="popover: {title: transients.speciesTitle, content: transients.speciesInformation}"><i class="icon-info-sign"></i></a>
                                 </span>
