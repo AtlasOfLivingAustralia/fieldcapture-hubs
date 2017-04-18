@@ -92,6 +92,11 @@ class PrintModelWidgetRenderer implements ModelWidgetRenderer {
         defaultRender(context)
     }
 
+    @Override
+    void renderSelect2(WidgetRenderContext context) {
+        defaultRender(context)
+    }
+
     private void defaultRender(WidgetRenderContext context) {
 
 

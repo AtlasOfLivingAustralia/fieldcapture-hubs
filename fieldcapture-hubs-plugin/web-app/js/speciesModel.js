@@ -3,17 +3,15 @@
 var speciesFormatters = function() {
 
     var singleLineSpeciesFormatter = function(species) {
-        if (species.id == -1) {
-            return 'Please select...';
-        }
+
         if (species.scientificName && species.commonName) {
-            return species.scientificName + ' (' + species.commonName + ')';
+            return $('<span/>').append($('<span class="scientific-name"/>').text(scientificName(species))).append($('<span class="common-name"/>').text(' (' + commonName(species)+ ')'));
         }
         else if (species.scientificName) {
-            return species.scientificName;
+            return $('<span class="scientific-name"/>').text(scientificName(species));
         }
         else {
-            return species.name;
+            return $('<span class="common-name"/>').html(commonName(species)); // Html is used to avoid double escaping user entered data.
         }
     };
 
@@ -28,12 +26,12 @@ var speciesFormatters = function() {
 
     function scientificName(species) {
         var scientificName = species.scientificNameMatches && species.scientificNameMatches.length > 0 ? species.scientificNameMatches[0] : species.scientificName;
-        return $('<div class="scientific-name"></div>').html(scientificName || '');
+        return scientificName || '';
     }
 
     function commonName(species) {
         var commonName = species.commonNameMatches && species.commonNameMatches.length > 0 ? species.commonNameMatches[0] : species.commonName;
-        return $('<div class="common-name"></div>').html(commonName || species.name);
+        return  commonName || species.name;
     }
     var multiLineSpeciesFormatter = function(species, queryTerm, config) {
 
@@ -43,7 +41,7 @@ var speciesFormatters = function() {
         if (config.showImages) {
             result.append(image(species, config));
         }
-        result.append($('<div class="name-holder"/>').append(scientificName(species)).append(commonName(species)));
+        result.append($('<div class="name-holder"/>').append($('<div class="scientific-name"/>').html(scientificName(species))).append($('<div class="common-name"/>').html(commonName(species))));
 
         return result;
     };
@@ -337,7 +335,7 @@ var SpeciesViewModel = function(data, options) {
                         suppliedResults = true;
                     }
                     if (!speciesConfig.useAla && speciesConfig.allowUnmatched && term.length >= speciesConfig.unmatchedTermlength) {
-                        results.push({text: "Missing or unidentified species", children: [{id:name, name:term, listId:"unmatched"}]});
+                        results.push({text: "Missing or unidentified species", children: [{id:name, name: _.escape(term), listId:"unmatched"}]});
                     }
                     if (results.length > 0) {
                         callback({results: results}, false);
@@ -350,7 +348,7 @@ var SpeciesViewModel = function(data, options) {
                         results.push({text: "Atlas of Living Australia", children: resultArr});
                     }
                     if (speciesConfig.allowUnmatched && term.length >= speciesConfig.unmatchedTermlength) {
-                        results.push({text: "Missing or unidentified species", children: [{id:name, name:term, listId:"unmatched"}]});
+                        results.push({text: "Missing or unidentified species", children: [{id:name, name:_.escape(term), listId:"unmatched"}]});
                     }
                     callback({results:results}, suppliedResults);
                 });
