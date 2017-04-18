@@ -353,10 +353,27 @@ ko.bindingHandlers.speciesSelect2 = {
         templateSelection: function(data, container) { return self.select2AwareFormatter(data, container, model.formatSelectedSpecies); },
         dropdownAutoWidth: true,
         model:model,
+        escapeMarkup: function(markup) {
+          return markup;
+        },
         ajax:{} // We want infinite scroll and this is how to get it.
+      }).on('select2:close', function(e) {
+        $(element).validationEngine('validate');
       });
 
-    });
+    })
   },
   update: function (element, valueAccessor) {}
+};
+
+ko.bindingHandlers.select2 = {
+  init: function(element) {
+    $(element).select2({
+      placeholder:'Please select...',
+      dropdownAutoWidth:true,
+      allowClear:true
+    }).on('select2:close', function(e) {
+      $(element).validationEngine('validate');
+    });
+  }
 };

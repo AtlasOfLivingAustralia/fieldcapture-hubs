@@ -22,6 +22,7 @@ public interface ModelWidgetRenderer {
     void renderDate(WidgetRenderContext context)
     void renderDocument(WidgetRenderContext context)
     void renderSpeciesSelect(WidgetRenderContext context)
+    void renderSelect2(WidgetRenderContext context)
 
 }
 

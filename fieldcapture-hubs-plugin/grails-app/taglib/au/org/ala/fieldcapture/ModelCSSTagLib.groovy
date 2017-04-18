@@ -65,8 +65,9 @@ class ModelCSSTagLib {
         }
 
         out << INDENT*2 << "table.${tableClass} textarea {width:100%; box-sizing:border-box; }\n"
-        out << INDENT*2 << "table.${tableClass} .select {width:100%; box-sizing:border-box; }\n"
-        out << INDENT*2 << "table.${tableClass} .select2 {width:200px; box-sizing:border-box; }\n"
+
+        out << INDENT*2 << "table.${tableClass} .select2 {width:100% !important; box-sizing:border-box; }\n"
+        out << INDENT*2 << "table.${tableClass} .species-select2 {width:90% !important; min-width:200px; box-sizing:border-box; }\n"
 
         out << INDENT << "</style>"
     }

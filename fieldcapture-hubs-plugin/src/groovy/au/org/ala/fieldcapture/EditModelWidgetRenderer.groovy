@@ -51,6 +51,17 @@ public class EditModelWidgetRenderer implements ModelWidgetRenderer {
     }
 
     @Override
+    void renderSelect2(WidgetRenderContext context) {
+        context.databindAttrs.add 'value', context.source
+        // Select one or many view types require that the data model has defined a set of valid options
+        // to select from.
+        context.databindAttrs.add 'options', 'transients.' + context.model.source + 'Constraints'
+        context.databindAttrs.add 'optionsCaption', '""'
+        context.databindAttrs.add 'select2', 'true'
+        context.writer <<  "<select${context.attributes.toString()} class=\"select\" data-bind='${context.databindAttrs.toString()}'${context.validationAttr}></select>"
+    }
+
+    @Override
     void renderSelectMany(WidgetRenderContext context) {
 
         if (context.model.readonly) {
@@ -155,6 +166,11 @@ public class EditModelWidgetRenderer implements ModelWidgetRenderer {
 
     @Override
     void renderSpeciesSelect(WidgetRenderContext context) {
-        context.writer << """<span data-bind="with:${context.source}" class="input-append"><select data-bind="speciesSelect2:\$data" class="input-xlarge select2"></select><span class="add-on"><a data-bind="popover: {title: transients.speciesTitle, content: transients.speciesInformation}"><i class="icon-info-sign"></i></a></span>"""
+        context.writer << """<span data-bind="with:${context.source}" class="input-append species-select2" style="width:100%; min-width: 200px;">
+                                <select data-bind="speciesSelect2:\$data" class="select2"${context.validationAttr} style="width:90%"></select>
+                                <span class="add-on">
+                                    <a data-bind="popover: {title: transients.speciesTitle, content: transients.speciesInformation}"><i class="icon-info-sign"></i></a>
+                                </span>
+                             </span>"""
     }
 }
