@@ -374,7 +374,19 @@ $.fn.select2.amd.define('select2/species', [
 ], function (AjaxAdapter, Utils) {
     function SpeciesAdapter($element, options) {
         this.model = options.get("model");
+        this.$element = $element;
+
         SpeciesAdapter.__super__.constructor.call(this, $element, options);
+
+        var id = this.model.id();
+
+        if (id) {
+            this.addOptions(this.option({id:id, text:this.model.name()}));
+        }
+        else {
+            this.addOptions(this.option({text:options.placeholder}));
+        }
+
     }
 
     Utils.Extend(SpeciesAdapter, AjaxAdapter);

@@ -333,6 +333,15 @@ ko.bindingHandlers.constraint.preprocess = function(value, name, addBindingCallb
   return undefined;
 };
 
+
+function applySelect2ValidationCompatibility(element) {
+  var $element = $(element);
+  var select2 = $element.next('.select2-container');
+  $element.on('select2:close', function(e) {
+    $element.validationEngine('validate');
+  }).attr("data-prompt-position", "topRight:"+select2.width());
+}
+
 ko.bindingHandlers.speciesSelect2 = {
   select2AwareFormatter: function(data, container, delegate) {
     if (data.text) {
@@ -354,13 +363,11 @@ ko.bindingHandlers.speciesSelect2 = {
         dropdownAutoWidth: true,
         model:model,
         escapeMarkup: function(markup) {
-          return markup;
+          return markup; // We want to apply our own formatting so manually escape the user input.
         },
         ajax:{} // We want infinite scroll and this is how to get it.
-      }).on('select2:close', function(e) {
-        $(element).validationEngine('validate');
       });
-
+      applySelect2ValidationCompatibility(element);
     })
   },
   update: function (element, valueAccessor) {}
@@ -372,8 +379,7 @@ ko.bindingHandlers.select2 = {
       placeholder:'Please select...',
       dropdownAutoWidth:true,
       allowClear:true
-    }).on('select2:close', function(e) {
-      $(element).validationEngine('validate');
     });
+    applySelect2ValidationCompatibility(element);
   }
 };
