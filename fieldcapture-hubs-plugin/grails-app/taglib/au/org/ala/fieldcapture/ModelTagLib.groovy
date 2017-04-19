@@ -197,6 +197,9 @@ class ModelTagLib {
             case 'select2':
                 renderer.renderSelect2(renderContext)
                 break
+            case 'currency':
+                renderer.renderCurrency(renderContext)
+                break
             default:
                 log.warn("Unhandled widget type: ${model.type}")
                 break
