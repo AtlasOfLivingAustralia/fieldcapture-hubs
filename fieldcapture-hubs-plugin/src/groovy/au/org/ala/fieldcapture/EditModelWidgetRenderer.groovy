@@ -173,4 +173,14 @@ public class EditModelWidgetRenderer implements ModelWidgetRenderer {
                                 </span>
                              </span>"""
     }
+
+    @Override
+    void renderCurrency(WidgetRenderContext context) {
+        context.databindAttrs.add('value', context.source)
+        context.writer << """<span class="input-prepend input-append currency-input">
+            <span class="add-on">\$</span>
+            <input type="number" data-bind='${context.databindAttrs.toString()}'${context.validationAttr}'>
+            <span class="add-on">.00</span>
+           </span>"""
+    }
 }

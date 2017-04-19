@@ -126,4 +126,10 @@ class ViewModelWidgetRenderer implements ModelWidgetRenderer {
             </span>"""
     }
 
+    @Override
+    void renderCurrency(WidgetRenderContext context) {
+        context.databindAttrs.add 'text', context.source
+        context.writer << """\$<span data-bind="${context.databindAttrs.toString()}"></span>.00"""
+    }
+
 }

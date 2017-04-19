@@ -116,4 +116,9 @@ class PrintModelWidgetRenderer implements ModelWidgetRenderer {
             </ul>
         """
     }
+
+    @Override
+    void renderCurrency(WidgetRenderContext context) {
+       defaultRender(context)
+    }
 }
