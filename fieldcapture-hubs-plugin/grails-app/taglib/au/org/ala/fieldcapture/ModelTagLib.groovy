@@ -590,6 +590,9 @@ class ModelTagLib {
         def tableClass = isprintblankform ? "printed-form-table" : ""
         def validation = model.editableRows && model.source ? "data-bind=\"independentlyValidated:data.${model.source}\"":""
         out << "<div class=\"row-fluid ${extraClassAttrs}\">\n"
+        if (model.title) {
+            out << model.title
+        }
         out << INDENT*3 << "<table class=\"table table-bordered ${model.source} ${tableClass}\" ${validation}>\n"
         tableHeader out, attrs, model
         if (isprintblankform) {
