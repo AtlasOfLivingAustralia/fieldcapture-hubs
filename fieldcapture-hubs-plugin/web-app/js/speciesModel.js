@@ -75,6 +75,13 @@ var speciesSearchEngines = function() {
         if (species.name) {
             result = result.concat(species.name.split(/\W+/));
         }
+        if (species.kvpValues) {
+            for (var i in species.kvpValues) {
+                if (species.kvpValues[i].key.indexOf('name') >= 0) {
+                    result = result.concat(species.kvpValues[i].value.split(/\W+/));
+                }
+            }
+        }
         return result;
     };
 
@@ -108,9 +115,11 @@ var speciesSearchEngines = function() {
     }
 
     function get(config) {
-        var engine = engines[engineKey(config.listId, config.useAla)];
+        var key = engineKey(config.listId, config.useAla);
+        var engine = engines[key];
         if (!engine) {
             engine = define(config);
+            engines[key] = engine;
         }
         return engine;
     };
@@ -294,14 +303,14 @@ var SpeciesViewModel = function(data, options) {
 
     function markMatch (text, term) {
         if (!text) {
-            return '';
+            return {match:false, text:''};
         }
         // Find where the match is
         var match = text.toUpperCase().indexOf(term.toUpperCase());
 
         // If there is no match, move on
         if (match < 0) {
-            return text;
+            return {match:false, text:text};
         }
 
         // Put in whatever text is before the match
@@ -313,7 +322,7 @@ var SpeciesViewModel = function(data, options) {
         // Put in whatever is after the match
         result += text.substring(match + term.length);
 
-        return result;
+        return {match:true, text:result};
     }
 
 
@@ -328,8 +337,21 @@ var SpeciesViewModel = function(data, options) {
                     if (resultArr.length > 0) {
 
                         for (var i in resultArr) {
-                            resultArr[i].scientificNameMatches = [markMatch(resultArr[i].scientificName, term)];
-                            resultArr[i].commonNameMatches = [markMatch(resultArr[i].commonName || resultArr[i].name, term)];
+                            resultArr[i].scientificNameMatches = [markMatch(resultArr[i].scientificName, term).text];
+                            var match = markMatch(resultArr[i].commonName || resultArr[i].name, term);
+
+                            if (resultArr[i].kvpValues && resultArr[i].kvpValues.length > 0) {
+                                var j = 0;
+                                while (!match.match) {
+                                    if (resultArr[i].kvpValues[j].key.indexOf('name') >= 0) {
+                                        match = markMatch(resultArr[i].kvpValues[j].value, term);
+                                    }
+                                    j++;
+                                }
+
+                            }
+                            resultArr[i].commonNameMatches = [match.text];
+
                         }
                         results.push({text: "Species List", children: resultArr});
                         suppliedResults = true;
