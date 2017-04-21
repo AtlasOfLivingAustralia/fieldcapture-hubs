@@ -57,7 +57,7 @@ public class EditModelWidgetRenderer implements ModelWidgetRenderer {
         // to select from.
         context.databindAttrs.add 'options', 'transients.' + context.model.source + 'Constraints'
         context.databindAttrs.add 'optionsCaption', '""'
-        context.databindAttrs.add 'select2', 'true'
+        context.databindAttrs.add 'select2', '{allowClear:true}'
         context.writer <<  "<select${context.attributes.toString()} class=\"select\" data-bind='${context.databindAttrs.toString()}'${context.validationAttr}></select>"
     }
 
@@ -70,6 +70,14 @@ public class EditModelWidgetRenderer implements ModelWidgetRenderer {
         else {
             renderSelectManyAsCheckboxes(context)
         }
+    }
+
+    @Override
+    void renderSelect2Many(WidgetRenderContext context) {
+        context.databindAttrs.add 'options', 'transients.' + context.model.source + 'Constraints'
+        context.databindAttrs.add 'optionsCaption', '"Please select"'
+        context.databindAttrs.add 'multiSelect2', "{value: ${context.source}, tags:true, allowClear:false}"
+        context.writer <<  "<select${context.attributes.toString()} multiple=\"multiple\" class=\"select\" data-bind='${context.databindAttrs.toString()}'${context.validationAttr}></select>"
     }
 
     private void renderSelectManyAsCheckboxes(WidgetRenderContext context) {
