@@ -121,4 +121,9 @@ class PrintModelWidgetRenderer implements ModelWidgetRenderer {
     void renderCurrency(WidgetRenderContext context) {
        defaultRender(context)
     }
+
+    @Override
+    void renderSelect2Many(WidgetRenderContext context) {
+        renderCheckboxes(context)
+    }
 }

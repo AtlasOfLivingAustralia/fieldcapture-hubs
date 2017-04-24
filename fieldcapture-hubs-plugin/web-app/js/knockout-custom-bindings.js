@@ -374,12 +374,41 @@ ko.bindingHandlers.speciesSelect2 = {
 };
 
 ko.bindingHandlers.select2 = {
-  init: function(element) {
-    $(element).select2({
+  init: function(element, valueAccessor) {
+    var defaults = {
       placeholder:'Please select...',
       dropdownAutoWidth:true,
       allowClear:true
-    });
+    };
+    var options = _.defaults(valueAccessor() || {}, defaults);
+    $(element).select2(options);
     applySelect2ValidationCompatibility(element);
+  }
+};
+
+ko.bindingHandlers.multiSelect2 = {
+  init: function(element, valueAccessor) {
+    var defaults = {
+      placeholder:'Please select...',
+      dropdownAutoWidth:true,
+      allowClear:false,
+      tags:true
+    };
+    var options = valueAccessor();
+    var model = options.value;
+    if (!ko.isObservable(model, ko.observableArray)) {
+      throw "The options require a key of model with a value of type ko.observableArray";
+    }
+    delete options.value;
+    var options = _.defaults(valueAccessor() || {}, defaults);
+
+    $(element).select2(options).change(function() {
+      model($(element).val());
+    });
+
+    applySelect2ValidationCompatibility(element);
+  },
+  update: function(element, valueAccessor) {
+    $(element).val(valueAccessor().value()).trigger('change');
   }
 };

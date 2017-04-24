@@ -132,4 +132,10 @@ class ViewModelWidgetRenderer implements ModelWidgetRenderer {
         context.writer << """\$<span data-bind="${context.databindAttrs.toString()}"></span>.00"""
     }
 
+    @Override
+    void renderSelect2Many(WidgetRenderContext context) {
+        context.databindAttrs.add 'text', context.source+'().join(", ")'
+        context.writer << "<span ${context.attributes.toString()} data-bind='${context.databindAttrs.toString()}'></span>"
+    }
+
 }

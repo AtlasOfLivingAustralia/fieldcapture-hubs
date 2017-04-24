@@ -197,6 +197,9 @@ class ModelTagLib {
             case 'select2':
                 renderer.renderSelect2(renderContext)
                 break
+            case 'select2Many':
+                renderer.renderSelect2Many(renderContext)
+                break
             case 'currency':
                 renderer.renderCurrency(renderContext)
                 break
