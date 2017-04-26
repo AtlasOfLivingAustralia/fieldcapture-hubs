@@ -389,7 +389,7 @@ ko.bindingHandlers.select2 = {
 ko.bindingHandlers.multiSelect2 = {
   init: function(element, valueAccessor) {
     var defaults = {
-      placeholder:'Please select...',
+      placeholder:'Select all that apply...',
       dropdownAutoWidth:true,
       allowClear:false,
       tags:true
