@@ -409,6 +409,13 @@ ko.bindingHandlers.multiSelect2 = {
     applySelect2ValidationCompatibility(element);
   },
   update: function(element, valueAccessor) {
+    var $element = $(element);
+    var data = valueAccessor().value();
+    var currentOptions = $element.find("option").map(function() {return $(this).val();}).get();
+    var extraOptions = _.difference(data, currentOptions);
+    for (var i=0; i<extraOptions.length; i++) {
+      $element.append($("<option>").val(data[i]).text(data[i]));
+    }
     $(element).val(valueAccessor().value()).trigger('change');
   }
 };
