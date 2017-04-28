@@ -191,6 +191,7 @@ modules = {
         resource url:'js/outputs.js', plugin: 'fieldcapture-plugin'
         resource url:'js/activity.js', plugin: 'fieldcapture-plugin'
         resource url:'js/projectActivityPlan.js', plugin: 'fieldcapture-plugin'
+        resource url:'css/activity.css', plugin: 'fieldcapture-plugin'
     }
 
     jqueryGantt {
