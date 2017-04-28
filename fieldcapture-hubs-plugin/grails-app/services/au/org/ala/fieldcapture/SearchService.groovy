@@ -127,7 +127,7 @@ class SearchService {
         params.flimit = 999
         params.fsort = "term"
         //params.offset = 0
-        params.query = "docType:project"
+        params.query = params.query ?: "docType:project"
         handleDateFilters(params)
         if (useDefaultFacetQuery) {
             addDefaultFacetQuery(params)
@@ -190,7 +190,7 @@ class SearchService {
     def dashboardReport(params) {
         cacheService.get("dashboard-"+params, {
             addDefaultFacetQuery(params)
-            params.query = 'docType:project'
+            params.query = params.query ?: 'docType:project'
             handleActivityDateFilters(params)
             def url = grailsApplication.config.ecodata.baseUrl + 'search/dashboardReport' + commonService.buildUrlParamsFromMap(params)
             webService.getJson(url, 1200000)
