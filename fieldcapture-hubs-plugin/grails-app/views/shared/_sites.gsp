@@ -58,6 +58,9 @@
         <g:if test="${params.toDate}">
             url += "&toDate=${params.toDate}";
         </g:if>
+        <g:if test="${params.query}">
+            url += "&query=${params.query.encodeAsURL()}"
+        </g:if>
         $("#legend-table").hide();
         $("#map-colorby-status").show();
         $.getJSON(url, function(data) {

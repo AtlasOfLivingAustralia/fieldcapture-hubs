@@ -227,7 +227,7 @@ modules = {
         defaultBundle 'application'
         dependsOn 'knockout'
         resource url:'js/speciesModel.js', plugin: 'fieldcapture-plugin'
-        resource url:'vendor/typeahead/0.11.1/typeahead.bundle.js', plugin: 'fieldcapture-plugin'
+        resource url:'vendor/typeahead/0.11.1/bloodhound.min.js', plugin: 'fieldcapture-plugin'
     }
 
     imageViewer {

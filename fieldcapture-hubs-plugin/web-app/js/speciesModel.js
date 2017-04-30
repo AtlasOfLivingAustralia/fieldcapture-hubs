@@ -133,7 +133,6 @@ var speciesSearchEngines = function() {
         if (config.listId) {
             options.prefetch = {
                 url: config.speciesListUrl + '?druid='+config.listId+'&includeKvp=true',
-                cache: false,
                 transform: select2ListTransformer
             };
         }
@@ -342,7 +341,7 @@ var SpeciesViewModel = function(data, options) {
 
                             if (resultArr[i].kvpValues && resultArr[i].kvpValues.length > 0) {
                                 var j = 0;
-                                while (!match.match) {
+                                while (!match.match && j<resultArr[i].kvpValues.length) {
                                     if (resultArr[i].kvpValues[j].key.indexOf('name') >= 0) {
                                         match = markMatch(resultArr[i].kvpValues[j].value, term);
                                     }
