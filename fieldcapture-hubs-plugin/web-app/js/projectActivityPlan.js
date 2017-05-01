@@ -77,7 +77,7 @@ var PlannedActivity = function (act, isFirst, project, stage, options) {
             if (self.displayReasonModal.trigger() === 'progress_change') {
                 self.saveProgress({progress: self.progress(), activityId: self.activityId});
             }
-            self.deferReason().recordOnlySave(config.documentUpdateUrl + (self.deferReason().documentId ? self.deferReason().documentId : ''));
+            self.deferReason().recordOnlySave(config.documentUpdateUrl + (self.deferReason().documentId ? ('/'+self.deferReason().documentId) : ''));
             self.displayReasonModal.closeReasonModal();
         }
     };

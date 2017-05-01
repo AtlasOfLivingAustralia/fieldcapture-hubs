@@ -1,8 +1,7 @@
+<%@ page import="au.org.ala.fieldcapture.SettingPageType" %>
 
 <g:if test="${metadata.projects.size() > 1}">
-<p>
-Data presented in this dashboard has been extracted from grant recipient progress reports approved by the Department of the Environment. While efforts are made to ensure the accuracy of the ecological information contained in MERIT, for confirmation of authoritative data please contact the <g:createLink controller="home" action="contacts">Department of Environment</g:createLink>. Also note that dashboard data for Biodiversity Fund Round One are incomplete due to legacy issues.
-</p>
+<fc:getSettingContent settingType="${au.org.ala.fieldcapture.SettingPageType.DASHBOARD_EXPLANATION}"/>
 <div class="accordion" id="reports">
     <g:each in="${categories}" var="category" status="i">
 

@@ -311,3 +311,111 @@ ko.extenders.withPrevious = function (target) {
   // Return modified observable
   return target;
 };
+
+// Dummy binding as a placeholder for the preprocessor which does all the work.
+ko.bindingHandlers.constraint = {
+  init:function(element, valueAccessor, allBindingsAccessor, viewModel, bindingContext) {
+  },
+  update:function() {
+  }
+};
+
+ko.bindingHandlers.constraint.preprocess = function(value, name, addBindingCallback) {
+
+  var params = value.substring(1, value.length-1).split(':');
+
+  if (!params.length == 2) {
+    throw "The constraint binding requires a binding:expression value"
+  }
+
+  addBindingCallback(params[0], "expressionEvaluator.evaluateBoolean('"+params[1]+"', $data)");
+
+  return undefined;
+};
+
+
+function applySelect2ValidationCompatibility(element) {
+  var $element = $(element);
+  var select2 = $element.next('.select2-container');
+  $element.on('select2:close', function(e) {
+    $element.validationEngine('validate');
+  }).attr("data-prompt-position", "topRight:"+select2.width());
+}
+
+ko.bindingHandlers.speciesSelect2 = {
+  select2AwareFormatter: function(data, container, delegate) {
+    if (data.text) {
+      return data.text;
+    }
+    return delegate(data);
+  },
+  init: function (element, valueAccessor) {
+
+    var self = ko.bindingHandlers.speciesSelect2;
+    var model = valueAccessor();
+
+    $.fn.select2.amd.require(['select2/species'], function(SpeciesAdapter) {
+      $(element).select2({
+        dataAdapter: SpeciesAdapter,
+        placeholder:{id:-1, text:'Please select...'},
+        templateResult: function(data, container) { return self.select2AwareFormatter(data, container, model.formatSearchResult); },
+        templateSelection: function(data, container) { return self.select2AwareFormatter(data, container, model.formatSelectedSpecies); },
+        dropdownAutoWidth: true,
+        model:model,
+        escapeMarkup: function(markup) {
+          return markup; // We want to apply our own formatting so manually escape the user input.
+        },
+        ajax:{} // We want infinite scroll and this is how to get it.
+      });
+      applySelect2ValidationCompatibility(element);
+    })
+  },
+  update: function (element, valueAccessor) {}
+};
+
+ko.bindingHandlers.select2 = {
+  init: function(element, valueAccessor) {
+    var defaults = {
+      placeholder:'Please select...',
+      dropdownAutoWidth:true,
+      allowClear:true
+    };
+    var options = _.defaults(valueAccessor() || {}, defaults);
+    $(element).select2(options);
+    applySelect2ValidationCompatibility(element);
+  }
+};
+
+ko.bindingHandlers.multiSelect2 = {
+  init: function(element, valueAccessor) {
+    var defaults = {
+      placeholder:'Select all that apply...',
+      dropdownAutoWidth:true,
+      allowClear:false,
+      tags:true
+    };
+    var options = valueAccessor();
+    var model = options.value;
+    if (!ko.isObservable(model, ko.observableArray)) {
+      throw "The options require a key of model with a value of type ko.observableArray";
+    }
+    delete options.value;
+    var options = _.defaults(valueAccessor() || {}, defaults);
+
+    $(element).select2(options).change(function() {
+      model($(element).val());
+    });
+
+    applySelect2ValidationCompatibility(element);
+  },
+  update: function(element, valueAccessor) {
+    var $element = $(element);
+    var data = valueAccessor().value();
+    var currentOptions = $element.find("option").map(function() {return $(this).val();}).get();
+    var extraOptions = _.difference(data, currentOptions);
+    for (var i=0; i<extraOptions.length; i++) {
+      $element.append($("<option>").val(data[i]).text(data[i]));
+    }
+    $(element).val(valueAccessor().value()).trigger('change');
+  }
+};

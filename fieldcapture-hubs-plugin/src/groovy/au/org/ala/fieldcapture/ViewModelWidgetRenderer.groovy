@@ -51,6 +51,12 @@ class ViewModelWidgetRenderer implements ModelWidgetRenderer {
     }
 
     @Override
+    void renderSelect2(WidgetRenderContext context) {
+        context.databindAttrs.add 'text', context.source
+        context.writer << "<span ${context.attributes.toString()} data-bind='${context.databindAttrs.toString()}'></span>"
+    }
+
+    @Override
     void renderSelectMany(WidgetRenderContext context) {
         context.databindAttrs.add 'text', context.source+'().join(", ")'
         context.writer << "<span ${context.attributes.toString()} data-bind='${context.databindAttrs.toString()}'></span>"
@@ -78,10 +84,12 @@ class ViewModelWidgetRenderer implements ModelWidgetRenderer {
 
     @Override
     void renderAutocomplete(WidgetRenderContext context) {
-        context.databindAttrs.add 'text', 'name'
-        context.writer << """<span data-bind="with: ${context.source}"><span${context.attributes.toString()} data-bind='${context.databindAttrs.toString()}'></span>
-            <a href="#" data-bind="popover: {title: name, content: transients.speciesInformation}"><i class="icon-info-sign"></i></a>
-            </span>"""
+        renderReadOnlySpecies(context)
+    }
+
+    @Override
+    void renderSpeciesSelect(WidgetRenderContext context) {
+        renderReadOnlySpecies(context)
     }
 
     @Override
@@ -109,6 +117,25 @@ class ViewModelWidgetRenderer implements ModelWidgetRenderer {
         context.writer << """<div data-bind="if:(${context.source}())">"""
         context.writer << """    <div data-bind="template:{name:'documentViewTemplate', data:${context.source}}"></div>"""
         context.writer << """</div>"""
+    }
+
+    private void renderReadOnlySpecies(WidgetRenderContext context) {
+        context.databindAttrs.add 'text', 'name'
+        context.writer << """<span data-bind="with: ${context.source}"><span${context.attributes.toString()} data-bind='${context.databindAttrs.toString()}'></span>
+            <a href="#" data-bind="popover: {title: name, content: transients.speciesInformation}"><i class="icon-info-sign"></i></a>
+            </span>"""
+    }
+
+    @Override
+    void renderCurrency(WidgetRenderContext context) {
+        context.databindAttrs.add 'text', context.source
+        context.writer << """\$<span data-bind="${context.databindAttrs.toString()}"></span>.00"""
+    }
+
+    @Override
+    void renderSelect2Many(WidgetRenderContext context) {
+        context.databindAttrs.add 'text', context.source+'().join(", ")'
+        context.writer << "<span ${context.attributes.toString()} data-bind='${context.databindAttrs.toString()}'></span>"
     }
 
 }

@@ -28,6 +28,7 @@ module.exports = function (config) {
 
         // list of files / patterns to load in the browser
         files: [
+            'test/js/util/**/*.js',
             'web-app/vendor/underscorejs/1.8.3/underscore.js',
             'web-app/vendor/knockout/3.4.0/knockout-3.4.0.js',
             'web-app/js/knockout.mapping-latest.js',
@@ -42,10 +43,11 @@ module.exports = function (config) {
             'web-app/vendor/momentjs/moment-timezone-with-data.min.js',
             'web-app/js/organisation.js',
             'web-app/js/sites.js',
+            'web-app/vendor/typeahead/0.11.1/typeahead.bundle.js',
+            'web-app/vendor/select2/4.0.3/js/select2.full.js',
             'web-app/js/speciesModel.js',
             'web-app/js/projectActivity.js',
             'web-app/js/outputs.js',
-            'test/js/util/**/*.js',
             'test/js/spec/**/*.js'
         ],
 

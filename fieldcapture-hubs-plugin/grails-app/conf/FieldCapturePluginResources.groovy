@@ -92,6 +92,9 @@ modules = {
         resource url: 'css/empty.css' , plugin: 'fieldcapture-plugin'// needed for less-resources plugin ?
         resource url: 'js/bootstrap-combobox.js', plugin: 'fieldcapture-plugin'
         resource url: 'css/bootstrap-combobox.css', plugin: 'fieldcapture-plugin'
+        resource url: 'css/typeahead.css', plugin: 'fieldcapture-plugin'
+        resource url: 'vendor/select2/4.0.3/js/select2.full.js'
+        resource url: 'vendor/select2/4.0.3/css/select2.css'
     }
 
     app_bootstrap_responsive {
@@ -188,6 +191,7 @@ modules = {
         resource url:'js/outputs.js', plugin: 'fieldcapture-plugin'
         resource url:'js/activity.js', plugin: 'fieldcapture-plugin'
         resource url:'js/projectActivityPlan.js', plugin: 'fieldcapture-plugin'
+        resource url:'css/activity.css', plugin: 'fieldcapture-plugin'
     }
 
     jqueryGantt {
@@ -223,6 +227,7 @@ modules = {
         defaultBundle 'application'
         dependsOn 'knockout'
         resource url:'js/speciesModel.js', plugin: 'fieldcapture-plugin'
+        resource url:'vendor/typeahead/0.11.1/bloodhound.min.js', plugin: 'fieldcapture-plugin'
     }
 
     imageViewer {

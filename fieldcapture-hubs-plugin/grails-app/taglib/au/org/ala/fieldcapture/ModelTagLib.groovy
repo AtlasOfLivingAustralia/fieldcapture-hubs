@@ -102,6 +102,7 @@ class ModelTagLib {
     def dataTag(attrs, model, context, editable, elementAttributes, databindAttrs, labelAttributes) {
         ModelWidgetRenderer renderer
 
+
         def validate = validationAttribute(attrs, model, editable)
 
         if (attrs.printable) {
@@ -121,6 +122,15 @@ class ModelTagLib {
         }
 
         def renderContext = new WidgetRenderContext(model, context, validate, databindAttrs, elementAttributes, labelAttributes, g, attrs)
+
+        // The data model item we are rendering the view for.
+        Map source = getAttribute(attrs.model.dataModel, model.source)
+        if (source?.behaviour) {
+            source.behaviour.each { constraint ->
+                println constraint
+                renderContext.databindAttrs.add "constraint", "{${constraint.type}:${constraint.condition}}"
+            }
+        }
 
         if (model.visibility) {
             renderContext.databindAttrs.add "visible", evalDependency(model.visibility)
@@ -180,6 +190,18 @@ class ModelTagLib {
                 break
             case 'document':
                 renderer.renderDocument(renderContext)
+                break
+            case 'speciesSelect':
+                renderer.renderSpeciesSelect(renderContext)
+                break
+            case 'select2':
+                renderer.renderSelect2(renderContext)
+                break
+            case 'select2Many':
+                renderer.renderSelect2Many(renderContext)
+                break
+            case 'currency':
+                renderer.renderCurrency(renderContext)
                 break
             default:
                 log.warn("Unhandled widget type: ${model.type}")
@@ -571,6 +593,9 @@ class ModelTagLib {
         def tableClass = isprintblankform ? "printed-form-table" : ""
         def validation = model.editableRows && model.source ? "data-bind=\"independentlyValidated:data.${model.source}\"":""
         out << "<div class=\"row-fluid ${extraClassAttrs}\">\n"
+        if (model.title) {
+            out << model.title
+        }
         out << INDENT*3 << "<table class=\"table table-bordered ${model.source} ${tableClass}\" ${validation}>\n"
         tableHeader out, attrs, model
         if (isprintblankform) {

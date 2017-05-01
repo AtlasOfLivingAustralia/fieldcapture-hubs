@@ -2,6 +2,7 @@ package au.org.ala.fieldcapture
 
 import au.org.ala.fieldcapture.hub.HubSettings
 import grails.converters.JSON
+import grails.util.Holders
 import groovy.text.GStringTemplateEngine
 import org.codehaus.groovy.grails.web.servlet.GrailsFlashScope
 import org.codehaus.groovy.grails.web.servlet.mvc.GrailsWebRequest
@@ -31,6 +32,28 @@ class SettingService {
 
     def webService, cacheService, cookieService
     def grailsApplication
+
+
+    public void withHub(String hub, Closure closure) {
+
+        HubSettings previousHub = getHubConfig()
+
+        HubSettings settings = getHubSettings(hub)
+        SettingService.setHubConfig(settings)
+
+        try {
+            closure()
+        }
+        finally {
+            setHubConfig(previousHub)
+        }
+    }
+
+    public void withDefaultHub(Closure closure) {
+        String hub = Holders.grailsApplication.config.app.default.hub?:'default'
+
+        withHub(hub, closure)
+    }
 
     /**
      * Checks if there is a configuration defined for the specified hub.

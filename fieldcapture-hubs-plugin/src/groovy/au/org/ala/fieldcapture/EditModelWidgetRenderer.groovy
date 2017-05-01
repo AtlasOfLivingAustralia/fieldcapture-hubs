@@ -47,7 +47,18 @@ public class EditModelWidgetRenderer implements ModelWidgetRenderer {
         // to select from.
         context.databindAttrs.add 'options', 'transients.' + context.model.source + 'Constraints'
         context.databindAttrs.add 'optionsCaption', '"Please select"'
-        context.writer <<  "<select${context.attributes.toString()} data-bind='${context.databindAttrs.toString()}'${context.validationAttr}></select>"
+        context.writer <<  "<select${context.attributes.toString()} class=\"select\" data-bind='${context.databindAttrs.toString()}'${context.validationAttr}></select>"
+    }
+
+    @Override
+    void renderSelect2(WidgetRenderContext context) {
+        context.databindAttrs.add 'value', context.source
+        // Select one or many view types require that the data model has defined a set of valid options
+        // to select from.
+        context.databindAttrs.add 'options', 'transients.' + context.model.source + 'Constraints'
+        context.databindAttrs.add 'optionsCaption', '""'
+        context.databindAttrs.add 'select2', '{allowClear:true}'
+        context.writer <<  "<select${context.attributes.toString()} class=\"select\" data-bind='${context.databindAttrs.toString()}'${context.validationAttr}></select>"
     }
 
     @Override
@@ -59,6 +70,14 @@ public class EditModelWidgetRenderer implements ModelWidgetRenderer {
         else {
             renderSelectManyAsCheckboxes(context)
         }
+    }
+
+    @Override
+    void renderSelect2Many(WidgetRenderContext context) {
+        context.databindAttrs.add 'options', 'transients.' + context.model.source + 'Constraints'
+        context.databindAttrs.add 'optionsCaption', '"Please select"'
+        context.databindAttrs.add 'multiSelect2', "{value: ${context.source}, tags:true, allowClear:false}"
+        context.writer <<  "<select${context.attributes.toString()} multiple=\"multiple\" class=\"select\" data-bind='${context.databindAttrs.toString()}'${context.validationAttr}></select>"
     }
 
     private void renderSelectManyAsCheckboxes(WidgetRenderContext context) {
@@ -111,11 +130,10 @@ public class EditModelWidgetRenderer implements ModelWidgetRenderer {
     @Override
     void renderAutocomplete(WidgetRenderContext context) {
         def newAttrs = new Databindings()
-        def link = context.g.createLink(controller: 'search', action:'species', absolute:'true')
 
         newAttrs.add "value", "transients.textFieldValue"
         newAttrs.add "event", "{focusout:focusLost}"
-        newAttrs.add "autocomplete", "{url:'${link}', render: renderItem, listId: list, result:speciesSelected, valueChangeCallback:textFieldChanged}"
+        newAttrs.add "speciesAutocomplete", "{url:transients.speciesSearchUrl, result:speciesSelected, valueChangeCallback:textFieldChanged}"
 
         context.writer << context.g.render(template: '/output/speciesTemplate', plugin:'fieldcapture-plugin', model:[source: context.source, databindAttrs: newAttrs.toString(), validationAttrs:context.validationAttr])
     }
@@ -152,5 +170,25 @@ public class EditModelWidgetRenderer implements ModelWidgetRenderer {
         context.writer << """</div>"""
 
 
+    }
+
+    @Override
+    void renderSpeciesSelect(WidgetRenderContext context) {
+        context.writer << """<span data-bind="with:${context.source}" class="input-append species-select2" style="width:100%; min-width: 200px;">
+                                <select data-bind="speciesSelect2:\$data" ${context.validationAttr} style="width:90%"></select>
+                                <span class="add-on">
+                                    <a data-bind="popover: {title: transients.speciesTitle, content: transients.speciesInformation}"><i class="icon-info-sign"></i></a>
+                                </span>
+                             </span>"""
+    }
+
+    @Override
+    void renderCurrency(WidgetRenderContext context) {
+        context.databindAttrs.add('value', context.source)
+        context.writer << """<span class="input-prepend input-append currency-input">
+            <span class="add-on">\$</span>
+            <input type="number" data-bind='${context.databindAttrs.toString()}'${context.validationAttr}'>
+            <span class="add-on">.00</span>
+           </span>"""
     }
 }

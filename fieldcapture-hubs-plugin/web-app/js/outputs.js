@@ -318,6 +318,9 @@ ko.bindingHandlers.editDocument = {
 
 expressionEvaluator = function() {
     function bindVariable(variable, context) {
+        if (!context) {
+            return;
+        }
         var result;
         var contextVariable = variable;
         var specialVariables = ['index', 'parent'];
@@ -346,8 +349,7 @@ expressionEvaluator = function() {
 
     var expressionCache = {};
 
-    function evaluate(expression, context, numberOfDecimalPlaces) {
-
+    function evaluateInternal(expression, context) {
         var parsedExpression = expressionCache[expression];
         if (!parsedExpression) {
             parsedExpression = Parser.parse(expression);
@@ -357,17 +359,9 @@ expressionEvaluator = function() {
         var variables = parsedExpression.variables();
         var boundVariables = bindVariables(variables, context);
 
-        if (numberOfDecimalPlaces == undefined) {
-            numberOfDecimalPlaces = 2;
-        }
-
-
         var result;
         try {
             result = parsedExpression.evaluate(boundVariables);
-            if (!isNaN(result)) {
-                result = neat_number(result, numberOfDecimalPlaces);
-            }
         }
         catch (e) { // undefined dependencies cause an exception to be thrown.
             result = ''; // Ignore as this is will happen when the computed is first evaluated against the model before load has been called.
@@ -376,17 +370,43 @@ expressionEvaluator = function() {
         return result;
     }
 
+    function evaluateNumber(expression, context, numberOfDecimalPlaces) {
+
+        var result = evaluateInternal(expression, context);
+        if (!isNaN(result)) {
+            if (numberOfDecimalPlaces == undefined) {
+                numberOfDecimalPlaces = 2;
+            }
+
+            result = neat_number(result, numberOfDecimalPlaces);
+        }
+
+        return result;
+    }
+
+    function evaluateBoolean(expression, context) {
+        var result = evaluateInternal(expression, context);
+        return result ? true : false;
+    }
+
+    function evaluateString(expression, context) {
+        var result = evaluateInternal(expression, context);
+        return ''.concat(result);
+    }
+
     return {
-        evaluate:evaluate
+        evaluate:evaluateNumber,
+        evaluateBoolean:evaluateBoolean,
+        evaluateString:evaluateString
     }
 
 }();
 
-OutputListSupport = function(parent, listName, ListItemType) {
+OutputListSupport = function(parent, listName, ListItemType, config) {
     var self = this;
     self.listName = listName;
     self.addRow = function () {
-        var newItem = new ListItemType(undefined, parent, self.rowCount());
+        var newItem = new ListItemType(undefined, parent, self.rowCount(), config);
         parent.data[listName].push(newItem);
     };
     self.removeRow = function (item) {

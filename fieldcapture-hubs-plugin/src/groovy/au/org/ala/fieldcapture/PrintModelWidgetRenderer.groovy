@@ -87,6 +87,16 @@ class PrintModelWidgetRenderer implements ModelWidgetRenderer {
         defaultRender(context)
     }
 
+    @Override
+    void renderSpeciesSelect(WidgetRenderContext context) {
+        defaultRender(context)
+    }
+
+    @Override
+    void renderSelect2(WidgetRenderContext context) {
+        defaultRender(context)
+    }
+
     private void defaultRender(WidgetRenderContext context) {
 
 
@@ -105,5 +115,15 @@ class PrintModelWidgetRenderer implements ModelWidgetRenderer {
                 </li>
             </ul>
         """
+    }
+
+    @Override
+    void renderCurrency(WidgetRenderContext context) {
+       defaultRender(context)
+    }
+
+    @Override
+    void renderSelect2Many(WidgetRenderContext context) {
+        renderCheckboxes(context)
     }
 }
