@@ -225,7 +225,7 @@ modules = {
 
     species {
         defaultBundle 'application'
-        dependsOn 'knockout'
+        dependsOn 'knockout','app_bootstrap'
         resource url:'js/speciesModel.js', plugin: 'fieldcapture-plugin'
         resource url:'vendor/typeahead/0.11.1/bloodhound.min.js', plugin: 'fieldcapture-plugin'
     }
