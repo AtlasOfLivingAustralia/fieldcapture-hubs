@@ -24,6 +24,7 @@
             config.model = ${fc.modelAsJavascript(model:outputModel)};
             config.excelOutputTemplateUrl = fcConfig.excelOutputTemplateUrl;
             config.disablePrepop = true;
+            config.speciesProfileUrl = fcConfig.speciesProfileUrl;
 
             window[viewModelInstance] = new window[viewModelName](output, fcConfig.project, config);
             window[viewModelInstance].loadData(output.data, <fc:modelAsJavascript model="${activity.documents}"/>);
