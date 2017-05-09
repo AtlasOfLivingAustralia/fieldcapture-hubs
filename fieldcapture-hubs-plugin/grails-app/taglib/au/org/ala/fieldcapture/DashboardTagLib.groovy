@@ -191,16 +191,33 @@ class DashboardTagLib {
         if (!data) {
             return
         }
-        out << '<div class="chart-plus-title">'
-        def chartId = (label + '_chart').replaceAll(" ", "-")
+        if (!attrs.omitTitle) {
+            out << '<div class="chart-plus-title">'
+            out << "<div class='chartTitle'>${title}${helpText}</div>"
+        }
 
-        out << "<div class='chartTitle'>${title}${helpText}</div>"
+        def chartId = (label + '_chart').replaceAll(" ", "-")
 
         switch (type) {
 
             case 'piechart':
-                out << "<div id=\"${chartId}\" class=\"chart\"></div>"
-                out << gvisualization.pieCoreChart([elementId: chartId, chartArea:[left:20, top:5, right:20, width:'430', height:'300'], dynamicLoading: true, title: title, columns: columns, data: data, width:'450', height:'300', backgroundColor: 'transparent'])
+                out << "<div id=\"${chartId}\" class=\"chart\" style=\" width:100%; height: 300px;\"></div>"
+                Map options = [elementId: chartId, chartArea:[left:20, top:5, right:20, width:'430', height:'300'], dynamicLoading: true, title: title, columns: columns, data: data, width:'450', height:'300', backgroundColor: 'transparent']
+                if (attrs.sliceColoursByTitle) {
+                    Map slices = [:]
+                    attrs.sliceColoursByTitle.each { sliceTitle, colour ->
+                        data.eachWithIndex { item, index ->
+                            if (item[0] == sliceTitle) {
+                                slices[index] = [color:colour]
+                            }
+                        }
+                    }
+                    options['slices'] = slices
+                }
+                if (attrs.chartOptions) {
+                    options.putAll(attrs.chartOptions)
+                }
+                out << gvisualization.pieCoreChart(options)
                 break;
             case 'barchart':
 
@@ -214,14 +231,21 @@ class DashboardTagLib {
                 else {
                     out << "<div id=\"${chartId}\" class=\"chart\"></div>"
                 }
-                out << gvisualization.barCoreChart([elementId: chartId, legend:[fontSize:10], fontSize:11, tooltip:[fontSize:10], legend:"none", dynamicLoading: true, title: title, columns: columns, data: data, chartArea:[left:140, top:topMargin, bottom:bottomMargin, width:'290', height:height-topMargin-bottomMargin], width:'450', height:height, backgroundColor: 'transparent'])
+                Map options = [elementId: chartId, legend:chartFont(), fontSize:11, tooltip:chartFont(), legend:"none", dynamicLoading: true, title: title, columns: columns, data: data, chartArea:[left:140, top:topMargin, bottom:bottomMargin, width:'290', height:height-topMargin-bottomMargin], width:'450', height:height, backgroundColor: 'transparent']
+                if (attrs.chartOptions) {
+                    options.putAll(attrs.chartOptions)
+                }
+                out << gvisualization.barCoreChart(options)
                 break;
         }
-        out << '</div>'
+        if (!attrs.omitTitle) {
+            out << '</div>'
+        }
+
     }
 
     def chartFont() {
 
-        return new Expando(fontSize:'10');
+        return [fontSize:10]
     }
 }
