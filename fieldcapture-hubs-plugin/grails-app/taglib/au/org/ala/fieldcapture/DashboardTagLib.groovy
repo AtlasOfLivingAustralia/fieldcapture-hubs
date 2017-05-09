@@ -200,7 +200,7 @@ class DashboardTagLib {
 
             case 'piechart':
                 out << "<div id=\"${chartId}\" class=\"chart\"></div>"
-                out << gvisualization.pieCoreChart([elementId: chartId, slices:[[color:'red']], chartArea:[left:20, top:5, right:20, width:'430', height:'300'], dynamicLoading: true, title: title, columns: columns, data: data, width:'450', height:'300', backgroundColor: 'transparent'])
+                out << gvisualization.pieCoreChart([elementId: chartId, chartArea:[left:20, top:5, right:20, width:'430', height:'300'], dynamicLoading: true, title: title, columns: columns, data: data, width:'450', height:'300', backgroundColor: 'transparent'])
                 break;
             case 'barchart':
 
