@@ -132,7 +132,7 @@ class DashboardTagLib {
         def result = score.result?.result
 
         if (result instanceof Map) {
-            if (result.size() <= 1) {
+            if (!enoughResults(result.size(), attrs)) {
                 return
             }
             def chartData = toArray(result)
@@ -163,7 +163,7 @@ class DashboardTagLib {
     private void renderGroupedScore(score, attrs) {
         def result = score.result
         if (result && result.result instanceof Map) {
-            if (result.result.size() <= 1) {
+            if (!enoughResults(result.result.size(), attrs.minResults)) {
                 return
             }
             def chartData = toArray(result.result)
@@ -182,6 +182,11 @@ class DashboardTagLib {
 
     }
 
+    private boolean enoughResults(int resultSize, attrs) {
+        int min = Integer.parseInt(attrs.minResults) ?: 2
+        return resultSize >= min
+    }
+
     private void drawChart(type, label, title, helpText, columns, data, attrs) {
         if (!data) {
             return
@@ -195,7 +200,7 @@ class DashboardTagLib {
 
             case 'piechart':
                 out << "<div id=\"${chartId}\" class=\"chart\"></div>"
-                out << gvisualization.pieCoreChart([elementId: chartId,  chartArea:new Expando(left:20, top:5, right:20, width:'430', height:'300'), dynamicLoading: true, title: title, columns: columns, data: data, width:'450', height:'300', backgroundColor: 'transparent'])
+                out << gvisualization.pieCoreChart([elementId: chartId, chartArea:[left:20, top:5, right:20, width:'430', height:'300'], dynamicLoading: true, title: title, columns: columns, data: data, width:'450', height:'300', backgroundColor: 'transparent'])
                 break;
             case 'barchart':
 
@@ -209,7 +214,7 @@ class DashboardTagLib {
                 else {
                     out << "<div id=\"${chartId}\" class=\"chart\"></div>"
                 }
-                out << gvisualization.barCoreChart([elementId: chartId, legendTextStyle:chartFont(), fontSize:11, tooltipTextStyle:chartFont(), legend:"none", dynamicLoading: true, title: title, columns: columns, data: data, chartArea:new Expando(left:140, top:topMargin, bottom:bottomMargin, width:'290', height:height-topMargin-bottomMargin), width:'450', height:height, backgroundColor: 'transparent'])
+                out << gvisualization.barCoreChart([elementId: chartId, legend:[fontSize:10], fontSize:11, tooltip:[fontSize:10], legend:"none", dynamicLoading: true, title: title, columns: columns, data: data, chartArea:[left:140, top:topMargin, bottom:bottomMargin, width:'290', height:height-topMargin-bottomMargin], width:'450', height:height, backgroundColor: 'transparent'])
                 break;
         }
         out << '</div>'
