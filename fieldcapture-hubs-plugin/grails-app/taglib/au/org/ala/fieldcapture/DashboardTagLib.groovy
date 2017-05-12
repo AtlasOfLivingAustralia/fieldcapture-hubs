@@ -201,7 +201,7 @@ class DashboardTagLib {
         switch (type) {
 
             case 'piechart':
-                out << "<div id=\"${chartId}\" class=\"chart\" style=\" width:100%; height: 300px;\"></div>"
+                out << "<div id=\"${chartId}\" class=\"chart\" style=\" width:100%;\"></div>"
                 Map options = [elementId: chartId, chartArea:[left:20, top:5, right:20, width:'430', height:'300'], dynamicLoading: true, title: title, columns: columns, data: data, width:'450', height:'300', backgroundColor: 'transparent']
                 if (attrs.sliceColoursByTitle) {
                     Map slices = [:]
