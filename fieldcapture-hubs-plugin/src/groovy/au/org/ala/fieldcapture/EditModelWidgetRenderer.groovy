@@ -155,7 +155,8 @@ public class EditModelWidgetRenderer implements ModelWidgetRenderer {
 
     @Override
     void renderDate(WidgetRenderContext context) {
-        context.writer << "<div class=\"input-append\"><input data-bind=\"datepicker:${context.source}.date\" type=\"text\" size=\"12\"${context.validationAttr}/>"
+        context.databindAttrs.add 'datepicker', context.source + '.date'
+        context.writer << "<div class=\"input-append\"><input data-bind=\"${context.databindAttrs}\" type=\"text\" size=\"12\"${context.validationAttr}/>"
         context.writer << "<span class=\"add-on open-datepicker\"><i class=\"icon-th\"></i></span></div>"
     }
 
