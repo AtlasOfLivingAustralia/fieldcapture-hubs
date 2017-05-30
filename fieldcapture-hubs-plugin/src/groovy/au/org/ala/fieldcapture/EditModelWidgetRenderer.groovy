@@ -1,5 +1,7 @@
 package au.org.ala.fieldcapture
 
+import grails.converters.JSON
+
 public class EditModelWidgetRenderer implements ModelWidgetRenderer {
 
     @Override
@@ -156,7 +158,10 @@ public class EditModelWidgetRenderer implements ModelWidgetRenderer {
     @Override
     void renderDate(WidgetRenderContext context) {
         context.databindAttrs.add 'datepicker', context.source + '.date'
-        context.writer << "<div class=\"input-append\"><input data-bind=\"${context.databindAttrs}\" type=\"text\" size=\"12\"${context.validationAttr}/>"
+        if (context.model.displayOptions) {
+            context.databindAttrs.add "datepickerOptions", (context.model.displayOptions as JSON).toString().replaceAll("\"", "'")
+        }
+        context.writer << "<div class=\"input-append\"><input ${context.attributes.toString()} class=\"input-small\" data-bind=\"${context.databindAttrs}\" type=\"text\" size=\"12\"${context.validationAttr}/>"
         context.writer << "<span class=\"add-on open-datepicker\"><i class=\"icon-th\"></i></span></div>"
     }
 
