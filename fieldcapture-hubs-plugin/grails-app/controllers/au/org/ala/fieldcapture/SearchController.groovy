@@ -10,10 +10,8 @@ class SearchController {
      * @param query
      * @return resp
      */
-    def index(String query) {
-        params.facets = 'className,'+ StringUtils.join(SettingService.getHubConfig().availableFacets, ',')
-        params.weightResultsByEntity = true
-        [facetsList: params.facets.tokenize(","), results: searchService.fulltextSearch(params)]
+    def index() {
+        chain(controller: 'home', action:'projectExplorer', params:params)
     }
 
     /**

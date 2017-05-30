@@ -74,6 +74,7 @@ public class WidgetRenderContext {
             case 11..20: return 'input-small'
             case 21..30: return 'input-medium'
             case 31..40: return 'input-large'
+            case 41..100: return 'input-xlarge'
             default: return 'input-small'
         }
     }

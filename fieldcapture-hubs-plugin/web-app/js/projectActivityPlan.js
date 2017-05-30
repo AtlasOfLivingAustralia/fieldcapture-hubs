@@ -493,6 +493,7 @@ function ProjectActivitiesTabViewModel(activities, reports, outputTargets, targe
     self.reportToStage = ko.observable(defaultReportStage);
     self.projectReportSections = [
         {value:'Images', text:'Images', default:true},
+        {value:'Blog', text:'Blog', default:true},
         {value:'Activity status summary', text:'Activity status summary', default:true},
         {value:'Supporting documents', text:'Supporting documents', default:true},
         {value:'Project outcomes', text:'Project outcomes', default:true},

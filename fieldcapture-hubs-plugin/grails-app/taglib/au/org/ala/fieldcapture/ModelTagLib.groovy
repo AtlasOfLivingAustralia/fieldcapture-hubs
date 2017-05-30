@@ -85,8 +85,15 @@ class ModelTagLib {
         LayoutRenderContext childContext = new LayoutRenderContext(parentView:'', dataContext: '', span:ctx.span)
 
         out << """<div class="repeating-section" data-bind="foreach:data.${model.source}">"""
+        if (model.userAddedRows) {
+            out << """<button class="btn btn-warning pull-right" data-bind="click:\$root.transients.${model.source}Support.removeRow">Remove Section</button>"""
+        }
         viewModelItems(out, attrs, model.items, childContext)
+
         out << "</div>"
+        if (model.userAddedRows) {
+            out << """<button type="button" class="btn btn-small" data-bind="click:transients.${model.source}Support.addRow"><i class="fa fa-plus"></i> ${model.addRowText?:'Add'}</button>"""
+        }
     }
 
     /**
@@ -127,8 +134,7 @@ class ModelTagLib {
         Map source = getAttribute(attrs.model.dataModel, model.source)
         if (source?.behaviour) {
             source.behaviour.each { constraint ->
-                println constraint
-                renderContext.databindAttrs.add "constraint", "{${constraint.type}:${constraint.condition}}"
+                renderContext.databindAttrs.add constraint.type, "transients.${model.source}${constraint.type}Constraint"
             }
         }
 

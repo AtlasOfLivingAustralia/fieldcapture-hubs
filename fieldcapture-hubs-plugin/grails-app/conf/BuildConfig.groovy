@@ -19,7 +19,6 @@ grails.project.dependency.resolution = {
         excludes 'xercesImpl'
     }
 
-    log "error" // log level of Ivy resolver, either 'error', 'warn', 'info', 'debug' or 'verbose'
     checksums true // Whether to verify checksums on resolve
 
     repositories {
@@ -76,7 +75,7 @@ grails.project.dependency.resolution = {
         compile ':cache:1.1.8'
         compile ":cache-ehcache:1.0.5"
 
-        compile ":google-visualization:0.6.2"
+        compile ":google-visualization:1.0.1"
         compile ":mail:1.0.6"
 
         compile ":excel-export:0.2.0"
