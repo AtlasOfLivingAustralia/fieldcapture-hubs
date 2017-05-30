@@ -232,13 +232,18 @@ function stringToDate(date) {
                 $element.data('date', initialDateStr);
             }
 
+            var defaults = {format: 'dd-mm-yyyy', autoclose: true};
+            var options = _.defaults(allBindingsAccessor().datepickerOptions || {}, defaults);
+
             //initialize datepicker with some optional options
-            $element.datepicker({format: 'dd-mm-yyyy', autoclose: true});
+            $element.datepicker(options);
 
             // if the parent container holds any element with the class 'open-datepicker'
             // then add a hook to do so
             $element.parent().find('.open-datepicker').click(function () {
-                $element.datepicker('show');
+                if (!$element.prop('disabled')) {
+                    $element.datepicker('show');
+                }
             });
 
             var changeHandler = function(event) {

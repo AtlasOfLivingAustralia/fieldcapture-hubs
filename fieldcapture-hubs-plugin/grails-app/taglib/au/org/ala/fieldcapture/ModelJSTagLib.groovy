@@ -480,6 +480,14 @@ class ModelJSTagLib {
             }
 
         }
+        if (model.behaviour) {
+            model.behaviour.each { constraint ->
+                out << INDENT*3 << "self.transients.${model.name}${constraint.type}Constraint = ko.computed(function() {\n"
+                out << INDENT*4 << "var condition = '${constraint.condition}';\n";
+                out << INDENT*4 << "return expressionEvaluator.evaluateBoolean(condition, self);\n"
+                out << INDENT*3 << "});\n"
+            }
+        }
     }
 
     /*------------ methods to look up attributes in the view model -------------*/

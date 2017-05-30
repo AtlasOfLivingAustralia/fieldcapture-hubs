@@ -134,8 +134,7 @@ class ModelTagLib {
         Map source = getAttribute(attrs.model.dataModel, model.source)
         if (source?.behaviour) {
             source.behaviour.each { constraint ->
-                println constraint
-                renderContext.databindAttrs.add "constraint", "{${constraint.type}:${constraint.condition}}"
+                renderContext.databindAttrs.add constraint.type, "transients.${model.source}${constraint.type}Constraint"
             }
         }
 
