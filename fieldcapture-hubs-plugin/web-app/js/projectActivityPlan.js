@@ -325,7 +325,7 @@ var PlanStage = function (stage, activities, planViewModel, isCurrentStage, proj
 
     this.isReadOnly = ko.computed(function() {
 
-        return !userIsEditor || self.isSubmitted() || self.isApproved();
+        return !userIsEditor || (!planViewModel.planStatus() != "unlocked" && (self.isSubmitted() || self.isApproved()));
     });
     this.stageStatusTemplateName = ko.computed(function(){
         if (!self.activities || self.activities.length == 0) {
@@ -561,131 +561,6 @@ function ProjectActivitiesTabViewModel(activities, reports, outputTargets, targe
     self.cancelGenerateReport = function() {
         $('#projectReportOptions').modal('hide');
     };
-
-    // MERI plan and stage report status changes
-    // Project status manipulations
-    // ----------------------------
-    // This has been refactored to update project status on specific actions (rather than subscribing
-    //  to changes in the status) so that errors can be handled in a known context.
-
-    // save new status and return a promise
-    this.saveStatus = function (newValue) {
-        var payload = {planStatus: newValue, projectId: project.projectId};
-        return $.ajax({
-            url: config.projectUpdateUrl +"/" + project.projectId,
-            type: 'POST',
-            data: JSON.stringify(payload),
-            contentType: 'application/json'
-        });
-    };
-    // submit plan and handle errors
-    this.confirmSubmitPlan = function () {
-        var declaration = $('#declaration')[0];
-        var declarationViewModel = {
-
-            termsAccepted : ko.observable(false),
-            submitReport : function() {
-                self.submitPlan();
-            }
-        };
-        ko.applyBindings(declarationViewModel, declaration);
-        $(declaration).modal({ backdrop: 'static', keyboard: true, show: true }).on('hidden', function() {ko.cleanNode(declaration);});
-
-    };
-    this.submitPlan = function () {
-
-        self.saveStatus('submitted')
-            .done(function (data) {
-                if (data.error) {
-                    showAlert("Unable to submit plan. An unhandled error occurred: " + data.detail + ' \n' + data.error,
-                        "alert-error","status-update-error-placeholder");
-                } else {
-                    self.planStatus('submitted');
-                    location.reload();
-                }
-            })
-            .fail(function (data) {
-                if (data.status === 401) {
-                    showAlert("Unable to submit plan. You do not have editor rights for this project.",
-                        "alert-error","status-update-error-placeholder");
-                } else {
-                    showAlert("Unable to submit plan. An unhandled error occurred: " + data.status,
-                        "alert-error","status-update-error-placeholder");
-                }
-            });
-    };
-    // approve plan and handle errors
-    this.approvePlan = function () {
-        // should we check that status is 'submitted'?
-        self.saveStatus('approved')
-            .done(function (data) {
-                if (data.error) {
-                    showAlert("Unable to approve plan. An unhandled error occurred: " + data.detail + ' \n' + data.error,
-                        "alert-error","status-update-error-placeholder");
-                } else {
-                    self.planStatus('approved');
-                    location.reload();
-                }
-            })
-            .fail(function (data) {
-                if (data.status === 401) {
-                    showAlert("Unable to approve plan. You do not have grant manager rights for this project.",
-                        "alert-error","status-update-error-placeholder");
-                } else {
-                    showAlert("Unable to approve plan. An unhandled error occurred: " + data.status,
-                        "alert-error","status-update-error-placeholder");
-                }
-            });
-    };
-    // reject plan and handle errors
-    this.rejectPlan = function () {
-        // should we check that status is 'submitted'?
-        self.saveStatus('not approved')
-            .done(function (data) {
-                if (data.error) {
-                    showAlert("Unable to reject plan. An unhandled error occurred: " + data.detail + ' \n' + data.error,
-                        "alert-error","status-update-error-placeholder");
-                } else {
-                    self.planStatus('not approved');
-                    location.reload();
-                }
-            })
-            .fail(function (data) {
-                if (data.status === 401) {
-                    showAlert("Unable to reject plan. You do not have grant manager rights for this project.",
-                        "alert-error","status-update-error-placeholder");
-                } else {
-                    showAlert("Unable to reject plan. An unhandled error occurred: " + data.status,
-                        "alert-error","status-update-error-placeholder");
-                }
-            });
-    };
-    // make plan modifiable and handle errors
-    // this is the same as rejectPlan apart from messages but it is expected that it will
-    // have different functionality in the future so it has been separated
-    this.modifyPlan = function () {
-        // should we check that status is 'approved'?
-        self.saveStatus('not approved')
-            .done(function (data) {
-                if (data.error) {
-                    showAlert("Unable to modify plan. An unhandled error occurred: " + data.detail + ' \n' + data.error,
-                        "alert-error","status-update-error-placeholder");
-                } else {
-                    self.planStatus('not approved');
-                    location.reload();
-                }
-            })
-            .fail(function (data) {
-                if (data.status === 401) {
-                    showAlert("Unable to modify plan. You do not have grant manager rights for this project.",
-                        "alert-error","status-update-error-placeholder");
-                } else {
-                    showAlert("Unable to modify plan. An unhandled error occurred: " + data.status,
-                        "alert-error","status-update-error-placeholder");
-                }
-            });
-    };
-
 
     this.submitReport = function (e) {
 
