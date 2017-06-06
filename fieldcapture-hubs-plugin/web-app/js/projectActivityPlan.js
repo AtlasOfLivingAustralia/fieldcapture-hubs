@@ -155,14 +155,10 @@ var PlannedActivity = function (act, isFirst, project, stage, options) {
 
     this.editActivityUrl = function () {
         var url;
-        if (stage.isReadOnly() || (self.isSubmitted() || self.isApproved())) {
+        if (stage.isReadOnly()) {
             return self.viewActivityUrl();
-        } else if (stage.canEditOutputData()) {
-            url = fcConfig.activityEnterDataUrl + "/" + self.activityId + "?returnTo=" + encodeURIComponent(here);
-        } else if (stage.canEditActivity()) {
-            url = fcConfig.activityEditUrl + "/" + self.activityId + "?returnTo=" + encodeURIComponent(here);
         }
-        return url;
+        return stage.editActivityUrl(self.activityId);
     };
     this.viewActivityUrl = function() {
         return fcConfig.activityViewUrl + "/" + self.activityId + "?returnTo=" + encodeURIComponent(here);
@@ -324,8 +320,10 @@ var PlanStage = function (stage, activities, planViewModel, isCurrentStage, proj
     };
 
     this.isReadOnly = ko.computed(function() {
-
-        return !userIsEditor || (!planViewModel.planStatus() != "unlocked" && (self.isSubmitted() || self.isApproved()));
+        if (!userIsEditor) {
+            return true;
+        }
+        return (planViewModel.planStatus() != "unlocked for correction" && (self.isSubmitted() || self.isApproved()));
     });
     this.stageStatusTemplateName = ko.computed(function(){
         if (!self.activities || self.activities.length == 0) {
@@ -346,6 +344,19 @@ var PlanStage = function (stage, activities, planViewModel, isCurrentStage, proj
         return 'stageNotApprovedTmpl';
     });
 
+    this.editActivityUrl = function(activityId) {
+        var url;
+        if (self.canEditOutputData()) {
+            url = fcConfig.activityEnterDataUrl + "/" + activityId + "?returnTo=" + encodeURIComponent(here);
+            if (planViewModel.planStatus() == 'unlocked for correction') {
+                url += "&progress=corrected";
+            }
+        } else if (self.canEditActivity()) {
+            url = fcConfig.activityEditUrl + "/" + activityId + "?returnTo=" + encodeURIComponent(here);
+        }
+        return url;
+    };
+
     this.previewStage = function(){
         var status = "Report not submitted";
         if (!self.isReportable) {
@@ -363,7 +374,7 @@ var PlanStage = function (stage, activities, planViewModel, isCurrentStage, proj
         return !self.isReadOnly() && planViewModel.planStatus() === 'not approved';
     });
     this.canEditOutputData = ko.computed(function () {
-        return !self.isReadOnly() && planViewModel.planStatus() === 'approved';
+        return !self.isReadOnly() && planViewModel.planStatus() === 'approved' || planViewModel.planStatus() == 'unlocked for correction';
     });
     this.canPrintActivity = ko.computed(function () {
         return true;

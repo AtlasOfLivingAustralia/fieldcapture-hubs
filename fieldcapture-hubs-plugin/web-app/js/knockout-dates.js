@@ -1057,7 +1057,8 @@ var ACTIVITY_PROGRESS_CLASSES = {
     'started':'btn-success',
     'finished':'btn-info',
     'deferred':'btn-danger',
-    'cancelled':'btn-inverse'
+    'cancelled':'btn-inverse',
+    'corrected':'btn-danger'
 };
 
 
