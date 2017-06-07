@@ -226,12 +226,28 @@ var PlanStage = function (stage, activities, planViewModel, isCurrentStage, proj
             }).length === 0;
     }, this, {deferEvaluation: true});
 
-    this.riskAndDetailsActive = ko.computed(function(){
-        /*
-         if(project.risks)
-         return project.risks['status'] == 'active';
-         */
-        return true;
+
+    this.isComplete = project.status.match(/completed/i) && project.planStatus != PlanStatus.UNLOCKED;
+
+    this.canSubmitReport = ko.pureComputed(function() {
+        return !self.isComplete && self.readyForApproval() && !self.isApproved();
+    });
+
+    this.canApproveStage = ko.pureComputed(function() {
+        return !self.isComplete && self.isSubmitted();
+    });
+
+    this.canRejectStage = ko.pureComputed(function() {
+        return !self.isComplete && self.isSubmitted();
+    });
+
+    this.submitReportHelp = ko.pureComputed(function() {
+        if (self.readyForApproval()) {
+            return 'Submit this stage for implementation approval.';
+        }
+        else {
+            return 'Report cannot be submitted while activities are still open.';
+        }
     });
 
     this.submitReport = function () {
@@ -323,7 +339,7 @@ var PlanStage = function (stage, activities, planViewModel, isCurrentStage, proj
         if (!userIsEditor) {
             return true;
         }
-        return (planViewModel.planStatus() != "unlocked for correction" && (self.isSubmitted() || self.isApproved()));
+        return (planViewModel.planStatus() != PlanStatus.UNLOCKED && (self.isSubmitted() || self.isApproved()));
     });
     this.stageStatusTemplateName = ko.computed(function(){
         if (!self.activities || self.activities.length == 0) {
@@ -348,7 +364,7 @@ var PlanStage = function (stage, activities, planViewModel, isCurrentStage, proj
         var url;
         if (self.canEditOutputData()) {
             url = fcConfig.activityEnterDataUrl + "/" + activityId + "?returnTo=" + encodeURIComponent(here);
-            if (planViewModel.planStatus() == 'unlocked for correction') {
+            if (planViewModel.planStatus() == PlanStatus.UNLOCKED) {
                 url += "&progress=corrected";
             }
         } else if (self.canEditActivity()) {
@@ -719,7 +735,7 @@ function PlanViewModel(activities, reports, outputTargets, targetMetadata, proje
     };
 
     self.canEditOutputTargets = ko.computed(function() {
-        return userIsEditor && self.planStatus() === 'not approved';
+        return userIsEditor && self.planStatus() === PlanStatus.NOT_APPROVED;
     });
 
     var outputTargetHelper = new OutputTargets(activities, outputTargets, self.canEditOutputTargets, targetMetadata, config);
