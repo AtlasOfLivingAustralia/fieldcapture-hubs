@@ -238,7 +238,7 @@ var PlanStage = function (stage, activities, planViewModel, isCurrentStage, proj
     });
 
     this.canRejectStage = ko.pureComputed(function() {
-        return !self.isComplete && self.isSubmitted();
+        return !self.isComplete && (self.isSubmitted() || self.isApproved());
     });
 
     this.submitReportHelp = ko.pureComputed(function() {
