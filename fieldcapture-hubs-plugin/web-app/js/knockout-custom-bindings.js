@@ -68,11 +68,12 @@ ko.bindingHandlers.activityProgress = {
   update: function(element, valueAccessor) {
     var progressValue = ko.utils.unwrapObservable(valueAccessor());
 
-    for (progress in ACTIVITY_PROGRESS_CLASSES) {
-      ko.utils.toggleDomNodeCssClass(element, ACTIVITY_PROGRESS_CLASSES[progress], progress === progressValue);
+    for (var progress in ACTIVITY_PROGRESS_CLASSES) {
+      ko.utils.toggleDomNodeCssClass(element, ACTIVITY_PROGRESS_CLASSES[progress], false);
     }
+    ko.utils.toggleDomNodeCssClass(element, ACTIVITY_PROGRESS_CLASSES[progressValue], true);
   }
-}
+};
 
 ko.bindingHandlers.numeric = {
   init: function (element, valueAccessor) {

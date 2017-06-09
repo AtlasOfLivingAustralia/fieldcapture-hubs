@@ -54,7 +54,8 @@ enum SettingPageType {
     HELP_LINKS_TITLE('helpLinksTitle', 'Title for the Helpful Links section of the homepage', 'fielddata.helpLinksTitle.text'),
     ORGANISATION_LIST_PAGE_HEADER('organisationListHeader', 'Header content for the organisation list page', 'fielddata.organisationListHeader'),
     HOME_PAGE_STATISTICS('homePageStatistics', 'Configuration for the home page stats', 'statistics.config'),
-    DASHBOARD_EXPLANATION('dashboardExplanation', 'Header text under the dashboard report', 'fielddata.dashboardExplanation')
+    DASHBOARD_EXPLANATION('dashboardExplanation', 'Header text under the dashboard report', 'fielddata.dashboardExplanation'),
+    UNLOCK_PLAN_DECLARATION('unlockPlanDeclaration', 'Declaration', 'fielddata.unlockPlanDeclaration.text')
     String name
     String title
     String key

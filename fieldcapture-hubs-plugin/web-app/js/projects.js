@@ -224,7 +224,6 @@ function isValid(p, a) {
 }
 
 
-
 function ProjectViewModel(project, isUserEditor, organisations) {
     var self = $.extend(this, new Documents());
 
