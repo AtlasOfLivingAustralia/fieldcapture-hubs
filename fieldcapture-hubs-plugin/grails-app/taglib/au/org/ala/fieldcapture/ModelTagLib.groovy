@@ -814,52 +814,10 @@ class ModelTagLib {
         }
         colCount = (model.columns?.size()?:0) + 1
         if (attrs.edit && model.userAddedRows) {
-
-            out << INDENT*4 << """<tr><td colspan="${colCount}" style="text-align:left;">
-                        <button type="button" class="btn btn-small" data-bind="click:transients.${model.source}Support.addRow"""
-            if (model.editableRows) {
-                out << ", enable:!\$root.${model.source}Editing()"
-            }
-            out << """">
-                        <i class="icon-plus"></i> Add a row</button>"""
-            if (!attrs.disableTableUpload) {
-                out << """
-                <button type="button" class="btn btn-small" data-bind="click:transients.${model.source}Support.showTableDataUpload"><i class="icon-upload"></i> Upload data for this table</button>
-
-
-                    </td></tr>\n"""
-                out << """<tr data-bind="visible:transients.${model.source}Support.tableDataUploadVisible"><td colspan="${colCount}">"""
-                if (containsSpecies) {
-                    out << """
-                <div class="text-error text-left">
-                    Note: Only valid exact scientific names will be matched and populated from the database (indicated by a green tick). Unmatched species will load, but will be indicated by a green <b>?</b>. Please check your uploaded data and correct as required.
-                </div>"""
-                }
-                out << """<div class="text-left" style="margin:5px">
-                    <a data-bind="attr:{'href':transients.${model.source}Support.templateDownloadUrl()}" target="${model.source}TemplateDownload" class="btn">Step 1 - Download template (.xlsx)</a>
-                </div>
-
-                <div class="text-left" style="margin:5px;">
-                    <input type="checkbox" data-bind="checked:transients.${model.source}Support.appendTableRows" style="margin-right:5px">Append uploaded data to table (unticking this checkbox will result in all table rows being replaced)
-                </div>
-
-                <div class="btn fileinput-button" style="margin-left:5px">
-                        <input id="${
-                    model.source
-                }TableDataUpload" type="file" name="data" data-bind="fileUploadNoImage:transients.${model.source}Support.tableDataUploadOptions">
-                        Step 2 - Upload populated template
-                </div>"""
-            }
-            out<<"""</td></tr>"""
-            out << """ <script id="${model.source}template-upload" type="text/x-tmpl">{% %}</script>
-                       <script id="${model.source}template-download" type="text/x-tmpl">{% %}</script>"""
+            out << g.render(template:"/output/editModeTableFooterActions", model:[colCount:colCount, name:model.source, containsSpecies:containsSpecies, disableTableUpload:attrs.disableTableUpload], plugin:'fieldcapture-plugin')
         }
         else if (!model.edit && !attrs.printable) {
-            out << """<tr><td colspan="${colCount}">
-            <div class="text-left" style="margin:5px">
-                <a data-bind="click:transients.${model.source}Support.downloadTemplateWithData" class="btn"><i class="fa fa-download"></i> Download the data from this table (.xlsx)</a>
-            </div>
-            </tr>"""
+            out << g.render(template:"/output/viewModeTableFooterActions", model:[colCount:colCount, name:model.source], plugin:'fieldcapture-plugin')
         }
         out << INDENT*4 << "</tfoot>\n"
 

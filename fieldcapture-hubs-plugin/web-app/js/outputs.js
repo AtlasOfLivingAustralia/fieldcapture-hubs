@@ -421,8 +421,14 @@ OutputListSupport = function(parent, listName, ListItemType, config) {
         self.tableDataUploadVisible(!self.tableDataUploadVisible());
     };
 
-    self.templateDownloadUrl = function() {
-        return parent.templateDownloadUrl(listName);
+    self.downloadTemplate = function() {
+        // Download a blank template if we are appending, otherwise download a template containing the existing data.
+        if (self.appendTableRows()) {
+            parent.downloadTemplate(listName);
+        }
+        else {
+            parent.downloadDataTemplate(listName);
+        }
     };
     self.downloadTemplateWithData = function() {
         parent.downloadDataTemplate(listName);
@@ -457,8 +463,9 @@ OutputModel = function(output, context, config) {
     self.transients.questionText = config.optionalQuestionText || 'Not applicable';
     self.transients.dummy = ko.observable();
 
-    self.templateDownloadUrl = function(listName) {
-        return config.excelOutputTemplateUrl + '?listName='+listName+'&type='+output.name;
+    self.downloadTemplate = function(listName) {
+        var url = config.excelOutputTemplateUrl + '?listName='+listName+'&type='+output.name;
+        $.fileDownload(url);
     };
 
     self.downloadDataTemplate = function(listName) {

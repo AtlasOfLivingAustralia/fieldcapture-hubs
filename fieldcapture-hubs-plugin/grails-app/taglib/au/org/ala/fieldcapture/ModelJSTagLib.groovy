@@ -364,7 +364,7 @@ class ModelJSTagLib {
 
         out << """
             self.data.${model.name} = ko.observableArray([]);
-            self.transients.${model.name}Support = new OutputListSupport(self, '${model.name}', ${makeRowModelName(attrs.model.modelName, model.name)}, config);
+            self.transients.${model.name}Support = new OutputListSupport(self, '${model.name}', ${rowModelName}, config);
         """
 
         out << """
