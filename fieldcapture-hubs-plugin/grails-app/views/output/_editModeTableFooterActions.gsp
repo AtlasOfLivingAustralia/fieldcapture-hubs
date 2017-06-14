@@ -1,6 +1,6 @@
 <tr>
     <td colspan="${colCount}" style="text-align:left;">
-        <button type="button" class="btn btn-small" data-bind="${addRowDataBindings}"><i class="icon-plus"></i> Add a row</button>
+        <button type="button" class="btn btn-small" data-bind="visible:transients.${name}Support.allowUserAddedRows, click:transients.${name}Support.addRow"><i class="icon-plus"></i> Add a row</button>
         <g:if test="${!disableTableUpload}">
             <button type="button" class="btn btn-small" data-bind="click:transients.${name}Support.showTableDataUpload"><i class="icon-upload"></i> Upload data for this table</button>
          </g:if>
@@ -15,7 +15,7 @@
             </div>
         </g:if>
 
-        <div class="text-left" style="margin:5px;">
+        <div class="text-left" data-bind="visible:transients.${name}Support.allowUserAddedRows" style="margin:5px;">
             <input type="checkbox" data-bind="checked:transients.${name}Support.appendTableRows" style="margin-right:5px">Append uploaded data to table (unticking this checkbox will result in all table rows being replaced)
         </div>
 

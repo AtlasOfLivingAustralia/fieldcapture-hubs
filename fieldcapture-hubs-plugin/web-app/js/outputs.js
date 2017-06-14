@@ -402,7 +402,7 @@ expressionEvaluator = function() {
 
 }();
 
-OutputListSupport = function(parent, listName, ListItemType, config) {
+OutputListSupport = function(parent, listName, ListItemType, userAddedRows, config) {
     var self = this;
     self.listName = listName;
     self.addRow = function () {
@@ -415,7 +415,7 @@ OutputListSupport = function(parent, listName, ListItemType, config) {
     self.rowCount = function () {
         return parent.data[listName]().length;
     };
-    self.appendTableRows = ko.observable(true);
+    self.appendTableRows = ko.observable(userAddedRows);
     self.tableDataUploadVisible = ko.observable(false);
     self.showTableDataUpload = function() {
         self.tableDataUploadVisible(!self.tableDataUploadVisible());
@@ -434,8 +434,7 @@ OutputListSupport = function(parent, listName, ListItemType, config) {
         parent.downloadDataTemplate(listName);
     };
     self.tableDataUploadOptions = parent.buildTableOptions(self);
-
-    self.appendTableRows = ko.observable(true);
+    self.allowUserAddedRows = userAddedRows;
 };
 
 OutputModel = function(output, context, config) {

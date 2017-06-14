@@ -813,7 +813,7 @@ class ModelTagLib {
             out << INDENT*4 << "</tr>\n"
         }
         colCount = (model.columns?.size()?:0) + 1
-        if (attrs.edit && model.userAddedRows) {
+        if (attrs.edit) {
             out << g.render(template:"/output/editModeTableFooterActions", model:[colCount:colCount, name:model.source, containsSpecies:containsSpecies, disableTableUpload:attrs.disableTableUpload], plugin:'fieldcapture-plugin')
         }
         else if (!model.edit && !attrs.printable) {
