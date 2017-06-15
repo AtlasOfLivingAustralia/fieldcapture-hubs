@@ -427,11 +427,11 @@ OutputListSupport = function(parent, listName, ListItemType, userAddedRows, conf
             parent.downloadTemplate(listName);
         }
         else {
-            parent.downloadDataTemplate(listName);
+            parent.downloadDataTemplate(listName, true, userAddedRows);
         }
     };
     self.downloadTemplateWithData = function() {
-        parent.downloadDataTemplate(listName);
+        parent.downloadDataTemplate(listName, false, true);
     };
     self.tableDataUploadOptions = parent.buildTableOptions(self);
     self.allowUserAddedRows = userAddedRows;
@@ -467,11 +467,13 @@ OutputModel = function(output, context, config) {
         $.fileDownload(url);
     };
 
-    self.downloadDataTemplate = function(listName) {
+    self.downloadDataTemplate = function(listName, editMode, userAddedRows) {
         var data = ko.mapping.toJS(self.data[listName](), toIgnore);
         var params = {
             listName:listName,
             type:self.name,
+            editMode: editMode,
+            allowExtraRows: userAddedRows,
             data:JSON.stringify(data)
         };
         var url = config.excelOutputTemplateUrl;
