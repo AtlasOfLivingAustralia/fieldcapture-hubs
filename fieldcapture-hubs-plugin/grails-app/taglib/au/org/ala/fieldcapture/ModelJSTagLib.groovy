@@ -223,7 +223,7 @@ class ModelJSTagLib {
 
     def repeatingModel(attrs, model, out) {
         def edit = attrs.edit as boolean
-        def editableRows = viewModelFor(attrs, model.name, '')?.editableRows
+        def editableRows = viewModelFor(attrs, model.name)?.editableRows
         def observable = editableRows ? 'protectedObservable' : 'observable'
         out << INDENT*2 << "var ${makeRowModelName(attrs.model.modelName, model.name)} = function (data, parent, index, config) {\n"
         out << INDENT*3 << "var self = this;\n"
@@ -350,7 +350,9 @@ class ModelJSTagLib {
 
     def listViewModel(attrs, model, out) {
         def rowModelName = makeRowModelName(attrs.model.modelName, model.name)
-        def editableRows = viewModelFor(attrs, model.name, '')?.editableRows
+        Map viewModel = viewModelFor(attrs, model.name)
+        def editableRows = viewModel?.editableRows
+        boolean userAddedRows = Boolean.valueOf(viewModel?.userAddedRows)
         def defaultRows = []
         model.defaultRows?.eachWithIndex { row, i ->
             defaultRows << INDENT*5 + "self.data.${model.name}.push(new ${rowModelName}(${row.toString()}, self, $i, config));"
@@ -364,7 +366,7 @@ class ModelJSTagLib {
 
         out << """
             self.data.${model.name} = ko.observableArray([]);
-            self.transients.${model.name}Support = new OutputListSupport(self, '${model.name}', ${makeRowModelName(attrs.model.modelName, model.name)}, config);
+            self.transients.${model.name}Support = new OutputListSupport(self, '${model.name}', ${rowModelName}, ${userAddedRows}, config);
         """
 
         out << """
@@ -491,11 +493,31 @@ class ModelJSTagLib {
     }
 
     /*------------ methods to look up attributes in the view model -------------*/
-    static viewModelFor(attrs, name, context) {
-        def viewModel = attrs.model.viewModel
-        // todo: this needs to use context to do a hierarchy search
-        def x = viewModel.find { it.name == name }
-        return viewModel.find { it.source == name }
+    Map viewModelFor(Map attrs, String name) {
+        List viewModel = attrs.model.viewModel
+
+        return findViewByName(viewModel, name)
+    }
+    Map findViewByName(List viewModel, String name) {
+
+        return viewModel.findResult { node ->
+
+            if (node.source == name) {
+                return node
+            }
+            else if (isNestedViewModelType(node)) {
+                List nested = getNestedViewNodes(node)
+                return findViewByName(nested, name)
+            }
+            return null
+        }
     }
 
+    List getNestedViewNodes(node) {
+        return (node.type in ['table', 'photoPoints', 'grid'] ) ? node.columns: node.items
+    }
+
+    boolean isNestedViewModelType(node) {
+        return (node.items != null || node.columns != null)
+    }
 }

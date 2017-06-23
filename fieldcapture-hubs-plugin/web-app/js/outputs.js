@@ -402,7 +402,7 @@ expressionEvaluator = function() {
 
 }();
 
-OutputListSupport = function(parent, listName, ListItemType, config) {
+OutputListSupport = function(parent, listName, ListItemType, userAddedRows, config) {
     var self = this;
     self.listName = listName;
     self.addRow = function () {
@@ -415,21 +415,26 @@ OutputListSupport = function(parent, listName, ListItemType, config) {
     self.rowCount = function () {
         return parent.data[listName]().length;
     };
-    self.appendTableRows = ko.observable(true);
+    self.appendTableRows = ko.observable(userAddedRows);
     self.tableDataUploadVisible = ko.observable(false);
     self.showTableDataUpload = function() {
         self.tableDataUploadVisible(!self.tableDataUploadVisible());
     };
 
-    self.templateDownloadUrl = function() {
-        return parent.templateDownloadUrl(listName);
+    self.downloadTemplate = function() {
+        // Download a blank template if we are appending, otherwise download a template containing the existing data.
+        if (self.appendTableRows()) {
+            parent.downloadTemplate(listName);
+        }
+        else {
+            parent.downloadDataTemplate(listName, true, userAddedRows);
+        }
     };
     self.downloadTemplateWithData = function() {
-        parent.downloadDataTemplate(listName);
+        parent.downloadDataTemplate(listName, false, true);
     };
     self.tableDataUploadOptions = parent.buildTableOptions(self);
-
-    self.appendTableRows = ko.observable(true);
+    self.allowUserAddedRows = userAddedRows;
 };
 
 OutputModel = function(output, context, config) {
@@ -457,15 +462,18 @@ OutputModel = function(output, context, config) {
     self.transients.questionText = config.optionalQuestionText || 'Not applicable';
     self.transients.dummy = ko.observable();
 
-    self.templateDownloadUrl = function(listName) {
-        return config.excelOutputTemplateUrl + '?listName='+listName+'&type='+output.name;
+    self.downloadTemplate = function(listName) {
+        var url = config.excelOutputTemplateUrl + '?listName='+listName+'&type='+output.name;
+        $.fileDownload(url);
     };
 
-    self.downloadDataTemplate = function(listName) {
+    self.downloadDataTemplate = function(listName, editMode, userAddedRows) {
         var data = ko.mapping.toJS(self.data[listName](), toIgnore);
         var params = {
             listName:listName,
             type:self.name,
+            editMode: editMode,
+            allowExtraRows: userAddedRows,
             data:JSON.stringify(data)
         };
         var url = config.excelOutputTemplateUrl;

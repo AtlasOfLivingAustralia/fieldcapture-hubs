@@ -211,6 +211,10 @@ modules = {
         resource url:'js/sites.js', plugin: 'fieldcapture-plugin'
     }
 
+    siteUpload {
+        resource url:'js/site-upload.js'
+    }
+
     jquery_cookie {
         defaultBundle 'application'
         dependsOn 'jquery'
