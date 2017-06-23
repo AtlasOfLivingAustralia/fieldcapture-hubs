@@ -510,7 +510,7 @@ function SiteViewModelWithMapIntegration (siteData, projectId) {
         var currentDrawnShape = ko.toJS(self.extent().geometry);
         //retrieve the current shape if exists
         if(currentDrawnShape !== undefined){
-            if(currentDrawnShape.type == 'Polygon'){
+            if(currentDrawnShape.type == 'Polygon' || currentDrawnShape == 'MultiPolygon'){
                 showOnMap('polygon', geoJsonToPath(currentDrawnShape));
                 zoomToShapeBounds();
             } else if(currentDrawnShape.type == 'Circle'){
@@ -774,6 +774,10 @@ var SitesViewModel =  function(sites, map, mapFeatures, isUserEditor, projectId)
         });
         return siteIds;
     });
+
+    self.getSiteById = function(siteId) {
+        return _.find(self.sites, function(site ) { return siteId == site.siteId });
+    };
     self.sitesFilter = ko.observable("");
     self.throttledFilter = ko.computed(self.sitesFilter).extend({throttle: 400});
     self.filteredSites = ko.observableArray(self.sites);
@@ -835,6 +839,14 @@ var SitesViewModel =  function(sites, map, mapFeatures, isUserEditor, projectId)
         previousIndicies.splice(0, previousIndicies.length);
         Array.prototype.push.apply(previousIndicies, indicies);
 
+    };
+
+    self.displayAllSites = function() {
+        var indicies = [];
+        for (var i=0; i<sites.length; i++) {
+            indicies.push(i);
+        }
+        self.sitesFiltered(indicies);
     };
 
     self.highlightSite = function(index) {
@@ -976,6 +988,20 @@ var SitesViewModel =  function(sites, map, mapFeatures, isUserEditor, projectId)
         ko.utils.arrayForEach(self.sites, function (site) {
             map.getAddressById(site.name(), site.setAddress);
         });
+    };
+
+    self.getSiteBounds = function(siteId) {
+        // Only works for polygon sites.
+        var site = self.getSiteById(siteId);
+        var bounds = new google.maps.LatLngBounds();
+
+        if (site && site.extent && site.extent.geometry && site.extent.geometry.coordinates) {
+            var coords = site.extent.geometry.coordinates[0];
+            for (var i=0; i<coords.length; i++) {
+                bounds.extend(coords[i]);
+            }
+        }
+        return bounds;
     };
 
     self.displaySites();
