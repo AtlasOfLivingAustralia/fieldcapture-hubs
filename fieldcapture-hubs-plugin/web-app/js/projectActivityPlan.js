@@ -204,11 +204,11 @@ var PlanStage = function (stage, activities, planViewModel, isCurrentStage, proj
             return act.plannedEndDate > stage.fromDate &&  act.plannedEndDate <= stage.toDate;
         });
     this.label = stageLabel;
-    var fromDateLabel = stage.fromDate < project.plannedStartDate ? project.plannedStartDate : stage.fromDate;
-    var toDateLabel = stage.toDate > project.plannedEndDate ? project.plannedEndDate : stage.toDate;
+    self.fromDateLabel = stage.fromDate < project.plannedStartDate ? project.plannedStartDate : stage.fromDate;
+    self.toDateLabel = stage.toDate > project.plannedEndDate ? project.plannedEndDate : stage.toDate;
 
-    var fromDateForLabel = moment(fromDateLabel).add(1, 'hours').toDate();
-    var toDateForLabel = moment(toDateLabel).subtract(1, 'hours').toDate(); // This is because the stages cut off at midnight on the 1st of each month, adding/subtracting an hour makes the labels fall onto the day before.
+    var fromDateForLabel = moment(self.fromDateLabel).add(1, 'hours').toDate();
+    var toDateForLabel = moment(self.toDateLabel).subtract(1, 'hours').toDate(); // This is because the stages cut off at midnight on the 1st of each month, adding/subtracting an hour makes the labels fall onto the day before.
     this.datesLabel = convertToSimpleDate(fromDateForLabel, false) + ' - ' + convertToSimpleDate(toDateForLabel, false);
     this.isCurrentStage = isCurrentStage;
     this.isReportable = isStageReportable(project,stage);
