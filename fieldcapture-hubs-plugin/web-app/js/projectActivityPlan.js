@@ -1,3 +1,10 @@
+ActivityProgress = {
+    planned: 'planned',
+    started: 'started',
+    finished: 'finished',
+    deferred: 'deferred',
+    cancelled:'cancelled',
+};
 
 var PlannedActivity = function (act, isFirst, project, stage, options) {
 
@@ -104,7 +111,7 @@ var PlannedActivity = function (act, isFirst, project, stage, options) {
             self.displayReasonModal(true);
         } else if (self.displayReasonModal.needsToBeSaved) {
 
-            if ((newValue === 'started' || newValue === 'finished')) {
+            if ((newValue === ActivityProgress.started || newValue === ActivityProgress.finished)) {
                 blockUIWithMessage('Loading activity form...');
                 var url = config.activityEnterDataUrl;
                 document.location.href = url + "/" + self.activityId + "?returnTo=" + encodeURIComponent(here) + '&progress='+newValue;
@@ -114,6 +121,10 @@ var PlannedActivity = function (act, isFirst, project, stage, options) {
             }
         }
     });
+
+    this.isComplete = function() {
+        return [ActivityProgress.finished, ActivityProgress.deferred, ActivityProgress.cancelled].indexOf(self.progress()) >= 0;
+    };
 
     this.saveProgress = function(payload) {
         self.isSaving(true);
@@ -193,11 +204,11 @@ var PlanStage = function (stage, activities, planViewModel, isCurrentStage, proj
             return act.plannedEndDate > stage.fromDate &&  act.plannedEndDate <= stage.toDate;
         });
     this.label = stageLabel;
-    var fromDateLabel = stage.fromDate < project.plannedStartDate ? project.plannedStartDate : stage.fromDate;
-    var toDateLabel = stage.toDate > project.plannedEndDate ? project.plannedEndDate : stage.toDate;
+    self.fromDateLabel = stage.fromDate < project.plannedStartDate ? project.plannedStartDate : stage.fromDate;
+    self.toDateLabel = stage.toDate > project.plannedEndDate ? project.plannedEndDate : stage.toDate;
 
-    var fromDateForLabel = moment(fromDateLabel).add(1, 'hours').toDate();
-    var toDateForLabel = moment(toDateLabel).subtract(1, 'hours').toDate(); // This is because the stages cut off at midnight on the 1st of each month, adding/subtracting an hour makes the labels fall onto the day before.
+    var fromDateForLabel = moment(self.fromDateLabel).add(1, 'hours').toDate();
+    var toDateForLabel = moment(self.toDateLabel).subtract(1, 'hours').toDate(); // This is because the stages cut off at midnight on the 1st of each month, adding/subtracting an hour makes the labels fall onto the day before.
     this.datesLabel = convertToSimpleDate(fromDateForLabel, false) + ' - ' + convertToSimpleDate(toDateForLabel, false);
     this.isCurrentStage = isCurrentStage;
     this.isReportable = isStageReportable(project,stage);
@@ -222,7 +233,7 @@ var PlanStage = function (stage, activities, planViewModel, isCurrentStage, proj
 
     this.readyForApproval = ko.computed(function() {
         return $.grep(self.activities, function (act, i) {
-                return act.progress() === 'planned' || act.progress() === 'started';
+                return !act.isComplete();
             }).length === 0;
     }, this, {deferEvaluation: true});
 
@@ -672,7 +683,7 @@ function PlanViewModel(activities, reports, outputTargets, targetMetadata, proje
         });
         return currPlanStage.length > 0 ? currPlanStage[0].readyForApproval() : false;
     });
-    self.progressOptions = ['planned','started','finished','deferred','cancelled'];
+    self.progressOptions = [ActivityProgress.planned, ActivityProgress.started, ActivityProgress.finished, ActivityProgress.cancelled, ActivityProgress.deferred];
     self.newActivity = function () {
         var context = '',
             projectId = project.projectId,

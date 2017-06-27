@@ -196,7 +196,7 @@
                     self.featureBounds.extend(f.getBounds().getSouthWest());
                     self.addFeature(f, loc, iw);
                     loaded = true;
-                } else if (loc.type.toLowerCase() === 'polygon') {
+                } else if (loc.type.toLowerCase() === 'polygon' || loc.type.toLowerCase() === 'multipolygon') {
                     var points;
                     var paths = geojsonToPaths(loc.coordinates[0]);
                     f = new google.maps.Polygon({
