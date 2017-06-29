@@ -88,6 +88,14 @@ public class EditModelWidgetRenderer implements ModelWidgetRenderer {
         context.writer <<  "<select${context.attributes.toString()} multiple=\"multiple\" class=\"select\" data-bind='${context.databindAttrs.toString()}'${context.validationAttr}></select>"
     }
 
+    @Override
+    void renderMultiInput(WidgetRenderContext context) {
+
+        context.writer << "<multi-input params=\"values: ${context.model.source}, template:'${context.model.source}InputTemplate'\">\
+                              <input type=\"text\" ${context.attributes.toString()} ${context.validationAttr} data-bind=\"value:val\" class=\"input-small\">\
+                           </multi-input>"
+    }
+
     private void renderSelectManyAsCheckboxes(WidgetRenderContext context) {
         context.labelAttributes.addClass 'checkbox-list-label '
         def constraints = 'transients.' + context.model.source + 'Constraints'

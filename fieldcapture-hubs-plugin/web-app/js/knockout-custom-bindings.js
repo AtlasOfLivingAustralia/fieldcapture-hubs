@@ -420,3 +420,49 @@ ko.bindingHandlers.multiSelect2 = {
     $(element).val(valueAccessor().value()).trigger('change');
   }
 };
+
+
+ko.components.register('multi-input', {
+  viewModel: function(params) {
+    var self = this;
+
+    self.observableValues = ko.observableArray();
+
+    // This method updates the values parameter with the contents of the managed array.
+    function syncValues() {
+      var rawValues = [];
+      for (var i=0; i<self.observableValues().length; i++) {
+        rawValues.push(self.observableValues()[i].val());
+      }
+      params.values(rawValues);
+    }
+
+    function newValue(value) {
+      var observable = ko.observable(value || '');
+      observable.subscribe(syncValues);
+      self.observableValues.push({val:observable});
+    }
+
+    self.addValue = function() {
+      newValue();
+    };
+
+    self.removeValue = function(value) {
+      self.observableValues.remove(value);
+    };
+
+    for (var i=0; i<params.values().length; i++) {
+      newValue(params.values()[i]);
+    }
+
+    self.observableValues.subscribe(syncValues);
+  },
+  template:
+      '<div data-bind="foreach: observableValues">\
+          <div class="input-append">\
+            <span data-bind="template:{nodes:$componentTemplateNodes}"></span><span class="add-on" data-bind="click:$parent.removeValue"><i class="fa fa-remove"></i></span>\
+          </div>\
+      </div>\
+      <i class="fa fa-plus" data-bind="click:addValue"></i>\
+      '
+});
