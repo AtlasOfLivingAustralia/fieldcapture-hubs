@@ -138,4 +138,10 @@ class ViewModelWidgetRenderer implements ModelWidgetRenderer {
         context.writer << "<span ${context.attributes.toString()} data-bind='${context.databindAttrs.toString()}'></span>"
     }
 
+    @Override
+    void renderMultiInput(WidgetRenderContext context) {
+        context.databindAttrs.add 'text', context.source+'().join(", ")'
+        context.writer << "<span ${context.attributes.toString()} data-bind='${context.databindAttrs.toString()}'></span>"
+    }
+
 }
