@@ -126,4 +126,9 @@ class PrintModelWidgetRenderer implements ModelWidgetRenderer {
     void renderSelect2Many(WidgetRenderContext context) {
         renderCheckboxes(context)
     }
+
+    @Override
+    void renderMultiInput(WidgetRenderContext context) {
+        renderTextArea(context)
+    }
 }

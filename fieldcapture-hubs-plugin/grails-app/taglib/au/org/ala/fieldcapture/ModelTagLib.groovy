@@ -209,6 +209,9 @@ class ModelTagLib {
             case 'currency':
                 renderer.renderCurrency(renderContext)
                 break
+            case 'multiInput':
+                renderer.renderMultiInput(renderContext)
+                break
             default:
                 log.warn("Unhandled widget type: ${model.type}")
                 break

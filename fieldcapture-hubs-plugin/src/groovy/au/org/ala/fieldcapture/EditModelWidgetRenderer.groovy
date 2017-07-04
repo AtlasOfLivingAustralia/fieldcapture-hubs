@@ -33,7 +33,13 @@ public class EditModelWidgetRenderer implements ModelWidgetRenderer {
     @Override
     void renderTextArea(WidgetRenderContext context) {
         context.databindAttrs.add 'value', context.source
-        context.writer << "<textarea ${context.attributes.toString()} data-bind='${context.databindAttrs.toString()}'${context.validationAttr}></textarea>"
+        if (context.model.rows) {
+            context.attributes.add("rows", context.model.rows)
+        }
+        if (context.model.cols) {
+            context.attributes.add("cols", context.model.cols)
+        }
+        context.writer << "<textarea ${context.attributes.toString()} rows=\"10\" data-bind='${context.databindAttrs.toString()}'${context.validationAttr}></textarea>"
     }
 
     @Override
@@ -80,6 +86,14 @@ public class EditModelWidgetRenderer implements ModelWidgetRenderer {
         context.databindAttrs.add 'optionsCaption', '"Please select"'
         context.databindAttrs.add 'multiSelect2', "{value: ${context.source}, tags:true, allowClear:false}"
         context.writer <<  "<select${context.attributes.toString()} multiple=\"multiple\" class=\"select\" data-bind='${context.databindAttrs.toString()}'${context.validationAttr}></select>"
+    }
+
+    @Override
+    void renderMultiInput(WidgetRenderContext context) {
+
+        context.writer << "<multi-input params=\"values: ${context.model.source}, template:'${context.model.source}InputTemplate'\">\
+                              <input type=\"text\" ${context.attributes.toString()} ${context.validationAttr} data-bind=\"value:val\" class=\"input-small\">\
+                           </multi-input>"
     }
 
     private void renderSelectManyAsCheckboxes(WidgetRenderContext context) {

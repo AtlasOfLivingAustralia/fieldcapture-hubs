@@ -25,6 +25,7 @@ public interface ModelWidgetRenderer {
     void renderSelect2(WidgetRenderContext context)
     void renderSelect2Many(WidgetRenderContext context)
     void renderCurrency(WidgetRenderContext context)
+    void renderMultiInput(WidgetRenderContext context)
 
 }
 

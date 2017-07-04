@@ -967,3 +967,34 @@ function OutputTargets(activities, targets, targetsEditable, scores, config) {
 
 
 }
+
+/**
+ * Star/Unstar project for user - send AJAX and update UI
+ *
+ * @param boolean isProjectStarredByUser
+ */
+function toggleStarred(isProjectStarredByUser) {
+    var basUrl = fcConfig.starProjectUrl;
+    var query = "?userId=${user?.userId}&projectId=${project?.projectId}";
+    if (isProjectStarredByUser) {
+        // remove star
+        $.getJSON(basUrl + "/remove" + query, function(data) {
+            if (data.error) {
+                alert(data.error);
+            } else {
+                $("#starBtn i").removeClass("icon-star").addClass("icon-star-empty");
+                $("#starBtn span").text("Add to favourites");
+            }
+        }).fail(function(j,t,e){ alert(t + ":" + e);}).done();
+    } else {
+        // add star
+        $.getJSON(basUrl + "/add" + query, function(data) {
+            if (data.error) {
+                alert(data.error);
+            } else {
+                $("#starBtn i").removeClass("icon-star-empty").addClass("icon-star");
+                $("#starBtn span").text("Remove from favourites");
+            }
+        }).fail(function(j,t,e){ alert(t + ":" + e);}).done();
+    }
+}
