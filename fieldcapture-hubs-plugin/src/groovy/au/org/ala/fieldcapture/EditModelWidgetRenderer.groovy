@@ -39,7 +39,7 @@ public class EditModelWidgetRenderer implements ModelWidgetRenderer {
         if (context.model.cols) {
             context.attributes.add("cols", context.model.cols)
         }
-        context.writer << "<textarea ${context.attributes.toString()} rows=\"10\" data-bind='${context.databindAttrs.toString()}'${context.validationAttr}></textarea>"
+        context.writer << "<textarea ${context.attributes.toString()} data-bind='${context.databindAttrs.toString()}'${context.validationAttr}></textarea>"
     }
 
     @Override
